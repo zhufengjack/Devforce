@@ -1,0 +1,10 @@
+<apex:component controller="ChinaTSPaymentLinkController" access="global">
+    <apex:attribute name="oppId" assignTo="{!OppIdValue}" description="Opportunity Id." type="String"/>
+    <apex:attribute name="linkType" description="" type="String"/>
+    <apex:outputPanel rendered="{!IF((linkType = 'link'), true, false)}">
+        <a href="https://secure.englishtown.com/commerce/elpayment.ashx?opid={!oppId}&vcode={!VeriCode}">https://secure.englishtown.com/commerce/elpayment.ashx?opid={!oppId}&amp;vcode={!VeriCode}</a>
+    </apex:outputPanel>
+    <apex:outputPanel rendered="{!IF((linkType = 'text'), true, false)}">
+        <a href="https://secure.englishtown.com/commerce/elpayment.ashx?opid={!oppId}&vcode={!VeriCode}">此处</a>
+    </apex:outputPanel>
+</apex:component>

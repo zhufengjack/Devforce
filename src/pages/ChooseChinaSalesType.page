@@ -1,0 +1,25 @@
+<apex:page Controller="ChooseChinaSalesType" action="{!createOpportunity}">
+    <style type="text/css" media="all">
+        .error {
+              margin: 0; 
+              padding: 0;              
+              background-color: #f3f3ec; 
+              font-size: 15;
+              color: red;             
+            }
+    </style>
+    <apex:form >
+        <!-- <apex:selectRadio value="{!SalesType}">
+            <apex:selectOptions value="{!SalesTypes}"/>
+        </apex:selectRadio><p/>
+        <apex:commandButton value="Continue" action="{!createOpportunity}"/> -->
+        
+        <apex:pageBlock >
+            <apex:pageBlockSection >
+                <apex:outputlabel > 
+                    <apex:messages styleClass="error"/>
+                </apex:outputlabel>                         
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

@@ -1,0 +1,45 @@
+<apex:page controller="ExportedActivitiesController" tabStyle="event" showHeader="false" sidebar="false">
+  <apex:pageMessages />
+  <div style="height:10px" ></div> 
+  <H3 style="font-size:24px">{!HeaderTitle}</H3>
+  <div style="height:10px" ></div> 
+  <apex:pageblock title="Old activity history">
+      <apex:pageblocktable value="{!Activities}" var="at" rendered="{!isHasRecord}">
+          <apex:column >
+              <apex:facet name="header">Subject</apex:facet>
+              <apex:outputText value="{!at.subject}"/>
+          </apex:column> 
+          <apex:column >
+              <apex:facet name="header">Created</apex:facet>
+              <apex:outputtext value="{!at.createdByName}"></apex:outputtext>
+          </apex:column>
+          <apex:column >
+              <apex:facet name="header">ActivtyDate</apex:facet>
+              <apex:outputtext value="{!at.LocalActivityDate}"></apex:outputtext>
+          </apex:column>
+          <apex:column >
+              <apex:facet name="header">CreatedDate</apex:facet>
+              <apex:outputtext value="{!at.LocalCreatedDate}"></apex:outputtext>
+          </apex:column>
+          <apex:column >
+              <apex:facet name="header">Appt Status</apex:facet>
+              <apex:outputText value="{!at.apptStatus}">&nbsp;</apex:outputText>
+          </apex:column>
+          <apex:column >
+              <apex:facet name="header">Owner</apex:facet>
+              <apex:outputText value="{!at.owner}">&nbsp;</apex:outputText>
+          </apex:column>
+          <apex:column >
+              <apex:facet name="header">Description</apex:facet>
+              <apex:outputText value="{!at.Description}">&nbsp;</apex:outputText>
+          </apex:column>
+          <apex:column >
+              <apex:facet name="header">Comment</apex:facet>
+              <apex:outputText value="{!at.Comment}">&nbsp;</apex:outputText>
+          </apex:column>
+      </apex:pageblocktable>
+      <apex:pageblockSection rendered="{!Not(isHasRecord)}">
+        <apex:outputLabel value="No history recordes"/>
+      </apex:pageblockSection>
+  </apex:pageblock>
+ </apex:page>

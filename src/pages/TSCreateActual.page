@@ -1,0 +1,89 @@
+<apex:page standardController="Opportunity" extensions="TSCreateActualController" tabStyle="Opportunity">
+    <script type="text/javascript">
+        function changeSalesTypeStatus()
+        {
+            var radiobox0 = document.getElementById("{!$Component.actualForm.blockArea.sectionArea.stageArea.closeWon}:0");
+            var radiobox1 = document.getElementById("{!$Component.actualForm.blockArea.sectionArea.stageArea.closeWon}:1");
+            checkRadioValue(radiobox0);
+            checkRadioValue(radiobox1);
+        }
+        function checkRadioValue(radioElement)
+        {
+            if(radioElement.checked)
+            {
+                var salesType = document.getElementById("{!$Component.actualForm.blockArea.sectionArea.salesTypeItem.salesType}");
+                if(radioElement.value == 'Yes')
+                {
+                    salesType.disabled = false;
+                }
+                else
+                { 
+                    salesType.value = 'Deposit'; 
+                    salesType.disabled = true;
+                }
+            }
+        }
+        function confirmSubmmit()
+        {
+            var amount = document.getElementById("{!$Component.actualForm.blockArea.sectionArea.amountItem.amount}").value;
+            if(amount == null || amount == '' || amount < 0)
+            {
+                alert("Please fill in amount.");
+                return false;
+            }
+            if(confirm("Are you sure?"))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    </script>
+    <apex:form id="actualForm">
+        <apex:sectionHeader title="Create Actual" subtitle="{!Opportunity.Name}"/>
+        <apex:pageMessages id="pMessage" escape="false"/>
+        <apex:pageBlock id="blockArea">
+            <apex:pageBlockSection columns="1" id="sectionArea">
+                <apex:pageBlockSectionItem id="stageArea">
+                    <apex:outputLabel >Update opportunity stage to close won?</apex:outputLabel>
+                    <apex:selectRadio value="{!financeInfo.closeWon}" id="closeWon" onclick="changeSalesTypeStatus('0');">
+                        <apex:selectOption itemLabel="Yes" itemValue="Yes" />
+                        <apex:selectOption itemLabel="No" itemValue="No" />
+                    </apex:selectRadio> 
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem id="salesTypeItem">
+                    <apex:outputLabel >Sales Type</apex:outputLabel>
+                    <apex:selectList value="{!financeInfo.SalesType}" id="salesType" size="1" style="width: 100px">
+                        <apex:selectOptions value="{!SalesTypes}"/>
+                    </apex:selectList>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel >Company Code</apex:outputLabel>
+                    <apex:selectList value="{!financeInfo.CompanyCode}" id="companyCode" size="1">
+                        <apex:selectOptions value="{!CompanyCodeList}" />
+                        <!-- <apex:selectOption itemLabel="CN220" itemValue="CN220" />
+                        <apex:selectOption itemLabel="CN227" itemValue="CN227" />
+                        <apex:selectOption itemLabel="CN240" itemValue="CN240" />
+                        <apex:selectOption itemLabel="CN451" itemValue="CN451" />
+                        <apex:selectOption itemLabel="CN401" itemValue="CN401" />
+                        <apex:selectOption itemLabel="CN402" itemValue="CN402" />
+                        <apex:selectOption itemLabel="CN403" itemValue="CN403" /> -->
+                    </apex:selectList>
+                </apex:pageBlockSectionItem>
+                <apex:pageblockSectionItem >
+                    <apex:outputLabel >Close Date</apex:outputLabel>
+                    <apex:inputField value="{!financeInfo.Record.CloseDate}"/>
+                </apex:pageblockSectionItem>
+            </apex:pageblockSection>
+            <apex:pageBlockButtons location="bottom">
+                <apex:commandButton value="Create Actual" action="{!save}" onclick="return confirmSubmmit();"/>
+                <apex:commandButton value="Cancel" action="{!cancel}"/> 
+            </apex:pageBlockButtons>
+        </apex:pageBlock>
+    </apex:form>
+    <script type="text/javascript">
+        changeSalesTypeStatus();
+    </script>
+</apex:page>

@@ -1,0 +1,46 @@
+<apex:page controller="CustomerPortalWelcomeController" showHeader="false">
+
+
+<apex:form >   
+   <!-- This section shows the customer's recent cases in a table -->
+    <apex:pageBlock title="My Recent Cases">
+      <apex:pageBlockTable value="{!MyRecentCases}" var="currentCase" id="caseTable">
+         <apex:column >
+            <apex:facet name="header">
+                 <apex:commandLink value="Case Number" action="{!SortCases}" rerender="caseTable">
+                     <apex:param name="sortField2" value="CaseNumber" assignTo="{!sortField2}"/>
+                 </apex:commandLink>
+            </apex:facet>
+            <a href="/{!currentCase.id}" target="_top">{!currentCase.CaseNumber}</a>
+         </apex:column>
+         <apex:column >
+            <apex:facet name="header">
+                 <apex:commandLink value="Subject" action="{!SortCases}" rerender="caseTable">
+                     <apex:param name="sortField2" value="Subject" assignTo="{!sortField2}"/>
+                 </apex:commandLink>
+            </apex:facet>
+            <a href="/{!currentCase.id}" target="_top">{!currentCase.Subject}</a>
+         </apex:column>
+         <apex:column >
+            <apex:facet name="header">
+                 <apex:commandLink value="Status" action="{!SortCases}" rerender="caseTable">
+                     <apex:param name="sortField2" value="Status" assignTo="{!sortField2}"/>
+                 </apex:commandLink>
+            </apex:facet>
+            <apex:outputField value="{!currentCase.Status}" />
+         </apex:column> 
+         <apex:column >
+            <apex:facet name="header">
+                 <apex:commandLink value="Type" action="{!SortCases}" rerender="caseTable">
+                     <apex:param name="sortField2" value="Type" assignTo="{!sortField2}"/>
+                 </apex:commandLink>
+            </apex:facet>
+            <apex:outputField value="{!currentCase.Type}" />
+         </apex:column> 
+
+      </apex:pageBlockTable>
+   </apex:pageBlock>
+      
+</apex:form>  
+
+</apex:page>

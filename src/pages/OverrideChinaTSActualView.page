@@ -1,0 +1,325 @@
+<apex:page StandardController="Actual__c" extensions="OverrideChinaTSActualViewController">
+    <header>
+        <script type="text/javascript">
+            String.prototype.trim = function() 
+            { 
+            
+            return this.replace(/(^\s*)|(\s*$)/g, ""); 
+            
+            } 
+            function showRefundDialog(paymentId, amount)
+            {
+                var url = "/apex/ChinaTSRefundDialog?paymentId=" + paymentId + "&amount=" + amount;
+                window.open (url, 'newwindow', 'height=440, width=580, top=150, left=300, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=no, status=no') ;
+            }
+            function reloadSelf()
+            {
+                window.location.reload();
+            }
+            
+            function numbersonly(myfield, e, dec)
+            {
+                var key;
+                var keychar;
+                
+                if (window.event)
+                {
+                   key = window.event.keyCode;
+                }
+                else if (e)
+                {
+                   key = e.which;
+                }
+                else
+                {
+                   return true;
+                }
+                keychar = String.fromCharCode(key);
+                
+                // control keys
+                if ((key==null) || (key==0) || (key==8) || (key==9) || (key==13) || (key==27) )
+                {
+                   return true;
+                }
+                // numbers
+                else if ((("0123456789").indexOf(keychar) > -1))
+                {
+                   return true;
+                }
+                // decimal point jump
+                else if (dec && (keychar == "."))
+                {
+                   myfield.form.elements[dec].focus();
+                   return false;
+                }
+                else
+                {
+                   return false;
+                }
+            }
+            function swipeZodacard()
+            {
+               InvokeAxtiveX(0);
+            }
+            function swipeNinenineBillcard()
+            {
+               InvokeAxtiveX(1);
+            }
+            function isNumber(oNum)
+            {
+              if(!oNum) 
+              return false;
+              var strP=/^\d+(\.\d+)?$/;
+              if(!strP.test(oNum)) 
+              return false;
+              try
+              {
+                if(parseFloat(oNum)!=oNum) 
+                return false;
+              }
+              catch(ex)
+              {alert(ex);
+                return false;
+              }
+              return true;
+           }
+            
+          function validExpDatebeforCreatedPayment()
+          {
+            var expDate = document.getElementById("page:form:block3:section4:expDateItem:expDate");
+            var ExpDateRegex = /^((0([1-9]{1}))|(1[0-2]{1}))\/([0-9]{2})$/;
+            if(expDate != null && expDate.value != null && expDate.value != "")
+            {
+              if(!ExpDateRegex.test(expDate.value) )
+              {
+                alert("ExpDate is invalid format!please input exp date format as MM/YY");
+                return false;
+              }
+              else
+              {
+                var isContinue = confirm('Are you sure?');
+                if(!isContinue)
+                {
+                    return false;
+                }
+              }
+            }
+            var isContinue2 = confirm('Are you sure?');
+            if(!isContinue2)
+            {
+                return false;
+            }
+            return true;
+          }
+          
+          function checkExpDate(expDateStr)
+          {
+            var expDate = document.getElementById(expDateStr);
+            var ExpDateRegex = /^((0([1-9]{1}))|(1[0-2]{1}))\/([0-9]{2})$/;
+            if(expDate != null && expDate.value != null && expDate.value != "")
+            {
+              if(!ExpDateRegex.test(expDate.value) )
+              {
+                alert("ExpDate is invalid format!please input exp date format as MM/YY");
+                expDate.focus();
+                return false;
+              }
+            }
+            return true;
+          } 
+           
+            function changeButtonStatus(buttonElement, textValue, classValue)
+            {
+                buttonElement.className = classValue;
+                buttonElement.value = textValue;
+            }
+            
+            function checkForCreatePaymentData(element)
+            {
+                changeButtonStatus(element, "Saving ...", "btnDisabled");
+                if(checkExpDate('{!$Component.pageForm.createNewPaymentBlock.createNewPaymentSection.expDateItem.expDate}')) 
+                {
+                    if(!confirm('Are you sure?'))
+                    {
+                        changeButtonStatus(this, "Create Payment", "btn"); alert('Return false');
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    changeButtonStatus(this, "Create Payment", "btn");
+                    return false;
+                }
+            }
+            
+        </script>
+    </header>
+    <body>
+        <apex:form id="pageForm">
+            <apex:detail subject="{!Actual__c.Id}"/>
+            <apex:pageBlock id="studentActualBlock" title="Student's Actuals">
+                <apex:pageBlockSection columns="1" id="studentActualSection">
+                    <apex:pageBlockSectionItem >
+                        <apex:pageBlockTable value="{!studentActuals}" var="student" id="studentDataTable"> 
+                            <apex:column >
+                                <apex:facet name="header">Student Actual Name</apex:facet>
+                                <a href="OverrideStudentActualView?id={!student.Id}" target="_blank">{!student.studentName}</a>
+                            </apex:column>
+                            <apex:column >
+                                <apex:facet name="header">Student</apex:facet>
+                                <a href="/{!student.StudentId}" target="_blank">{!student.studentName}</a>
+                            </apex:column>
+                            <apex:column >
+                                <apex:facet name="header">Elite Card #</apex:facet>
+                                <apex:outputText value="{!student.EliteCard}"/>
+                            </apex:column>
+                            <apex:column >
+                                <apex:facet name="header">Final Price</apex:facet>
+                                <apex:outputText value="{!student.finalPrice}"/>
+                            </apex:column>
+                            <apex:column >
+                                <apex:facet name="header">Status</apex:facet>
+                                <apex:outputText value="{!student.Status}"/>
+                            </apex:column>
+                            <apex:column >
+                                <apex:facet name="header">Individual Portion</apex:facet>
+                                <apex:outputText value="{!student.IndividualPortain}"/>
+                            </apex:column>
+                        </apex:pageBlockTable>
+                    </apex:pageBlockSectionItem>
+                </apex:pageBlockSection>    
+            </apex:pageBlock>
+            <apex:pageBlock id="paymentDataBlock" title="Payment Details" rendered="false">
+                <apex:pageBlockSection columns="1" id="paymentDataSection">
+                    <apex:pageBlockSectionItem rendered="{!Payments.size > 0}" id="sItem">
+                        <apex:pageBlockTable value="{!Payments}" var="payment" id="payDateTable"> 
+                            <apex:column >
+                                <apex:facet name="header">NO.</apex:facet>
+                                <apex:outputLink value="/{!payment.paymentId}">{!payment.Index}</apex:outputLink>
+                            </apex:column>
+                            <apex:column >
+                                <apex:facet name="header">Card Holder</apex:facet>
+                                <apex:outputText value="{!payment.CardHolder}"/>
+                            </apex:column>
+                            <apex:column >
+                                <apex:facet name="header">Pay Type</apex:facet>
+                                <apex:outputText value="{!payment.PayType}"/>
+                            </apex:column>
+                            <apex:column >
+                                <apex:facet name="header">Status</apex:facet>
+                                <apex:outputText value="{!payment.Status}"/>
+                            </apex:column>
+                            <apex:column >
+                                <apex:facet name="header">Pay Method</apex:facet>
+                                <apex:outputText value="{!payment.PayMethod}"/>
+                            </apex:column>
+                            <apex:column >
+                                <apex:facet name="header">Amount Collected</apex:facet>
+                                <apex:outputText value="{!payment.Amount}"/>
+                            </apex:column>
+                            <apex:column >
+                                <apex:facet name="header">Amount Due</apex:facet>
+                                <apex:outputText value="{!payment.AmountDue}"/>
+                            </apex:column>
+                            <apex:column >
+                                <apex:facet name="header">Amount Refund</apex:facet>
+                                <apex:outputText value="{!payment.RefundAmount}" rendered="{!payment.RefundAmount <> 0}"/>
+                            </apex:column>
+                            <apex:column >
+                                <apex:facet name="header">Collected Date</apex:facet>
+                                <apex:outputText value="{!payment.CollectedDate}"/>
+                            </apex:column>
+                            <apex:column >
+                                <apex:facet name="header">Due Date</apex:facet>
+                                <apex:outputText value="{!payment.DueDate}"/>
+                            </apex:column>
+                            <apex:column >
+                                <apex:facet name="header">Command</apex:facet>
+                                <apex:commandButton action="{!payment.Refund}" value="Refund" onclick="showRefundDialog('{!payment.PaymentId}', '{!payment.Amount - payment.RefundAmount}')" disabled="{!payment.IsCanRefund}" reRender="message, payDateTable" status="displaying"/>          
+                                <apex:commandButton action="{!payment.tsPayWithDeposit}" value="Pay with Deposit" onclick="if(!confirm('Are you sure?'))return false;" rendered="{!payment.IsRenderPayWithDepositButton}" disabled="{!payment.IsDisabledPayDesButton}" reRender="message, payDateTable" status="displaying"/>
+                                <apex:actionStatus id="displaying">
+                                    <apex:facet name="start"><img src="/img/loading.gif" alt="loading..."/></apex:facet>
+                                </apex:actionStatus>
+                            </apex:column>
+                        </apex:pageBlockTable>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem rendered="{!Payments.size == 0}">
+                    No records to display
+                    </apex:pageBlockSectionItem>
+                </apex:pageBlockSection>
+            </apex:pageBlock>
+            <apex:pageBlock id="createNewPaymentBlock" title="Create New Payment">
+                <apex:pageBlockSection columns="2" id="createNewPaymentSection">
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Select Student(s)" for="student"/>
+                        <apex:selectCheckboxes value="{!SelectedStudent}" layout="pageDirection">
+                            <apex:selectOptions value="{!StudentActualOptions}"/> 
+                        </apex:selectCheckboxes>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Total Amount" for="payAmount"/>
+                        <apex:inputField value="{!TSNewPayment.Amount__c}" id="payAmount"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Pay method" for="payMethod"/>
+                        <apex:selectList value="{!PaymentMethod}" id="payMethod" size="1">
+                        <apex:selectOption itemLabel="Cash" itemValue="Cash" />
+                        <apex:selectOption itemLabel="POS" itemValue="POS" />
+                        <apex:selectOption itemLabel="POS-PCCC INSTALLMENT(交行支付宝)" itemValue="POS-PCCC INSTALLMENT(交行支付宝)"/>
+                        <apex:selectOption itemLabel="Check" itemValue="Check" />
+                        <apex:selectOption itemLabel="Bank Transfer" itemValue="Bank Transfer" />
+                        <apex:selectOption itemLabel="Normal Postal Remittance" itemValue="Normal Postal Remittance" />
+                        <apex:selectOption itemLabel="CHANGE COURSE" itemValue="CHANGE COURSE" />
+                        <apex:selectOption itemLabel="UnionPay" itemValue="UnionPay"/>
+                        <apex:selectOption itemLabel="OTHERS" itemValue="OTHERS" />
+                        <apex:selectOption itemLabel="99BILL-VPOS" itemValue="99BILL-VPOS" />
+                        <apex:selectOption itemLabel="99BILL-ONLINE PAYMENT" itemValue="99BILL-ONLINE PAYMENT" />
+                        <apex:selectOption itemLabel="Alipay" itemValue="Alipay" />
+                        <apex:selectOption itemLabel="Postal Remittance with code" itemValue="Postal Remittance with code" />
+                        </apex:selectList>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Pay Type" for="payType"/>
+                        <apex:selectList value="{!ChinaTSPaymentType}" size="1" multiselect="false" id="payType">
+                            <apex:selectOption itemValue="" itemLabel="--None--" />
+                            <apex:selectOption itemValue="China TS Deposit" itemLabel="China TS Deposit" />
+                            <apex:selectOption itemValue="China TS Payment" itemLabel="China TS Payment" />
+                        </apex:selectList>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Bank Name" for="bankName"/>
+                        <apex:selectList value="{!BankName}" id="bankName" size="1">
+                           <apex:selectOptions value="{!items}"/>
+                        </apex:selectList>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Card NO." for="cardNo"/>
+                        <apex:inputField value="{!TSNewPayment.CardNo__c}" id="cardNo"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem id="expDateItem">
+                        <apex:outputLabel value="Card Exp Date (MM/YY)" for="expDate"/>
+                        <apex:inputField value="{!TSNewPayment.Exp_Date__c}" id="expDate" onblur="checkExpDate('{!$Component.pageForm.createNewPaymentBlock.createNewPaymentSection.expDateItem.expDate}');"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Account Holder" for="cardHolder"/>
+                        <apex:inputField value="{!TSNewPayment.Card_Holder__c}" id="cardHolder"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="NO. of Installments" for="NoInstallments"/>
+                        <apex:inputField value="{!TSNewPayment.no_of_installments__c}" id="NoInstallments"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        &nbsp;
+                    </apex:pageBlockSectionItem>
+                    <apex:commandButton action="{!CreateTSPaymentData}" value="Create Payment" reRender="message" onclick="if(checkExpDate('{!$Component.pageForm.createNewPaymentBlock.createNewPaymentSection.expDateItem.expDate}')) {if(!confirm('Are you sure?'))return false;}else{return false;}" style="float:right" />
+                </apex:pageBlockSection>
+                <div style="clear:both"></div>
+                <apex:pageMessages id="message" escape="false"/>
+            </apex:pageBlock>
+        </apex:form>
+    </body>
+</apex:page>

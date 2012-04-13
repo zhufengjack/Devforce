@@ -1,0 +1,46 @@
+<apex:page standardController="Task" extensions="OverrideTaskNewController" action="{!checkTaskRecordType}">
+    <apex:form >
+        <apex:sectionHeader title="Task" subtitle="New Task"/>
+        <apex:PageMessages id="cMessage" />
+        <apex:pageBlock title="Task Edit">
+            <apex:pageBlockButtons location="bottom">
+                <apex:commandButton value="Save" action="{!save}" status="actionStatus" reRender="cMessage"/>
+                <apex:commandButton value="Cancel" action="{!cancel}" />
+                <apex:actionStatus id="actionStatus">
+                    <apex:facet name="start"><img src="/img/loading.gif" alt="loading..."/></apex:facet>
+                </apex:actionStatus>
+            </apex:pageBlockButtons>
+            <apex:pageblockSection columns="2" collapsible="false">
+                <apex:facet name="header"><span style="font-size:1.2em;color:black;">Task Information</span></apex:facet>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel >Assigned To</apex:outputLabel>
+                    <apex:inputField value="{!CurrentTask.OwnerId}"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel >Subject</apex:outputLabel>
+                    <apex:inputField value="{!CurrentTask.Subject}"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel >Due Date</apex:outputLabel>
+                    <apex:inputField value="{!CurrentTask.ActivityDate}"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel >Name</apex:outputLabel>
+                    <apex:outputLink value="/{!AdditionalInfo.contactId}" target="_blank">{!AdditionalInfo.contactName}</apex:outputLink>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel >Status</apex:outputLabel>
+                    <apex:outputField value="{!CurrentTask.Status}"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel >Related To</apex:outputLabel>
+                    <apex:outputLink value="{!AdditionalInfo.accountId}" target="_blank">{!AdditionalInfo.accountName}</apex:outputLink>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel >Attempt #</apex:outputLabel>
+                    <apex:outputField value="{!CurrentTask.Attempt__c}"/>
+                </apex:pageBlockSectionItem>
+            </apex:pageblockSection>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

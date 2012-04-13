@@ -1,0 +1,83 @@
+<apex:page standardController="Contact" extensions="OverrideContactPageController" tabStyle="Contact" id="page" action="{!redirectAndUpdateContact}">
+    <apex:includeScript value="{!URLFOR($Resource.jQuery, 'jquery-1.4.4.min.js')}" />
+    <script type="text/javascript">
+    $j = jQuery.noConflict();
+    function showCancelRescheduleDialog(suspendRescheduleId)
+    {
+        window.open('/apex/SmartCancelSuspension?id='+suspendRescheduleId, 'cancelWindow', 'height=160, width=450, toolbar=no, menubar=no, scrollbars=yes, resizable=no, location=no, status=no' );
+    }
+    function showResumeRescheduleDialog(resumeRescheduleId)
+    {
+        window.open('/apex/SmartResumeCourse?id='+resumeRescheduleId, 'resumeWindow', 'height=320, width=450, toolbar=no, menubar=no, scrollbars=yes, resizable=no, location=no, status=no' );
+    }
+    $j(function(){
+        $j("#page\\:theform\\:block").parents(".apexp").addClass("bRelatedList").removeClass('apexp');
+        $j("#page\\:theform\\:takoCaseHistory").parents(".apexp").addClass("bRelatedList").removeClass('apexp');
+        console.log($j("#page\\:theform\\:takoCaseHistory").css("height"));
+                 
+    })
+    </script>
+    <apex:form id="theform">
+        <apex:pagemessages />
+        <apex:detail subject="{!Contact.Id}" inlineEdit="true" />                       
+        <apex:pageBlock title="Suspend and Resume" id="block" rendered="{!HasSuspendAndResume}">
+            <apex:outputPanel layout="none" rendered="{!Reschedules.size = 0}" >
+                <table cellspacing="0" cellpadding="0" border="0" class="list"> 
+                    <tr class="headerRow">
+                        <th class="noRowsHeader" scope="col">No records to display</th>
+                    </tr>
+                </table> 
+            </apex:outputPanel>
+            <apex:pageBlockTable value="{!Reschedules}" var="reschedule" rendered="{!Reschedules.size > 0}">
+                <apex:variable var="Viewable" value="{!OR(Contains(LOWER($Profile.Name), 'system administrator new - smart'), Contains(LOWER($Profile.Name), 'system administrator new - tech'), Contains(LOWER($Profile.Name), 'system administrator new'))}"/>
+                <apex:column rendered="{!Viewable}">
+                    <apex:facet name="header">Action</apex:facet>
+                    <apex:outputLink value="/apex/OverrideCourseRescheduleEdit?supid={!reschedule.SuspendId}&resid={!reschedule.ResumeId}" style="color:#015BA7">Edit</apex:outputLink>
+                </apex:column>
+                <apex:column >
+                    <apex:facet name="header">Subject</apex:facet>
+                    <apex:outputLink value="/apex/OverrideCourseRescheduleDetail?supid={!reschedule.SuspendId}&resid={!reschedule.ResumeId}" >{!reschedule.Subject}</apex:outputLink>
+                </apex:column>
+                <apex:column >
+                    <apex:facet name="header">Suspend Date</apex:facet>
+                    <apex:outputText value="{0, Date, dd/MM/yyyy}"><apex:param value="{!reschedule.SuspendDate}" /></apex:outputText>
+                </apex:column>
+                <apex:column >
+                    <apex:facet name="header">Resume Date</apex:facet>
+                    <apex:outputText value="{0, Date, dd/MM/yyyy}"><apex:param value="{!reschedule.ResumeDate}" /></apex:outputText>
+                </apex:column>
+                <apex:column >
+                    <apex:facet name="header">Status</apex:facet>
+                    <apex:outputText value="{!reschedule.Status}" />
+                </apex:column>
+                <apex:column >
+                    <apex:facet name="header">Suspend Reason</apex:facet>
+                    <apex:outputText value="{!reschedule.SuspendReason}"/>  
+                </apex:column>
+                <apex:column >
+                    <apex:facet name="header">Duration</apex:facet>
+                    <apex:outputText value="{!reschedule.Duration}"/> 
+                </apex:column>  
+                <apex:column >  
+                    <apex:facet name="header">Command</apex:facet>
+                    <apex:outputPanel rendered="{!IF(reschedule.ResumeStatus == 'Not start yet', true, false)}" >
+                        <input type="button" class="btn" onclick="showResumeRescheduleDialog('{!reschedule.ResumeId}')" value="Resume" />&nbsp;&nbsp;
+                    </apex:outputPanel>
+                    <apex:outputPanel rendered="{!IF(reschedule.ResumeStatus != 'Not start yet', true, false)}" >
+                        <input type="button" class="btnDisabled" onclick="showResumeRescheduleDialog('{!reschedule.ResumeId}')" value="Resume" disabled="disabled"/>&nbsp;&nbsp;
+                    </apex:outputPanel>
+                    <apex:outputPanel rendered="{!IF(reschedule.SuspendStatus == 'Not start yet', true, false)}" >
+                        <input type="button" class="btn" onclick="showCancelRescheduleDialog('{!reschedule.SuspendId}')" value="Cancel" />
+                    </apex:outputPanel>
+                    <apex:outputPanel rendered="{!IF(reschedule.SuspendStatus != 'Not start yet', true, false)}" >
+                        <input type="button" class="btnDisabled" onclick="showCancelRescheduleDialog('{!reschedule.SuspendId}')" value="Cancel" disabled="disabled"/>
+                    </apex:outputPanel>                 
+                </apex:column>
+            </apex:pageBlockTable> 
+        </apex:pageBlock>
+        <!-- Pony Ma 2011-01-10 Added Tako Case History -->
+        <apex:pageBlock title="Tako Case History" id="takoCaseHistory">
+        	<apex:iframe src="/apex/TakoCaseHistory?contactId={!Contact.Id}" width="100%" height="210px"/>
+        </apex:pageBlock> 
+    </apex:form>
+</apex:page>

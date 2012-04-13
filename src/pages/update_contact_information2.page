@@ -1,0 +1,15 @@
+<apex:page standardController="Opportunity" extensions="Update_contact_information" tabStyle="Opportunity">
+<!-- snyc mobile,phone,email of contact in Opptunity object.-->
+ <apex:form >
+ <apex:pageBlock title="Update contact information here!" mode="edit">
+        <apex:pageBlockButtons >
+          <apex:commandButton value="Save" action="{!save}"/>
+        </apex:pageBlockButtons>
+             <apex:pageblockSection columns="3">
+             <apex:inputField value="{!con.email}"/>
+             <apex:inputField value="{!con.mobilephone}" />
+             <apex:inputField value="{!con.phone}"/>
+             </apex:pageblockSection>
+      </apex:pageBlock>
+</apex:form>
+</apex:page>

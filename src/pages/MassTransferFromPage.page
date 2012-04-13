@@ -1,0 +1,3 @@
+<apex:page controller="MassTransferFromPageRedirectController" action="{!setPageRedirect}">
+    <apex:pageMessages />
+</apex:page>

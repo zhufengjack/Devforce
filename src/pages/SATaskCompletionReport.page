@@ -1,0 +1,109 @@
+<apex:page id="page" controller="SATaskCompletionReportController" tabStyle="StudyAdvisorManager__tab">
+    <apex:sectionHeader title="Report" subtitle="Task Completion Report"/>
+    <script src="/soap/ajax/22.0/connection.js" type="text/javascript"></script>
+    <script src="/soap/ajax/22.0/apex.js" type="text/javascript"></script>
+    <apex:includeScript value="{!URLFOR($Resource.jQuery,'js/jquery-1.4.4.min.js')}"/>
+    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+      google.load('visualization', '1', {packages: ['corechart']});
+    </script>
+    <script type="text/javascript">
+      function drawVisualization() {
+        // Create and populate the data table.
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Name');
+        data.addColumn('number', 'Task Count');
+        var length = $("tbody [id $= output\:tb]").children().length;
+        data.addRows(length);
+        var i = 0; 
+        $.each($("tbody [id *= output:tb]").children(), function(){
+            data.setValue(i, 0, $(this).children().eq(0).text() + ' (' + $(this).children().eq(2).text() + '%)');
+            data.setValue(i, 1, parseInt($(this).children().eq(1).text()));
+            i++;
+        });
+        // Create and draw the visualization.
+        new google.visualization.PieChart(document.getElementById('visualization')).
+            draw(data, {tooltipText:"value", pieSliceText:"none"});
+      }
+    </script>
+    <script type="text/javascript">
+        function setFocusOnLoad() {} 
+    </script>
+    <script type="text/javascript">
+        function verifyDate()
+        {
+            var status = document.getElementById("page:form:block:section:item3:loadingStatus.start");
+            status.style.display = "";
+            var start = document.getElementById("{!$Component.page.form.block.section.item1.dateFrom}").value;
+            var end = document.getElementById("{!$Component.page.form.block.section.item2.dateTo}").value;
+            if(start != '' && end != '')
+            {
+                sforce.connection.sessionId = '{!$Api.Session_ID}';
+                var result = sforce.apex.execute("SAServiceHelper", "serviceForSATaskCompletionReport", {dateFrom: start, dateTo: end});
+                if(result == "false")
+                {
+                    alert("please select a shorter date range !!");
+                    status.style.display = "none";
+                }
+                else
+                {
+                    generateResult();
+                }
+            }
+            else
+            {
+                alert("Please fill in the date field completely.");
+                status.style.display = "none";
+            }
+        }
+    </script>
+    <apex:form id="form">
+        <apex:actionFunction name="generateResult" action="{!search}" oncomplete="drawVisualization()" rerender="output" status="loadingStatus"/>
+        <apex:pageBlock id="block">
+            <apex:pageBlockSection id="section" title="Search Filters" columns="2" collapsible="false">
+                <apex:pageBlockSectionItem id="item1">
+                    <apex:outputLabel for="dateFromFilter" value="Due Date From"/>
+                    <apex:inputField id="dateFrom" value="{!DateFromTask.ActivityDate}"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem id="item2">
+                    <apex:outputLabel for="dateToFilter" value="Due Date To"/>
+                    <apex:inputField id="dateTo" value="{!DateToTask.ActivityDate}"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel id="groupBy" for="groupByFilter" value="Group By"/>
+                    <apex:selectList id="groupByFilter" value="{!GroupByType}" size="1">
+                        <apex:selectOption itemLabel="Study Advisor" itemValue="Study Advisor"/>
+                        <apex:selectOption itemLabel="Language" itemValue="Language"/>
+                        <apex:selectOption itemLabel="Country" itemValue="Country"/>
+                        <apex:selectOption itemLabel="Corporate" itemValue="Corporate"/>
+                        <apex:selectOption itemLabel="Completion Result" itemValue="CallResult"/>
+                    </apex:selectList>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem id="item3">
+                    <apex:outputLabel />
+                    <apex:outputPanel >
+                        <input type="button" value="Search" class="btn" onclick="verifyDate()"/>
+                        <apex:actionStatus id="loadingStatus">
+                            <apex:facet name="start">
+                                <img src="/img/loading.gif" alt="loading" />
+                            </apex:facet>
+                        </apex:actionStatus>
+                    </apex:outputPanel>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+            <br/><br/>
+            <apex:pageBlockTable id="output" value="{!ResultInfos}" var="item" style="width: 70%">
+                <apex:column headerValue="{!GroupByType}">
+                    {!item.ResultName}
+                </apex:column>
+                <apex:column headerValue="# of completed Tasks">
+                    {!item.CompletedTaskNum}
+                </apex:column>
+                <apex:column headerValue="Success Rate ( % )">
+                    {!item.SuccessRate}
+                </apex:column>
+            </apex:pageBlockTable>    
+        </apex:pageBlock>
+        <div id="visualization" style="width: 1000px; height: 400px;"></div>
+    </apex:form>   
+</apex:page>

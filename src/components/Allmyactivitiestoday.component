@@ -1,0 +1,95 @@
+<apex:component controller="AllMyActivitiesToday" access="global" >
+<style type="text/css">
+<!--
+.STYLE3 {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 16px;
+}
+-->
+</style>
+   <apex:attribute name="userid" description="this is param for the CC." type="String" assignTo="{!userid}"/>
+    <span class="STYLE3"></span><br/>
+    <table style="BORDER-COLLAPSE: collapse" borderColor="#000000" cellSpacing="0" width="1055" align="left" bgColor="#ffffff" border="0">
+<tr><td width="1053" align="left" class="STYLE3">
+　<div align="left"><em><strong>All Events Need To Be Done Today</strong></em></div>
+<br/>
+<table style="BORDER-COLLAPSE: collapse" borderColor="#000000" cellSpacing="0" width="1051" align="left" bgColor="#ffffff" border="1">
+
+        <tr>
+            <th width="151">Subject</th>
+            <th width="196">Opportunity Name</th>
+            <th width="196">Opportunity Stage</th>
+            <th width="172">Event Appt Status</th>
+            <th width="314">Comments</th>
+        </tr>
+        <apex:repeat value="{!allmyeventtoday}" var="eventitem">
+            <tr>
+                <td style="width: 150px; text-align: center"><apex:outputLink value="https://ap1.salesforce.com/{!eventitem.EvnId}">{!eventitem.EventSubject}</apex:outputLink></td>
+                <td style="width: 200px; text-align: center"><apex:outputLink value="https://ap1.salesforce.com/{!eventitem.OppId}">{!eventitem.OppName}</apex:outputLink></td>
+                <td style="width: 200px; text-align: center"> {!eventitem.OppStage} </td> 
+                <td style="width: 150px; text-align: center"> {!eventitem.EventAppStatus} </td> 
+                <td style="width: 300px; text-align: center">{!eventitem.EventComments}</td>
+            </tr>
+        </apex:repeat>
+        <tr>
+            <td colspan="4" align="center">Total Number</td>
+            <td> {!allmyeventtodaylength}</td>
+        </tr>
+    </table></td> </tr>
+<tr><td class="STYLE3"><br/>
+<div align="left"><em><strong>All Task Need To Be Done Today</strong></em></div>
+<br/>
+<table style="BORDER-COLLAPSE: collapse" borderColor="#000000" cellSpacing="0" width="1051" align="left" bgColor="#ffffff" border="1">
+        <tr>
+            <th width="149">Subject</th>
+            <th width="199">Opportunity Name</th>
+            <th width="199">Opportunity Stage</th>
+            <th width="153">Task Status</th>
+            <th width="331">Comments</th>
+        </tr>
+        <apex:repeat value="{!allmytasktoday}" var="mytask">
+            <tr>
+              <td style="width: 150px; text-align: center"><apex:outputLink value="https://ap1.salesforce.com/{!mytask.TaskId}">{!mytask.TaskSubject}</apex:outputLink></td>
+                <td style="width: 200px; text-align: center"><apex:outputLink value="https://ap1.salesforce.com/{!mytask.OppId}">{!mytask.TaskRelatedName}</apex:outputLink></td>
+                <td style="width: 200px; text-align: center"> {!mytask.OppStage} </td> 
+                <td style="width: 150px; text-align: center"> {!mytask.TaskAppStatus} </td> 
+                <td style="width: 300px; text-align: center">{!mytask.TaskComments}</td>
+            </tr>
+        </apex:repeat>
+         <tr>
+            <td colspan="4" align="center">Total Number</td>
+            <td> {!allmytasktodaylength}</td>
+        </tr>
+    </table></td> </tr><br/>
+<tr><td class="STYLE3"> 
+  　
+  <div align="left"><em><strong>Over 60days Leads Need CC To Follow Up, Details As Below</strong></em></div>  
+  <br/>
+  <table style="BORDER-COLLAPSE: collapse" borderColor="#000000" cellSpacing="0" width="1051" align="left" bgColor="#ffffff" border="1">
+        <tr>
+            <th width="149">Account Owner</th>
+            <th width="149">Account Name</th>
+            <th width="119">Mobile</th>
+            <th width="121">First Show Up</th>
+            <th width="107">Opportunity Stage</th>
+            <th width="380">Comments</th>
+        </tr>
+        <apex:repeat value="{!sixtyopp}" var="sixopp">
+            <tr>
+                <td style="width: 150px; text-align: center">{!sixopp.Accountowner}</td>
+                <td style="width: 150px; text-align: center"><apex:outputLink value="https://ap1.salesforce.com/{!sixopp.Id}">{!sixopp.oppname}</apex:outputLink></td>
+                <td style="width: 120px; text-align: center">{!sixopp.mobile}</td>
+                <td style="width: 100px; text-align: center">{!sixopp.firstshowup}</td> 
+                <td style="width: 100px; text-align: center">{!sixopp.oppstage}</td>
+                <td style="width: 330px; text-align: center">{!sixopp.oppcomments}</td>
+            </tr>
+        </apex:repeat>
+         <tr>
+            <td colspan="5" align="center">Total Number</td>
+            <td> {!sixtyopplength}</td>
+        </tr>
+    </table></td> </tr>
+</table>
+     
+    <span class="STYLE3">   </span>
+    </apex:component>

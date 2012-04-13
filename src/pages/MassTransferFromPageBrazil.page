@@ -1,0 +1,99 @@
+<apex:page controller="MassTransferFromBrazilController" >
+   
+    <apex:pageBlock title="Mass Transfer Tool">
+        <apex:form id="TransferFromForm">
+        
+            <apex:pageBlockSection id="conditionSection">
+                
+                    
+                        <apex:panelGrid width="600px" columns="3">
+                        
+                            <apex:outputLabel value="School Center:" for="chooseSchool" escape="false"/>
+                            <apex:selectList id="chooseSchool" value="{!schoolName}" size="1">
+                                <apex:actionSupport event="onchange" reRender="ownerList" status="status"/>
+                                <apex:selectOptions value="{!schoolList}"/>
+                            </apex:selectList>
+                            <apex:actionStatus id="status" startText="Loading Sales Consultant..."></apex:actionStatus>
+                        
+                        
+                            <apex:outputLabel value="Student Owner:" for="chooseOwner" escape="false"/>
+                            <apex:selectList id="chooseOwner" value="{!ownerOpType}" size="1">
+                                <apex:selectOption itemValue="0" itemLabel="equals"/>
+                            </apex:selectList> 
+                            <apex:selectList value="{!accOwner}" size="1" id="ownerList">
+                                <apex:selectOptions value="{!ownerList}" />
+                            </apex:selectList>
+                        
+                        
+                            
+                            <apex:outputLabel value="Stage:" for="chooseStage"/>
+                            <apex:selectList id="chooseStage" value="{!stageOpType}" size="1">
+                                <apex:selectOption itemValue="0" itemLabel="equals"/>
+                            </apex:selectList> 
+                            <apex:selectList value="{!accStage}" size="1">
+                                <apex:selectOptions value="{!stageList}"/>
+                            </apex:selectList>
+                        
+                        
+                            
+                            <apex:outputLabel value="Initial Appt Date(1):(dd/MM/yyyy)" for="chooseInitialDate1"/>
+                            <apex:selectList id="chooseInitialDate1" value="{!initialApptDateOpType1}" size="1">
+                                <apex:selectOption itemValue="0" itemLabel="equals"/>
+                                <apex:selectOption itemValue="1" itemLabel="less than"/>
+                                <apex:selectOption itemValue="2" itemLabel="greater than"/>
+                                <apex:selectOption itemValue="3" itemLabel="less or equal"/>
+                                <apex:selectOption itemValue="4" itemLabel="greater or equal"/>
+                            </apex:selectList> 
+                            <apex:inputText value="{!initialApptDate1}" id="initialApptDate1"/>
+
+                              <apex:outputLabel value="Initial Appt Date(2):(dd/MM/yyyy)" for="chooseInitialDate2"/>
+                            <apex:selectList id="chooseInitialDate2" value="{!initialApptDateOpType2}" size="1">
+                                <apex:selectOption itemValue="0" itemLabel="equals"/>
+                                <apex:selectOption itemValue="1" itemLabel="less than"/>
+                                <apex:selectOption itemValue="2" itemLabel="greater than"/>
+                                <apex:selectOption itemValue="3" itemLabel="less or equal"/>
+                                <apex:selectOption itemValue="4" itemLabel="greater or equal"/>
+                            </apex:selectList> 
+                            <apex:inputText value="{!initialApptDate2}" id="initialApptDate2"/>
+                        
+                        
+                        
+                            <apex:outputLabel value="Last Modified Date(1):(dd/MM/yyyy)" for="chooseModifiedDate1"/>
+                            <apex:selectList id="chooseModifiedDate1" value="{!lastModifiedDateOpType1}" size="1">
+                                <apex:selectOption itemValue="0" itemLabel="equals"/>
+                                <apex:selectOption itemValue="1" itemLabel="less than"/>
+                                <apex:selectOption itemValue="2" itemLabel="greater than"/>
+                                <apex:selectOption itemValue="3" itemLabel="less or equal"/>
+                                <apex:selectOption itemValue="4" itemLabel="greater or equal"/>
+                            </apex:selectList> 
+                            <apex:inputText value="{!lastModifiedDate1}" id="lastModifiedDate1"/>
+
+                            <apex:outputLabel value="Last Modified Date(2):(dd/MM/yyyy)" for="chooseModifiedDate2"/>
+                            <apex:selectList id="chooseModifiedDate2" value="{!lastModifiedDateOpType2}" size="1">
+                                <apex:selectOption itemValue="0" itemLabel="equals"/>
+                                <apex:selectOption itemValue="1" itemLabel="less than"/>
+                                <apex:selectOption itemValue="2" itemLabel="greater than"/>
+                                <apex:selectOption itemValue="3" itemLabel="less or equal"/>
+                                <apex:selectOption itemValue="4" itemLabel="greater or equal"/>
+                            </apex:selectList> 
+                            <apex:inputText value="{!lastModifiedDate2}" id="lastModifiedDate2"/>
+                        
+                        
+                        <apex:outputPanel > 
+                                <apex:commandButton value="Find Students" action="{!DoAction}" status="status1" disabled="{!Authority}">
+                                </apex:commandButton>
+                                <apex:actionStatus id="status1" startText="Loading data, please wait......"/>
+                       </apex:outputPanel>  
+                        
+                    </apex:panelGrid>
+            </apex:pageBlockSection>
+
+             <apex:pageBlockSection id="note">
+                 <!--
+        
+                       -->
+             </apex:pageBlockSection>
+        </apex:form>
+    </apex:pageBlock>
+ 
+</apex:page>

@@ -1,0 +1,161 @@
+<apex:page controller="MassTransferFromController" id="massTransferfromPage">
+    <head>
+        <script type="text/javascript">
+            function changeButtonStatus(buttonElement, textValue, classValue)
+            {
+                buttonElement.className = classValue;
+                buttonElement.value = textValue;
+            }
+            
+            function setFocusOnLoad() {}
+            
+            function checkDateFormate(thisElement)
+            {
+                changeButtonStatus(thisElement, 'Finding...', 'btnDisabled');
+                var date1 = document.getElementById("{!$Component.searchForm.block.section.initialApptDate1Item.initialDate1}");
+                var date2 = document.getElementById("{!$Component.searchForm.block.section.initialApptDate2Item.initialDate2}");
+                var date3 = document.getElementById("{!$Component.searchForm.block.section.lastModifiedDate1Item.lastModifiedDate1}");
+                var date4 = document.getElementById("{!$Component.searchForm.block.section.lastModifiedDate2Item.lastModifiedDate2}");
+                var dateElements = [date1, date2, date3, date4];
+                var hasInvalidDate = false;
+var reg = /^(((0[1-9]|[12][0-9]|3[01])\/((0[13578]|1[02]))|((0[1-9]|[12][0-9]|30)\/(0[469]|11))|(0[1-9]|[1][0-9]|2[0-8])\/(02))\/([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3}))|(29\/02\/(([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00)))/;
+                
+                for(var i = 0; i < dateElements.length; i++)
+                {
+                    if(dateElements[i].value != null && dateElements[i].value != "")
+                    {
+                        var valid = reg.test(dateElements[i].value);
+                        
+                        if(!valid || (dateElements[i].value.length != 10))
+                        {
+                            hasInvalidDate = true;
+                            dateElements[i].style.borderColor = "red";
+                        }
+                        else
+                        {
+                            dateElements[i].style.borderColor = "";
+                        }
+                    }
+                } 
+                if(hasInvalidDate)
+                {
+                    alert("Invalid date!");
+                    changeButtonStatus(thisElement, 'Find Students', 'btn');
+                }
+                return !hasInvalidDate;
+            }
+        </script>
+        <style type="text/css">
+            .datePickerInput
+            {
+                width:75px;
+                margin-left:5px;
+            }
+        </style>
+    </head>
+    <body>
+        <apex:form id="searchForm">
+            <apex:pagemessages id="cMessage" />
+            <apex:sectionHeader subtitle="Mass Transfer Tool"/>
+            <apex:pageblock id="block">
+                <apex:pageBlockSection id="section" columns="1">
+                    <apex:pageBlockSectionItem id="centerItem" labelStyle="width:30%;">
+                        <apex:outputLabel >School Center</apex:outputLabel>
+                        <apex:selectList value="{!salesCenter}" id="center" multiselect="false" size="1">
+                            <apex:selectOptions value="{!allSalesCenter}"/>
+                            <apex:actionSupport event="onchange" status="changeCenterStatus" action="{!resetRelatedSalesList}" reRender="studentOwner, FindStudentsButton"/>
+                        </apex:selectList>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem id="studentOwnerItem">
+                        <apex:outputLabel >Student Owner</apex:outputLabel>
+                        <apex:outputPanel >
+                            <apex:selectList value="{!StudentOwnerId}" id="studentOwner" multiselect="false" size="1">
+                                <apex:selectOptions value="{!RelatedStudentOwners}"/>
+                            </apex:selectList>
+                            <apex:actionStatus id="changeCenterStatus">
+                                <apex:facet name="start"><img src="/img/loading.gif" alt="loading..."/></apex:facet>
+                            </apex:actionStatus>
+                        </apex:outputPanel>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem id="stageItem">
+                        <apex:outputLabel >Stage</apex:outputLabel>
+                        <apex:selectList value="{!OpportunityStageName}" id="stage" multiselect="false" size="1">
+                            <apex:selectOption itemValue="*" itemLabel="All Stage"/>
+                            <apex:selectOption itemValue="Set Appt" itemLabel="Set Appt"/>
+                            <apex:selectOption itemValue="Showed Up - Followup" itemLabel="Showed Up - Followup"/>
+                            <apex:selectOption itemValue="Appt No Show - Rescheduled" itemLabel="Appt No Show - Rescheduled"/>
+                            <apex:selectOption itemValue="Appt No Show - Call Later" itemLabel="Appt No Show - Call Later"/>
+                            <apex:selectOption itemValue="Payment Pending" itemLabel="Payment Pending"/>
+                            <apex:selectOption itemValue="Closed Won" itemLabel="Closed Won"/>
+                            <apex:selectOption itemValue="Close/Lost -Show-Up" itemLabel="Close/Lost -Show-Up"/>
+                            <apex:selectOption itemValue="Close/Lost - No Show" itemLabel="Close/Lost - No Show"/>
+                            <apex:selectOption itemValue="Refunded" itemLabel="Refunded"/>
+                        </apex:selectList>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem id="initialApptDate1Item">
+                        <apex:outputLabel >Initial Appt Date(1):(dd/MM/yyyy)</apex:outputLabel>
+                        <apex:outputPanel >
+                            <apex:selectList id="initialApptDateOperator1" value="{!InitialDateFilter1.Operator}" size="1">
+                                <apex:selectOption itemValue="0" itemLabel="equals"/>
+                                <apex:selectOption itemValue="1" itemLabel="less than"/>
+                                <apex:selectOption itemValue="2" itemLabel="greater than"/>
+                                <apex:selectOption itemValue="3" itemLabel="less or equal"/>
+                                <apex:selectOption itemValue="4" itemLabel="greater or equal"/>
+                            </apex:selectList> 
+                            <apex:inputText value="{!InitialDateFilter1.InputDate}" id="initialDate1" onfocus="DatePicker.pickDate(true, this.id, false);" styleClass="datePickerInput"/>
+                        </apex:outputPanel>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem id="initialApptDate2Item">
+                        <apex:outputLabel >Initial Appt Date(2):(dd/MM/yyyy)</apex:outputLabel>
+                        <apex:outputPanel >
+                            <apex:selectList id="initialApptDateOperator2" value="{!InitialDateFilter2.Operator}" size="1">
+                                <apex:selectOption itemValue="0" itemLabel="equals"/>
+                                <apex:selectOption itemValue="1" itemLabel="less than"/>
+                                <apex:selectOption itemValue="2" itemLabel="greater than"/>
+                                <apex:selectOption itemValue="3" itemLabel="less or equal"/>
+                                <apex:selectOption itemValue="4" itemLabel="greater or equal"/>
+                            </apex:selectList> 
+                            <apex:inputText value="{!InitialDateFilter2.InputDate}" id="initialDate2" onfocus="DatePicker.pickDate(true, this.id, false);" styleClass="datePickerInput"/>
+                        </apex:outputPanel>  
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem id="lastModifiedDate1Item">
+                        <apex:outputLabel >Last Modified Date(1):(dd/MM/yyyy)</apex:outputLabel>
+                        <apex:outputPanel >
+                            <apex:selectList id="lastModifiedDateOperator1" value="{!LastModifiedDateFilter1.Operator}" size="1">
+                                <apex:selectOption itemValue="0" itemLabel="equals"/>
+                                <apex:selectOption itemValue="1" itemLabel="less than"/>
+                                <apex:selectOption itemValue="2" itemLabel="greater than"/>
+                                <apex:selectOption itemValue="3" itemLabel="less or equal"/>
+                                <apex:selectOption itemValue="4" itemLabel="greater or equal"/>
+                            </apex:selectList> 
+                            <apex:inputText value="{!LastModifiedDateFilter1.InputDate}" id="lastModifiedDate1" onfocus="DatePicker.pickDate(true, this.id, false);" styleClass="datePickerInput"/>
+                        </apex:outputPanel>  
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem id="lastModifiedDate2Item">
+                        <apex:outputLabel >Last Modified Date(2):(dd/MM/yyyy)</apex:outputLabel>
+                        <apex:outputPanel >
+                            <apex:selectList id="lastModifiedDateOperator2" value="{!LastModifiedDateFilter2.Operator}" size="1">
+                                <apex:selectOption itemValue="0" itemLabel="equals"/>
+                                <apex:selectOption itemValue="1" itemLabel="less than"/>
+                                <apex:selectOption itemValue="2" itemLabel="greater than"/>
+                                <apex:selectOption itemValue="3" itemLabel="less or equal"/>
+                                <apex:selectOption itemValue="4" itemLabel="greater or equal"/>
+                            </apex:selectList> 
+                            <apex:inputText value="{!LastModifiedDateFilter2.InputDate}" id="lastModifiedDate2" onfocus="DatePicker.pickDate(true, this.id, false);" styleClass="datePickerInput"/>
+                        </apex:outputPanel>  
+                    </apex:pageBlockSectionItem>
+                </apex:pageBlockSection>
+                <apex:pageBlockButtons location="bottom">
+                    <apex:commandButton value="Find Students" action="{!findStudents}" onclick="return checkDateFormate(this);" disabled="{!DisableFindStudentButton}" id="FindStudentsButton"/>
+                </apex:pageBlockButtons>
+            </apex:pageblock>
+        </apex:form>
+        <apex:variable var="lowCaseRole" value="{!LOWER($UserRole.Name)}" />
+        <apex:variable var="lowCaseProfile" value="{!LOWER($Profile.Name)}" />
+        <apex:variable var="showNoteMessage" value="{!IF(CONTAINS(lowCaseRole, 'China') || CONTAINS(lowCaseProfile, 'system administrator'), true, false)}"/>
+        <apex:panelGrid width="600px" columns="1" rendered="{!showNoteMessage}">
+            <apex:outputText style="font-style:bold;font-size:12pt;color:#FF0000" value="*注意: 请尽量避免高峰时段和月底使用此功能，建议早晨使用此工具。" />
+            <apex:outputLink value="https://na2.salesforce.com/servlet/servlet.FileDownload?file=01540000000dTgP" id="helplink">点击此处下载该功能培训文档</apex:outputLink>
+        </apex:panelGrid>
+    </body>
+</apex:page>

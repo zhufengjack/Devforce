@@ -1,0 +1,9 @@
+<apex:page controller="ReturnToPreviousPage">
+    <apex:form > 
+          <apex:outputLabel >该用户没有业务机会！！！</apex:outputLabel>
+          </p>
+          <apex:outputLabel >Click</apex:outputLabel>
+          <apex:commandLink action="{!previousPage}" value="here"/> 
+          <apex:outputLabel >to go back to the previous page. </apex:outputLabel>
+    </apex:form>
+</apex:page>

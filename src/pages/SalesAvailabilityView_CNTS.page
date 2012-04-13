@@ -1,0 +1,67 @@
+<apex:page sidebar="false" showHeader="false" id="page" controller="SalesAvailabilityView_CNTS_Controller">   
+    <script type="text/javascript">
+        function getAllocation() 
+        { 
+           var school = document.getElementById("page:j_id1:school");
+           var sdate = document.getElementById("page:j_id1:txtDate");
+           if(school.value != null && school.value != "")
+           {
+                if(sdate.value != null && sdate.value != "")
+                {
+                    window.location = "SalesAvailabilityView_CNTS?school=" + school.value + "&date=" + sdate.value;
+                }
+                else
+                {
+                    alert("please select a date!");
+                }
+           }
+           else
+           {
+                alert("please select a school!");
+           }
+        } 
+    </script>
+    <body>
+        <div id="tipinfo" style="border:1px dashed #CCC;background-color:#246424;color:#FFFFFF;display:none;padding:0px;margin:0px;width:30%"></div>
+        <apex:form >
+            <center>
+                <div id="divHead">
+                School Name: 
+                <apex:selectList id="school" size="1" >
+                <apex:selectOptions value="{!SchoolList}"/>
+                </apex:selectList>
+                &nbsp;&nbsp;&nbsp;&nbsp;Date:&nbsp;<apex:inputField value="{!Report.Appointment_Date__c}" id="txtDate"/> 
+    
+                <hr style="width:500px;" align="center"/>
+                <div id="tblDetails">
+                	<apex:pageMessages />
+                    <Table style="width:380px;border-color:#4F4431;" class="list" border="1" cellspacing="0" cellpadding="0" id="alloctable">
+                        <tr class="headerRow" style="background-color:#ACA96C;">
+                            <th scope="col" class="" style="width:10%;" style="text-align:center;">No.</th>
+                            <th scope="col" class="" style="width:40%;" style="text-align:center;">Hour</th>
+                            <th scope="col" class="" style="width:30%;" style="text-align:right;">Appointments Count</th>
+                        </tr>
+                        <apex:outputPanel id="results" rendered="{!results.size > 0}">
+                            <apex:repeat value="{!results}" var="appt" id="items">
+                                <tr style="background-color:#D6D5CF;">
+                                    <td align="center">{!appt.SNumber}</td>
+                                    <td align="center">{!appt.FormatHour}</td>
+                                    <td align="center">{!appt.AppointmentsCount}</td>
+                                </tr>
+                            </apex:repeat>
+                        </apex:outputPanel>
+                    </Table>
+                </div>
+                <hr style="width:500px;" align="center"/>
+                <input id="btnGetAllo" type="button" class="btn" value="Get Appointment Details" onClick="getAllocation();" /> 
+                <div id="errorinfo" class="footer"></div>
+                <div id="debuginfo" style="border:1px dashed #CCC;background-color:#E7E7E7;color:#000;display:none;padding:5px;margin:30px;width:80%;height:15px"></div>
+                </div>
+            </center>
+        </apex:form>
+        <script type="text/javascript">
+           document.getElementById("page:j_id1:school").value = "{!IF(ISNULL($CurrentPage.parameters.school), '', $CurrentPage.parameters.school)}";
+           document.getElementById("page:j_id1:txtDate").value = "{!IF(ISNULL($CurrentPage.parameters.date), '', $CurrentPage.parameters.date)}";
+        </script>
+    </body> 
+</apex:page>

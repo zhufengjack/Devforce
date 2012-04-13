@@ -1,0 +1,7 @@
+<apex:page controller="BatchProcessSubmit" language="en">
+ <apex:form > 
+    <apex:pageBlock title="Batch Process Submitted">
+    <h1>Your transfer request has been submitted. A notification email will be sent to your email account. </h1>
+    </apex:pageBlock>
+     </apex:form>
+</apex:page>

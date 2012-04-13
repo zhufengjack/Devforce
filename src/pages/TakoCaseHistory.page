@@ -1,0 +1,57 @@
+<!-- 
+*	Display tako case history in Contact page.
+*	Pony Ma 2011-12-14 Created	
+ -->
+<apex:page standardController="Contact" extensions="TakoCaseHistoryController" sidebar="false" showHeader="false">	
+	<apex:form >						       
+	     <apex:pageBlock id="takoCaseBlock" mode="mainDetail">	
+	     	<apex:pageBlockButtons location="top">
+	     		<apex:commandButton value="Load Tako Case History" action="{!loadTakoCases}" status="loadTakoCase" reRender="takoCaseBlock"/>
+	     		<apex:actionStatus id="loadTakoCase">
+					<apex:facet name="start">
+						<img src="/img/loading.gif"/>
+						<span>Loading tako case history, please wait...</span>
+					</apex:facet>
+				</apex:actionStatus>
+	     	</apex:pageBlockButtons>	     	
+	     	<apex:outputPanel layout="none" id="takoCaseData" rendered="{!TakoCases.size>0}">       		       	
+		       	<apex:pageBlockTable value="{!TakoCases}" var="TakoCase">        		
+		       		<apex:column width="30" styleClass="actionColumn">
+		       		    <apex:facet name="header">Action</apex:facet>
+		       			<apex:outputLink target="_blank" styleClass="actionLink" value="/apex/TakoCaseDetail?takoCaseId={!TakoCase.CaseId}" >View</apex:outputLink>
+		       		</apex:column>
+		       		<apex:column width="30">
+		       			<apex:facet name="header">Case Id</apex:facet>
+		       			<apex:outputText value="{!TakoCase.CaseId}"/>
+		       		</apex:column>
+		       		<apex:column >
+		       			<apex:facet name="header">Category</apex:facet>
+		       			<apex:outputText value="{!TakoCase.Category}"/>
+		       		</apex:column>
+		       		<apex:column >
+		       			<apex:facet name="header">Sub Category</apex:facet>
+		       			<apex:outputText value="{!TakoCase.SubCategory}"/>
+		       		</apex:column>        		
+		       	</apex:pageBlockTable>
+		       	<apex:outputPanel layout="block" styleClass="pShowMore" rendered="{!NOT(IsFirstPage && IsLastPage)}">				
+					<apex:commandLink action="{!prev}" style="color:#015BA7;text-decoration:none;" status="loadingstatus" rerender="takoCaseBlock" rendered="{!NoT(IsFirstPage)}">&lt;Prev</apex:commandLink>
+					<apex:outputPanel layout="inline"  style="color:#999" rendered="{!IsFirstPage}">&lt;Prev</apex:outputPanel>
+					&nbsp;|&nbsp;
+					<apex:commandLink action="{!next}" style="color:#015BA7;text-decoration:none;" status="loadingstatus" rerender="takoCaseBlock" rendered="{!NoT(IsLastPage)}">Next</apex:commandLink>
+					<apex:outputPanel layout="inline" style="color:#999" rendered="{!IsLastPage}">Next</apex:outputPanel>
+					&nbsp;|&nbsp;
+					<apex:outputLink target="_blank" style="color:#015BA7;text-decoration:none;" value="/apex/TakoCaseHistory?contactId={!ContactId}&showAll=1">Show All</apex:outputLink>&gt;																			
+					<apex:actionStatus id="loadingstatus">
+						<apex:facet name="start">
+							<img src="/img/loading.gif"/>
+							<span>loading...</span>
+						</apex:facet>
+					</apex:actionStatus>
+				</apex:outputPanel>   
+			</apex:outputPanel> 			
+			<apex:outputPanel id="takoCaseMessage" rendered="{!TakoCases.size==0}">
+				<apex:pageMessage summary="{!TakoCaseMessage}" strength="2" severity="{!TakoCaseMessageSeverity}"/>	
+			</apex:outputPanel>    					
+		</apex:pageBlock>						
+    </apex:form>    
+</apex:page>

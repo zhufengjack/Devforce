@@ -1,0 +1,71 @@
+<apex:page controller="BrazilDailySalesAvailabilityController">
+    <header>
+        <script type="text/javascript">
+        
+            function setFocusOnLoad() {}
+            
+            function changeButtonStatus(buttonElement, textValue, classValue)
+            {
+                buttonElement.className = classValue;
+                buttonElement.value = textValue;
+            }
+            
+        </script>
+        <style type="text/css">
+        
+        </style>
+    </header>
+    <body>
+        <apex:sectionHeader subtitle="Appt Summary View For TM"/>
+        <apex:form >
+            <apex:pageMessages id="cMessage" escape="false" />
+            <apex:pageBlock id="filterBlock">
+                <apex:pageBlockButtons location="bottom" id="buttonSet">
+                    <apex:commandButton action="{!refresh}" value="Refresh" onclick="changeButtonStatus(this, 'Running ... ', 'btnDisabled');"/>
+                </apex:pageBlockButtons>
+                <apex:pageblockSection id="filterSection" >
+                    <!-- Center -->
+                    <apex:pageblockSectionItem id="centerItem">
+                        <apex:outputLabel >Select a Geography</apex:outputLabel>
+                        <apex:outputpanel >
+                            <apex:selectList value="{!CenterName}" size="1" multiselect="false">
+                                <apex:selectOptions value="{!CenterList}" />
+                                <!-- apex:actionSupport action="{!resetTeamRoleList}" event="onchange" reRender="teamRoleId, cMessage" status="teamRoleStatus"/ -->
+                            </apex:selectList>
+                        </apex:outputpanel>
+                    </apex:pageblockSectionItem>
+                    <!-- Data -->
+                    <apex:pageblockSectionItem id="dateItem">
+                        <apex:outputLabel >Date</apex:outputLabel>
+                        <apex:inputText value="{!ApptReportDate}" onfocus="DatePicker.pickDate(true, this.id, false);" id="inputApptDateBox"/>
+                    </apex:pageblockSectionItem>
+                </apex:pageblockSection>
+            </apex:pageBlock>
+            <!-- report table -->
+            <apex:pageBlock id="reportTableBlock">
+                <apex:pageblockTable id="reportTable" columns="4" value="{!ApptBookingSituations}" var="ApptBookingSituation" columnsWidth="10%,30%,30%,30%">
+                    <!-- TimeSlot -->
+                    <apex:column >
+                        <apex:facet name="header">Time Slot</apex:facet>
+                        <apex:outputText value="{!ApptBookingSituation.TimeSlot}"></apex:outputText>
+                    </apex:column>
+                    <!-- D0 -->
+                    <apex:column >
+                        <apex:facet name="header"><apex:outputPanel rendered="true"><span style="margin-right:5px;">D0</span> <apex:outputPanel rendered="{!NOT(ISBLANK(D0DateString))}">({!D0DateString})</apex:outputPanel></apex:outputPanel></apex:facet>
+                        <apex:outputText value="{!ApptBookingSituation.D0BookingSituation.Situation}"></apex:outputText>
+                    </apex:column>
+                    <!-- D1 -->
+                    <apex:column >
+                        <apex:facet name="header"><apex:outputPanel rendered="true"><span style="margin-right:5px;">D1</span> <apex:outputPanel rendered="{!NOT(ISBLANK(D1DateString))}">({!D1DateString})</apex:outputPanel></apex:outputPanel></apex:facet>
+                        <apex:outputText value="{!ApptBookingSituation.D1BookingSituation.Situation}"></apex:outputText>
+                    </apex:column>
+                    <!-- D2 -->
+                    <apex:column >
+                        <apex:facet name="header"><apex:outputPanel rendered="true"><span style="margin-right:5px;">D2</span> <apex:outputPanel rendered="{!NOT(ISBLANK(D2DateString))}">({!D2DateString})</apex:outputPanel></apex:outputPanel></apex:facet>
+                        <apex:outputText value="{!ApptBookingSituation.D2BookingSituation.Situation}"></apex:outputText>
+                    </apex:column>
+                </apex:pageblockTable>
+            </apex:pageBlock>
+        </apex:form>
+    </body>
+</apex:page>

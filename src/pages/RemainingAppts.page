@@ -1,0 +1,58 @@
+<apex:page id="page"  controller="RemainingApptsController">
+    <script type="text/javascript"> 
+        function cityView()
+        { 
+            var city = document.getElementById("city");
+            if(city != null && city.value != '' && city.value != "all")
+            {
+              window.location ="/apex/RemainingAppts" + "?city=" + city.value; 
+            }
+        }
+        function open_win(url)
+        {
+            window.open(url,"_blank","toolbar=no, location=yes, directories=no, status=no, menubar=no, scrollbars=yes, resizable=no, copyhistory=yes, width=600, height=640");
+        }
+    </script>
+    <apex:form >
+        <apex:sectionHeader title="Remaining Appointments"/>
+        <apex:pageMessages />
+        <apex:outputPanel id="vendors" layout="block">
+            &nbsp;<b style="color:#1D2321">Select a City :</b>&nbsp;&nbsp;
+            <select id="city">
+              <option value="all">-select a city-</option>
+              <option value="BJ">Beijing</option>
+              <option value="SH">Shanghai</option>
+              <option value="GZ">Guangzhou</option>
+              <option value="SZ">Shenzhen</option> 
+            </select> &nbsp;&nbsp;&nbsp;&nbsp;
+            <!-- <input type="button" value="GO!" style="width:40px;font-weight:bold;background-color:#9399A4;color:white" onclick="cityView()"/> -->
+            <input type="button" value="GO!" class="btn" onclick="cityView()" />&nbsp;
+            <apex:commandButton action="{!refresh}" value="Refresh" rerender="result" status="status" />
+            <apex:actionStatus startText="refreshing..." stopText="" id="status" />
+            <br/>                            
+       </apex:outputPanel>
+       <hr style="color:green;size:4px;width:80%;" align="left"/>
+       <apex:outputPanel id="result">
+           <apex:outputPanel id="noResults" rendered="{!schoolSize == 0}">
+               <div style="width:80%;text-align:center;font-weight:bold;font-size:10pt;line-height:16pt;height:auto;margin-top:15px">
+                    <center>No records found.</center>
+               </div>
+           </apex:outputPanel>
+           <apex:outputPanel id="results" rendered="{!schoolSize > 0}">
+                <apex:outputText escape="false" value="{!Table.renderHtml}"></apex:outputText>
+                <br/>
+                <dl style="color:black">
+                    <dt>注解：</dt>
+                    <dd>蓝色数字是表示还剩余的Appt量</dd>
+                    <dd>红色表示负数，是说明已约的Appt已经超过了Max target</dd>
+                    <dd>页面每三分钟刷新一次, 需要看实时数据请点击Refresh按钮</dd>
+                </dl>
+                <hr style="color:green;size:4px;width:80%;" align="left"/>
+           </apex:outputPanel>
+       </apex:outputPanel>
+       <apex:actionPoller action="{!Refresh}" rerender="result" interval="180" rendered="{!schoolSize > 0}" status="status"/>
+       <script type="text/javascript">
+           document.getElementById("city").value = "{!IF(ISNULL($CurrentPage.parameters.city), "all", $CurrentPage.parameters.city)}";
+        </script>
+    </apex:form>
+</apex:page>

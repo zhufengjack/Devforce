@@ -1,0 +1,6 @@
+<apex:page controller="SmartShowConfirmationController" action="{!confirmAppt}">
+    <apex:outputPanel id="Messages">
+        <apex:pageMessages escape="false"/>
+    </apex:outputPanel>
+    <a href="/{!$CurrentPage.Parameters.oppId}"><b>Back to Opportunity</b></a>
+</apex:page>

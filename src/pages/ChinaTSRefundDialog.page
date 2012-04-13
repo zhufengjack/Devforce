@@ -1,0 +1,96 @@
+<apex:page controller="ChinaTSRefundDialogController" sidebar="false" showheader="false" id="page">
+    <script type="text/javascript">
+        var d=new Date();
+        var day=d.getDate();
+        var month=d.getMonth() + 1;
+        var year=d.getFullYear();
+        var currentDate = "";
+        if(month < 10)
+        {
+          month = "0" + month;
+        }
+        if(day < 10)
+        {
+          day = "0" + day;
+        }
+        currentDate = year + "-" + month + "-" + day;
+        function isNumber(oNum)
+        {
+            if(!oNum) return false;
+            var strP=/^\d+(\.\d+)?$/;
+            if(!strP.test(oNum)) 
+            return false;
+            try
+            {
+                if(parseFloat(oNum)!=oNum) 
+                return false;
+            }
+            catch(ex)
+            {
+                return false;
+            }
+            return true;
+        }
+        
+        function refreshParent()
+        {
+            alert("you have successed to create a refund record.");
+            window.opener.location.reload();
+            window.close();
+        }
+        function checkExpDate(expDate)
+        {
+          var ExpDateRegex = /^((0([1-9]{1}))|(1[0-2]{1}))\/([0-9]{2})$/;
+          if(expDate != null && expDate.value != "")
+          {
+            if(!ExpDateRegex.test(expDate.value) )
+            {
+              alert("ExpDate is invalid format!");
+              expDate.focus();
+            }
+          }
+        }
+    </script>
+     <apex:form id="form">
+        <apex:sectionHeader title="Refund Information"/>
+        <apex:pageBlock id="block">
+            <apex:pageMessages id="message" escape="false"/>
+             <apex:pageBlockButtons location="bottom">
+                <apex:commandButton action="{!tsRefund}" value="Refund" status="displaying1" reRender="message" />
+                <input type="button" class="btn" value="Cancel" onclick="window.close()"/> 
+                <apex:actionStatus id="displaying1">
+                    <apex:facet name="start"><img src="/img/loading.gif" alt="loading..."/></apex:facet>
+                </apex:actionStatus> 
+            </apex:pageBlockButtons> 
+            <apex:pageBlockSection title="Detail" columns="1" id="refundSection">
+                <apex:pageBlockSectionItem id="refundAmount">
+                <apex:outputLabel value="Refund Amount" for="Amount"/>
+                    <apex:inputField value="{!RefundRecord.Refund_Amount__c}" id="Amount"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                <apex:outputLabel value="Refund Method" for="payMethod"/>
+                    <apex:inputField value="{!RefundRecord.Refund_Payment_Method__c}" id="payMethod"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                <apex:outputLabel value="Bank Name" for="bankName"/>
+                    <apex:inputField value="{!RefundRecord.Refund_Bank_Name__c}" id="bankName"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                <apex:outputLabel value="Refund Credit Card #" for="creditCard"/>
+                    <apex:inputField value="{!RefundRecord.Refund_Credit_Card__c}" id="creditCard"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Refund CC Exp. Date" for="expDate"/>
+                    <apex:inputField value="{!RefundRecord.Refund_CC_Exp_Date__c}" id="expDate" onblur="checkExpDate(this)"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Refund Date" for="refundDate"/>
+                    <apex:inputField value="{!RefundRecord.Refund_Date_China__c}" id="refundDate"/>
+                </apex:pageBlockSectionItem> 
+            </apex:pageBlockSection> 
+        </apex:pageBlock>
+     </apex:form>
+     <script type="text/javascript">
+        document.getElementById("{!$Component.form.block.refundSection.refundAmount.Amount}").value="{!$CurrentPage.Parameters.amount}";
+     </script>
+</apex:page>

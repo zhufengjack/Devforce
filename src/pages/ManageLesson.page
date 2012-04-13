@@ -1,0 +1,569 @@
+<apex:page sidebar="false" controller="ManageLessonController">
+	<apex:stylesheet value="{!URLFOR($Resource.CRToolResource,'CRTool/CRTool.css')}"/>
+	<apex:stylesheet value="{!urlfor($Resource.YUI,'build/container/assets/skins/sam/container.css')}" />	
+	<apex:includeScript value="{!urlfor($Resource.YUI,'build/yahoo/yahoo-min.js')}" />
+	<apex:includeScript value="{!urlfor($Resource.YUI,'build/yahoo-dom-event/yahoo-dom-event.js')}" />
+	<apex:includeScript value="{!urlfor($Resource.YUI,'build/container/container-min.js')}" />
+	<apex:includeScript value="{!urlfor($Resource.YUI,'build/animation/animation-min.js')}" /> 
+	<apex:includeScript value="{!URLFOR($Resource.jQuery, 'jquery-1.4.4.min.js')}" />
+	<apex:form id="mainForm">
+		<apex:inputHidden id="canceledReasonValue" value="{!ActionReason}" rendered="{!Action=='Cancel'}"/>		
+		<apex:inputHidden id="refundReasonValue" value="{!ActionReason}" rendered="{!Action=='Refund'}"/>
+		<apex:inputHidden id="canceledByValue" value="{!ActionBy}" rendered="{!Action=='Cancel'}"/>	
+		<apex:inputHidden id="refundByValue" value="{!ActionBy}" rendered="{!Action=='Refund'}"/>						
+		<div id="Wrapper">
+			<div id="Header" class="selfClear">
+	     		<ul id="NavigationPrimary" class="selfClear">
+	     			<li class="active">
+			    		<apex:commandLink value="Manage Lesson" immediate="true"></apex:commandLink>				    				    						    	
+			    	</li>			    	 
+			    </ul>                      
+	    	</div> 
+	    	<div id="MainBody"><div id="MainChannel"><div id="Content"><div id="ContentChannel" class="selfClear">	    			    			    		
+	    		<div class="boxedContent">
+			           <div class="header">
+			               <div class="content"></div>                                                                 
+			           </div>
+			           <div class="channel">
+			               <div class="content">  
+			               	<apex:outputPanel id="filterPanel">
+				               	 <div class="fieldbox"> 			               	 					            	
+					               	<apex:panelGrid columns="6">
+					               	<apex:outputLabel value="User Name"/>
+					               		<apex:inputText value="{!SearchParam.UserName}"/>					               		
+					               		<apex:outputLabel value="Student Email"/>
+					               		<apex:inputText value="{!SearchParam.StudentEmail}"/>
+					               		<apex:outputLabel value="Teacher Name"/>
+					               		<apex:inputText value="{!SearchParam.TeacherName}"/>					               		
+					               		<apex:outputLabel value="Lesson Id"/>
+					               		<apex:inputText id="classId" value="{!SearchParam.ClassId}"/>					               						               		
+					               		<apex:outputLabel value="Type"/>					               		
+					               		<apex:selectList value="{!SearchParam.SearchType}" size="1">
+					               			<apex:selectOptions value="{!LessonTypes}"></apex:selectOptions>					               			
+					               		</apex:selectList>
+					               		<apex:outputLabel value="Topic"/>
+					               		<apex:inputText value="{!SearchParam.Topic}"/>					               							               							               							               
+					               		<apex:outputLabel value="Date From"/>
+					               		<apex:inputField value="{!DateTimeFieldStub.EmailBouncedDate}"/>
+					               		<apex:outputLabel value="Date To"/>
+					               		<apex:inputField value="{!DateTimeFieldStub2.EmailBouncedDate}"/>
+					               							               							               					               				               								               							               				               			               					               		 					               							               				               								                 							                 				                 	                                											               							                 	                                								            							                 							                 				                 	                                											               							                 	                                											                 	                                				
+					            	</apex:panelGrid>	
+					            					            	
+					            	<apex:outputPanel >                                                                                         
+					                      <div style="margin-top:10px;height:30px;">
+					                      	<ul class="buttons left">                         
+						                      	<li class="first"> 
+						                            <apex:commandLink action="{!searchLesson}" status="queryLessonStatus" reRender="mainForm"><span>Search</span></apex:commandLink>							                                                        	                           
+						                      	</li> 						                      	
+						                      	<li>
+						                      		<div style="margin-left:10px;padding-top:2px;">						                      			
+						                      			<apex:outputPanel layout="inline" styleClass="msgIcon" rendered="{!NOT(ISNULL(QueryMessage))}">						                      				
+						                      				<img alt="{!QueryMessage.Severity}" class="{!QueryMessage.Severity}Small" src="/s.gif" title="{!QueryMessage.Severity}"/>&nbsp;	
+						                      				{!QueryMessage.Summary}&nbsp;				                      									                      			
+						                      			</apex:outputPanel>
+						                      			<apex:actionStatus id="queryLessonStatus">
+						                      				<apex:facet name="start">
+																<img src="{!URLFOR($Resource.CRToolResource,'CRTool/loader16.gif')}"/>
+																<span>searching..., please wait</span>
+															</apex:facet>						                      				
+						                      			</apex:actionStatus>
+						                      		</div> 						                      		
+						                      	</li>                                                                                                     
+						                   </ul> 						                   						                   					                    								    	                      						                   	
+					                  	  </div> 					                  	                
+					                </apex:outputPanel>				            	
+				            	 </div>	  
+			            	 </apex:outputPanel>                         	
+			               </div>
+			           </div>
+		           	   <div class="footer"><div class="content"></div></div></div>
+		           	   		           	   
+		           	<apex:outputPanel id="dataPanel" layout="none" rendered="{!Lessons.size>0}">	   
+		           	   <div class="tableWrapper">
+				           <div class="header">
+				               <div class="content">
+				               		<h3>
+					                	Lessons Found					                	
+					                	<span class="hint">&nbsp;</span>						                					                							                			                
+					                </h3>						                
+					                <span>
+					                	<apex:outputPanel layout="inline" styleClass="msgIcon" rendered="{!NOT(ISNULL(ActionMessage))}">						                      				
+		                      				<img alt="{!ActionMessage.Severity}" class="{!ActionMessage.Severity}Small" src="/s.gif" title="{!ActionMessage.Severity}"/>&nbsp;	
+		                      				{!ActionMessage.Summary}&nbsp;				                      									                      			
+		                      			</apex:outputPanel>
+		                      			<apex:actionStatus id="loadingStatus">
+		                      				<apex:facet name="start">												
+												<span><img src="{!URLFOR($Resource.CRToolResource,'CRTool/loader16.gif')}"/>&nbsp;Processing..., please wait</span>
+											</apex:facet>						                      				
+		                      			</apex:actionStatus>
+		                      		</span>	
+		                      				                      						                
+				               </div>                                                                 
+				           </div>
+				           <div class="channel">
+				               <div class="content">  				               	
+												
+									<apex:dataTable rowclasses=" ,alt" value="{!Lessons}" var="ld">
+										<apex:column width="85">
+											<apex:facet name="header">
+						                    	<apex:outputPanel >
+						                    		<B>Action</B>	                    	
+						                    	</apex:outputPanel>						                    	
+					                    	</apex:facet>
+					                    	<apex:commandLink value="Refund" style="color:#0099FF;" action="{!loadLesson}">
+	                                            <apex:param name="ClassId" value="{!ld.ClassID}"/>
+	                                            <apex:param name="Action" value="Refund"/>
+	                                        </apex:commandLink>
+	                                        <apex:outputLabel value=" | " escape="false"/>    
+	                                        <apex:commandLink value="Cancel" style="color:#0099FF;" action="{!loadLesson}">
+	                                            <apex:param name="ClassId" value="{!ld.ClassID}"/>
+	                                            <apex:param name="Action" value="Cancel"/>
+	                                        </apex:commandLink>		                                        								
+										</apex:column>
+										<apex:column >
+					                    	<apex:facet name="header">
+						                    	<apex:outputPanel >
+						                    		<B>Class ID</B>	                    	
+						                    	</apex:outputPanel>						                    	
+					                    	</apex:facet>
+					                    	<apex:outputText value="{!ld.ClassID}" >					                    		
+					                    	</apex:outputText>
+					                    </apex:column>
+										<apex:column width="100">
+					                    	<apex:facet name="header">
+						                    	<apex:outputPanel >
+						                    		<B>Lesson Time</B>	                    	
+						                    	</apex:outputPanel>						                    	
+					                    	</apex:facet>
+					                    	<apex:outputText value="{!ld.StartTime}"/>	
+					                    </apex:column>
+					                    <apex:column >
+					                    	<apex:facet name="header">
+						                    	<apex:outputPanel >
+						                    		<B>Member ID</B>	                    	
+						                    	</apex:outputPanel>						                    	
+					                    	</apex:facet>
+					                    	<apex:outputText value="{!ld.StudentMemberId}"/>	
+					                    </apex:column>
+					                    <apex:column >
+					                    	<apex:facet name="header">
+						                    	<apex:outputPanel >
+						                    		<B>User Name</B>	                    	
+						                    	</apex:outputPanel>						                    	
+					                    	</apex:facet>
+					                    	<apex:outputText value="{!ld.UserName}"/>	
+					                    </apex:column>
+					                    <apex:column >
+					                    	<apex:facet name="header">
+						                    	<apex:outputPanel >
+						                    		<B>Email</B>	                    	
+						                    	</apex:outputPanel>						                    	
+					                    	</apex:facet>
+					                    	<apex:outputText value="{!ld.Email}"/>	
+					                    </apex:column>
+					                    <apex:column >
+					                    	<apex:facet name="header">
+						                    	<apex:outputPanel >
+						                    		<B>Country</B>	                    	
+						                    	</apex:outputPanel>						                    	
+					                    	</apex:facet>
+					                    	<apex:outputText value="{!ld.Country}"/>	
+					                    </apex:column>
+					                    <apex:column >
+					                    	<apex:facet name="header">
+						                    	<apex:outputPanel >
+						                    		<B>Teacher Name</B>	                    	
+						                    	</apex:outputPanel>						                    	
+					                    	</apex:facet>
+					                    	<apex:outputText value="{!ld.TeacherUserName}"/>	
+					                    </apex:column>
+					                    <apex:column >
+					                    	<apex:facet name="header">
+						                    	<apex:outputPanel >
+						                    		<B>Topic</B>	                    	
+						                    	</apex:outputPanel>						                    	
+					                    	</apex:facet>
+					                    	<apex:outputText value="{!ld.Topic}"/>	
+					                    </apex:column>
+					                    <apex:column >
+					                    	<apex:facet name="header">
+						                    	<apex:outputPanel >
+						                    		<B>Status</B>	                    	
+						                    	</apex:outputPanel>						                    	
+					                    	</apex:facet>
+					                    	<apex:outputText value="{!ld.ClassStatusCode}"/>	
+					                    </apex:column>					                    
+									</apex:dataTable>										
+								</div>																 			 					          
+					      </div>
+					      <div class="footer">
+					      	<apex:outputPanel >
+						        <div class="content selfClear">
+						        	<ul class="pagingController">					        							        		                                                     
+						               <li>
+						               		<apex:commandLink styleclass="previous" style="color:#0099FF" value="Prev" action="{!prev}" rendered="{!NOT(IsFirstPage)}" status="loadingStatus" reRender="dataPanel"/>
+						               		<apex:outputText value="Page {!CurPageIndex} of {!TotPageAmount}"/>	               
+						                   	<apex:commandLink styleclass="next" value="Next" style="color:#0099FF" action="{!next}" rendered="{!NOT(IsLastPage)}" status="loadingStatus" reRender="dataPanel"/>
+						               </li>
+						            </ul>
+						        </div> 
+						    </apex:outputPanel>  
+					      </div>
+					</div> 
+				</apex:outputPanel> 		       		    			    	
+	    	</div></div></div></div>
+	    	<apex:outputPanel layout="block" id="opParticipant">
+			    <div id="divParticipant" style="width:600px;display:none;">     
+			        <div class="hd">
+			        	<div style="height:20px;padding-top:5px;font-size:1.1em;">
+			        		<h1>Manage Lesson</h1>            	
+			            </div>
+			        </div>
+			        <div class="bd">            
+			            <apex:pageBlock mode="maindetail">                   
+			                <apex:pageBlockSection columns="2">
+			                	<apex:pageBlockSectionItem >
+			                		<apex:outputLabel value="Member ID"/>
+			                		<apex:outputText value="{!Lesson.StudentMemberId}"/>
+			                	</apex:pageBlockSectionItem>  
+			                	<apex:pageBlockSectionItem >
+			                		<apex:outputLabel value="UserName"/>
+			                		<apex:outputText value="{!Lesson.UserName}"/>
+			                	</apex:pageBlockSectionItem>
+			                	<apex:pageBlockSectionItem >
+			                		<apex:outputLabel value="Email"/>
+			                		<apex:outputText value="{!Lesson.Email}"/>
+			                	</apex:pageBlockSectionItem>  
+			                	<apex:pageBlockSectionItem >
+			                		<apex:outputLabel value="Country"/>
+			                		<apex:outputText value="{!Lesson.Country}"/>
+			                	</apex:pageBlockSectionItem>                                                  
+			                </apex:pageBlockSection> 
+			                <apex:pageBlockSection columns="2" collapsible="false">
+			                	<apex:facet name="header">
+			                		<div style="margin-bottom:5px;"></div>	
+			                	</apex:facet>
+			                	<apex:pageBlockSectionItem >
+			                		<apex:outputLabel value="Class ID"/>
+			                		<apex:outputText value="{!Lesson.ClassId}"/>
+			                	</apex:pageBlockSectionItem>  
+			                	<apex:pageBlockSectionItem >
+			                		<apex:outputLabel value="Lesson Time"/>
+			                		<apex:outputText value="{!Lesson.StartTime}"/>
+			                	</apex:pageBlockSectionItem>
+			                	<apex:pageBlockSectionItem >
+			                		<apex:outputLabel value="Teacher Name"/>
+			                		<apex:outputText value="{!Lesson.TeacherUserName}"/>
+			                	</apex:pageBlockSectionItem>  
+			                	<apex:pageBlockSectionItem >
+			                		<apex:outputLabel value="Topic"/>
+			                		<apex:outputText value="{!Lesson.Topic}"/>
+			                	</apex:pageBlockSectionItem> 
+			                	<apex:pageBlockSectionItem >
+			                		<apex:outputLabel value="Class Status"/>
+			                		<apex:outputText value="{!Lesson.ClassStatusCode}"/>
+			                	</apex:pageBlockSectionItem>
+			                	<apex:pageBlockSectionItem >
+			                		<apex:outputLabel value="Cancel Date"/>
+			                		<apex:outputText value="{!Lesson.CancelDate}"/>
+			                	</apex:pageBlockSectionItem>                                                   
+			                </apex:pageBlockSection>                  
+			                <apex:pageBlockSection columns="1" collapsible="false" rendered="{!Action=='Cancel' && Lesson.ClassStatusCode=='Booked'}">
+			                	<apex:facet name="header">
+			                		<div style="margin-bottom:5px;"></div>	
+			                	</apex:facet>
+			                	<apex:pageBlockSectionItem >
+				                	<apex:outputLabel value="Canceled By"/>	
+				                	<apex:outputPanel layout="inline">
+					                	<select id="canceledBy" style="width:210px;">
+				                			<apex:repeat value="{!CanceledBys}" var="cbs">
+				                				<option value="{!cbs.Value}">{!cbs.Label}</option>
+				                			</apex:repeat>
+				                		</select>	
+			                		</apex:outputPanel>			                					                	
+			                	</apex:pageBlockSectionItem>
+			                	<apex:pageBlockSectionItem >
+				                	<apex:outputLabel value="Cancel Reason"/>				                	
+				                	<apex:outputPanel layout="inline">
+				                		<select id="cancelReason" style="width:210px;">
+				                			<apex:repeat value="{!CancelReasons}" var="crs">
+				                				<option value="{!crs.Value}">{!crs.Label}</option>
+				                			</apex:repeat>
+				                		</select>					                	
+					                	<apex:commandButton value="Custom Reason" onclick="showCustomReason(this);return false;"/>
+				                		<input type="text" id="cancelCustomReason" style="width:210px;display:none;"/>				                		 
+				                	</apex:outputPanel>
+			                	</apex:pageBlockSectionItem>			                	
+			                </apex:pageBlockSection>
+			                <apex:pageBlockSection columns="1" collapsible="false" rendered="{!Action=='Refund'}">
+			                	<apex:facet name="header">
+			                		<div style="margin-bottom:5px;"></div>	
+			                	</apex:facet>
+			                	<apex:pageBlockSectionItem >
+				                	<apex:outputLabel value="Refund By"/>	
+				                	<apex:outputPanel layout="inline">
+					                	<select id="refundBy" style="width:210px;">
+				                			<apex:repeat value="{!RefundBys}" var="rbs">
+				                				<option value="{!rbs.Value}">{!rbs.Label}</option>
+				                			</apex:repeat>
+				                		</select>	
+			                		</apex:outputPanel>			                					                	
+			                	</apex:pageBlockSectionItem>
+			                	<apex:pageBlockSectionItem >
+				                	<apex:outputLabel value="Refund Reason"/>
+				                	<apex:outputPanel layout="none">
+				                		<select id="refundReason"  style="width:210px;">
+				                			<apex:repeat value="{!RefundReasons}" var="rrs">
+				                				<option value="{!rrs.Value}">{!rrs.Label}</option>
+				                			</apex:repeat>
+				                		</select>					                	
+					                	<apex:commandButton value="Custom Reason" onclick="showCustomReason(this);return false;"/>
+					                	<input type="text" id="refundCustomReason" style="width:210px;display:none;"/>				                		
+				                	</apex:outputPanel>
+			                	</apex:pageBlockSectionItem>
+			                </apex:pageBlockSection>                                           
+			                <apex:pageBlockButtons location="bottom">                                        
+			                    <div style="width:100%;text-align:center;">
+				                    <ul class="buttons left">   
+				                    	<apex:commandButton value="Cancel Lesson" id="btnCancel" rendered="{!Action=='Cancel' && Lesson.ClassStatusCode=='Booked'}" onclick="cancelLesson();return false;"></apex:commandButton>
+				                    	<apex:commandButton value="Refund Lesson" id="btnRefund" rendered="{!Action=='Refund'}" onclick="refundLesson();return false;"></apex:commandButton>
+				                    	<apex:commandButton value="Close" onclick="YAHOO.force.com.hideEditDialog();"></apex:commandButton>  
+				                    	<apex:actionFunction name="cancelLessonFunc" action="{!cancelLesson}" status="loadingStatus" reRender="dataPanel"/>   
+				                    	<apex:actionFunction name="refundLessonFunc" action="{!refundLesson}" status="loadingStatus" reRender="dataPanel"/>                                    	                                                                                                   
+				                    	
+				                    </ul> 
+			                    </div>                
+			                </apex:pageBlockButtons>  			                           
+			            </apex:pageBlock>                
+			        </div>                                                      
+			    </div>
+			 </apex:outputPanel>
+		</div>	
+	
+    <script>
+     // Create a namespace for our custom functions  
+     YAHOO.namespace("force.com");  
+     
+     // Function called when we want to show the dialog  
+     YAHOO.force.com.showMe = function() {  
+        
+         document.getElementById("divUploadData").style.display = "block";  
+         YAHOO.force.com.myDialog.show();  
+         
+     }  
+     // Function called when we want to hide the dialog  
+     YAHOO.force.com.hideMe = function() {  
+         YAHOO.force.com.myDialog.hide();  
+     }  
+     
+     YAHOO.force.com.showEditDialog=function(){          
+        document.getElementById("divParticipant").style.display = "block";
+        YAHOO.force.com.editDialog.show();      
+     }
+     
+     YAHOO.force.com.hideEditDialog=function(){
+        YAHOO.force.com.editDialog.hide();
+     }
+     
+     YAHOO.force.com.showSearchDialog=function(){        
+        document.getElementById("divSearch").style.display = "block";
+        YAHOO.force.com.searchDialog.show();        
+     }
+     
+     //YAHOO.force.com.hideEditDialog=function(){
+        //YAHOO.force.com.searchDialog.hide();
+     //}
+     
+     // Function called when the DOM is ready to create the dialog,  
+     // render the dialog into the document body, add our dialog skin  
+     // css to the body tag, and wire up the buttons on our dialog      
+     YAHOO.force.com.init = function() {  
+         document.body.className = document.body.className + " yui-skin-sam";  
+         YAHOO.force.com.myDialog = new YAHOO.widget.Panel(  
+             "divUploadData",  // The id of our dialog container  
+             {   
+                     width           :   300,    // You can play with this until it's right  
+                     visible         :   false,  // Should be invisible when rendered  
+                     draggable       :   true,   // Make the dialog draggable  
+                     close           :   true,  // Don't include a close title button  
+                     modal           :   true,   // Make it modal  
+                     fixedCenter     :   true,   // Keep centered if window is scrolled  
+                     zindex          :   40,     // Make sure it's on top of everything  
+                     // This line adds the appear/vanish fade effect  
+                     effect          :   {  
+                                           effect:YAHOO.widget.ContainerEffect.FADE,  
+                                           duration:0.35 
+                                         } 
+                     
+             }  
+          );  
+       
+         // Render the dialog to the document.body level of the DOM  
+         YAHOO.force.com.myDialog.render(document.body); 
+         
+         
+         YAHOO.force.com.searchDialog = new YAHOO.widget.Panel(  
+             "divSearch",  // The id of our dialog container  
+             {   
+                     width           :   300,    // You can play with this until it's right  
+                     visible         :   false,  // Should be invisible when rendered  
+                     draggable       :   true,   // Make the dialog draggable  
+                     close           :   true,  // Don't include a close title button  
+                     modal           :   true,   // Make it modal  
+                     fixedCenter     :   true,   // Keep centered if window is scrolled  
+                     zindex          :   40,     // Make sure it's on top of everything  
+                     // This line adds the appear/vanish fade effect  
+                     effect          :   {  
+                                           effect:YAHOO.widget.ContainerEffect.FADE,  
+                                           duration:0.35 
+                                         } 
+                     
+             }  
+          );  
+       
+         // Render the dialog to the document.body level of the DOM  
+         YAHOO.force.com.searchDialog.render(document.body); 
+         
+         YAHOO.force.com.editDialog = new YAHOO.widget.Panel(  
+             "divParticipant",  // The id of our dialog container  
+             {   
+                     width           :   600,    // You can play with this until it's right  
+                     visible         :   false,  // Should be invisible when rendered  
+                     draggable       :   true,   // Make the dialog draggable  
+                     close           :   false,  // Don't include a close title button  
+                     modal           :   true,   // Make it modal  
+                     fixedCenter     :   true,   // Keep centered if window is scrolled  
+                     zindex          :   41,     // Make sure it's on top of everything  
+                     // This line adds the appear/vanish fade effect  
+                     effect          :   {  
+                                           effect:YAHOO.widget.ContainerEffect.FADE,  
+                                           duration:0.35 
+                                         } 
+                     
+             }  
+          );  
+         
+         // Render the dialog to the document.body level of the DOM  
+         YAHOO.force.com.editDialog.render(document.body); 
+         
+         	if(!{!IsLessonEmpty}){
+            	YAHOO.force.com.showEditDialog();
+            }
+            console.log(YAHOO.force.com.editDialog);                                   
+     }
+     
+     function toggleButton(value,btnName){     	
+     	if(value==''){
+     		$j("input[id$=" + btnName + "]").css('disabled','disabled');
+     		$j("input[id$=" + btnName + "]").addClass('btnDisabled').removeClass('btn');
+     	}else{
+     		$j("input[id$=" + btnName + "]").removeAttr('disabled');
+     		$j("input[id$=" + btnName + "]").addClass('btn').removeClass('btnDisabled');
+     	}     
+     }
+     
+     function cancelLesson(){
+     	var canceledBy=$j("[id$='canceledBy']").val();
+     	var reason=$j("[id$='cancelReason']").val();
+     	var customReason=$j("[id$='cancelCustomReason']").val();
+     	
+     	if(canceledBy==''){
+     		alert("please select canceled by.");
+     		return;
+     	}
+     	
+     	if(reason=='' && customReason==''){
+     		alert("Please select or input cancel reason.");
+     		return;
+     	}
+     	
+     	$j("[id$='canceledByValue']").val(canceledBy);   
+     	
+     	if(customReason!=''){
+     		$j("[id$='canceledReasonValue']").val(customReason);     		
+     	}else{
+     		$j("[id$='canceledReasonValue']").val(reason);		
+     	}     	     	     	
+     	     	
+     	if(confirm('Are you sure to cancel the lesson?')){
+     		YAHOO.force.com.hideEditDialog();
+     		cancelLessonFunc();
+     	}     	
+     }
+     
+     function refundLesson(){
+     	var refundBy=$j("[id$='refundBy']").val();
+     	var reason=$j("[id$='refundReason']").val();
+     	var customReason=$j("[id$='refundCustomReason']").val();
+     	
+     	if(refundBy==''){
+     		alert("please select refund by.");
+     		return;
+     	}
+     	
+     	$j("[id$='refundByValue']").val(refundBy);  
+     	
+     	if(reason=='' && customReason==''){
+     		alert("Please select or input refund reason.");
+     		return;
+     	}
+     	
+     	if(customReason!=''){
+     		$j("[id$='refundReasonValue']").val(customReason);     		
+     	}else{
+     		$j("[id$='refundReasonValue']").val(reason);		
+     	}
+     	
+     	if(confirm('Are you sure to refund the lesson?')){
+     		YAHOO.force.com.hideEditDialog();
+     		refundLessonFunc();
+     	}     	
+     }
+     
+     function showCustomReason(customButton){
+     	console.log(customButton);
+     	$j(customButton).prev().hide()
+     	$j(customButton).next().show();	
+     	$j(customButton).hide();
+     	$j(customButton).next().focus();
+     }
+     
+     function showLessonDialog(){
+        
+     	YAHOO.force.com.editDialog.init();
+     	YAHOO.force.com.editDialog = new YAHOO.widget.Panel(  
+             "divParticipant",  // The id of our dialog container  
+             {   
+                     width           :   600,    // You can play with this until it's right  
+                     visible         :   false,  // Should be invisible when rendered  
+                     draggable       :   true,   // Make the dialog draggable  
+                     close           :   false,  // Don't include a close title button  
+                     modal           :   true,   // Make it modal  
+                     fixedCenter     :   true,   // Keep centered if window is scrolled  
+                     zindex          :   41,     // Make sure it's on top of everything  
+                     // This line adds the appear/vanish fade effect  
+                     effect          :   {  
+                                           effect:YAHOO.widget.ContainerEffect.FADE,  
+                                           duration:0.35 
+                                         } 
+                     
+             }  
+          );  
+         
+         // Render the dialog to the document.body level of the DOM  
+         YAHOO.force.com.editDialog.render(document.body);
+         
+         
+        document.getElementById("divParticipant").style.display = "block";
+        YAHOO.force.com.editDialog.show(); 		
+        
+     }
+     
+     // Add the init method to the window.load event  
+     YAHOO.util.Event.addListener(window, "load", YAHOO.force.com.init);  
+     
+     $j = jQuery.noConflict();           
+         </script> 
+  </apex:form>     
+</apex:page>

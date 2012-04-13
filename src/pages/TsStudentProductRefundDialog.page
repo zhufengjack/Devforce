@@ -1,0 +1,96 @@
+<apex:page controller="TsStudentProductRefundDialogController" showHeader="false">
+    <header>
+        <script type="text/javascript">
+            function checkInput(element, statusMessage)
+            {   
+                 changeStatus(element, statusMessage);
+            }
+            
+            function changeStatus(element, statusMessage)
+            {  
+                element.className = "btnDisabled";
+                element.value =statusMessage; //  'Refunding......';
+            }
+            
+            function completeStatus(element, statusMessage)
+            {
+                element.className = "btn";
+                element.value = statusMessage; //'Refund';
+            }
+            function closeWindow()
+            {
+                alert('Refund successful.');
+                 window.close();
+            }
+        </script>
+        <style type="text/css">
+        .requireSign
+        {
+            color:red;
+        }
+        </style>
+    </header>
+    <apex:outputPanel id="formPanel">
+        <apex:form id="refundForm">
+            <apex:pageBlock id="block">
+                <apex:pageMessages id="pMessage" escape="false" />
+                <apex:sectionHeader title="Student Product Refund Information"/>
+                <apex:pageBlockSection title="Information" columns="2" >
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel >Product Name:</apex:outputLabel>
+                        <apex:outputText >{!StudentProductName}</apex:outputText>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel >Product:</apex:outputLabel>
+                        <apex:outputText >{!ProductName}</apex:outputText>
+                    </apex:pageBlockSectionItem>
+                </apex:pageBlockSection>
+                <apex:outputPanel rendered="{!IF(VisualConfirm, false, true)}" id="panelStep1">
+                 <apex:pageBlockSection title="Detail" columns="1"  id="section">
+                        <apex:pageblockSectionItem labelStyle="width:30%;"  id="refundAmountSection">
+                            <apex:outputLabel >Refund Amount </apex:outputLabel>
+                            <apex:inputField value="{!MiddleObject.Refund_Amount__c}"  id="refundAmount"><span class="requireSign"> *</span></apex:inputField>
+                        </apex:pageblockSectionItem>
+                        <apex:pageblockSectionItem id="refundQuantitySection">
+                            <apex:outputLabel >Refund Quantity</apex:outputLabel>
+                            <apex:inputField value="{!MiddleObject.Refund_Quantity__c}" id="refundQuantity"><span class="requireSign"> *</span></apex:inputField>
+                        </apex:pageblockSectionItem>
+                        <apex:pageBlockSectionItem id="refundTypeSection">
+                            <apex:outputLabel >Refund Type</apex:outputLabel>
+                            <apex:inputField value="{!MiddleStudentActual.RefundType__c}" id="refundType"><span class="requireSign"> *</span></apex:inputField>
+                        </apex:pageBlockSectionItem>
+                        <apex:pageblockSectionItem id="refundDateSection">
+                            <apex:outputLabel >Refund date-China</apex:outputLabel>
+                            <apex:inputField value="{!MiddleObject.Refund_date_China__c}" id="refundDate"><span class="requireSign"> *</span></apex:inputField>
+                        </apex:pageblockSectionItem>
+                    </apex:pageBlockSection>
+                </apex:outputPanel> 
+                <apex:outputPanel rendered="{!VisualConfirm}">
+                 <apex:pageBlockSection title="Detail" columns="1" >
+                        <apex:pageblockSectionItem labelStyle="width:30%;">
+                            <apex:outputLabel >Refund Amount </apex:outputLabel>
+                            <apex:outputField value="{!MiddleObject.Refund_Amount__c}" />
+                        </apex:pageblockSectionItem>
+                        <apex:pageblockSectionItem >
+                            <apex:outputLabel >Refund Quantity</apex:outputLabel>
+                            <apex:outputField value="{!MiddleObject.Refund_Quantity__c}" />
+                        </apex:pageblockSectionItem>
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLabel >Refund Type</apex:outputLabel>
+                            <apex:outputField value="{!MiddleStudentActual.RefundType__c}"/>
+                        </apex:pageBlockSectionItem>
+                        <apex:pageblockSectionItem >
+                            <apex:outputLabel >Refund date-China</apex:outputLabel>
+                            <apex:outputField value="{!MiddleObject.Refund_date_China__c}"/>
+                        </apex:pageblockSectionItem>
+                    </apex:pageBlockSection>
+                </apex:outputPanel>    
+                <apex:pageBlockButtons location="bottom">
+                    <apex:commandButton value="Confirm" action="{!confirm}" rendered="{!AND(VisualConfirm, NOT(IsTSActual))}" onclick="changeStatus(this, 'Saving......');"/>
+                    <apex:commandButton value="Refund" action="{!refundTSPayment}" onclick="checkInput(this, 'Refunding......');" />
+                    <apex:commandButton value="Cancel"  onclick="window.close();"/>
+                </apex:pageBlockButtons>
+            </apex:pageBlock> 
+        </apex:form>
+    </apex:outputPanel>
+</apex:page>

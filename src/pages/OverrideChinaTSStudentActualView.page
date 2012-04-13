@@ -1,0 +1,128 @@
+<apex:page standardController="StudentActual__c" extensions="OverrideCNTSStudentActualViewController" >
+    <header>
+        <script type="text/javascript">
+            String.prototype.trim = function()
+            {
+                return this.replace(/(^\s*)|(\s*$)/g,"");
+            }
+            
+            function showRefundDialog(paymentId, amount)
+            {
+                var url = "/apex/ChinaTSRefundDialog?paymentId=" + paymentId + "&amount=" + amount;
+                var refundWin =  window.open (url, 'newwindow', 'height=420, width=580, top=150, left=300, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=no, status=no') ;
+                refundWin.focus();
+            }
+            
+            function showTsStudentProductRefundDialog(studentProductId)
+            {
+                var newWind = window.open('/apex/TsStudentProductRefundDialog?id=' + studentProductId, 'newStudentProductRefundDialog',  'height=410, width=530, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no' );
+               newWind.focus();
+            }
+        </script>
+    </header>
+    <body>
+        <apex:form id="studentActualForm">
+            <apex:pageMessages id="message" escape="false"/>
+            <apex:detail subject="{!StudentActual__c.Id}" relatedList="true"/>
+            <apex:pageBlock title="Student's Products">
+                <apex:pageBlockTable columns="9" value="{!StudentProducts}" var="studentProduct">
+                    <apex:column >
+                        <apex:facet name="header">Product Name</apex:facet>
+                        <apex:outputLink value="/{!studentProduct.Id}" >{!studentProduct.Name}</apex:outputLink>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Product</apex:facet>
+                         <apex:outputLink value="/{!studentProduct.Product__c}" >{!studentProduct.Product__r.Name}</apex:outputLink>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header"># Levels Purchased</apex:facet>
+                        <apex:outputText > {!studentProduct.LevelsPurchased__c}</apex:outputText>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Standard Length</apex:facet>
+                        <apex:outputText >{!studentProduct.StandardLength__c}</apex:outputText>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Free Length</apex:facet>
+                        <apex:outputText >{!studentProduct.FreeLength__c}</apex:outputText>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Marketing Length</apex:facet>
+                        <apex:outputText >{!studentProduct.MarketingLength__c}</apex:outputText>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Quantity</apex:facet>
+                        <apex:outputText value="{0, number, ####0}"><apex:param value="{!studentProduct.Quantity__c}" /></apex:outputText>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Status</apex:facet>
+                        <apex:outputText >{!studentProduct.Status__c}</apex:outputText>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header" >Command</apex:facet>
+                        <apex:commandButton value="Refund" onclick="showTsStudentProductRefundDialog('{!studentProduct.Id}');" reRender="message" disabled="{!IF(OR(ISBLANK(studentProduct.Refund_Amount__c), studentProduct.Refund_Amount__c = 0), false, true)}" />
+                     </apex:column>
+                </apex:pageBlockTable>
+            </apex:pageBlock>
+            <apex:pageBlock id="tsblock" title="Payment Details" >        
+                <apex:pageBlockSection columns="1" id="section2">
+                    <apex:pageBlockSectionItem rendered="{!TSPayments.size > 0}" id="sItem">
+                        <apex:pageBlockTable value="{!TSPayments}" var="payment" id="payDateTable"> 
+                            <apex:column >
+                                <apex:facet name="header">NO.</apex:facet>
+                                <apex:outputLink value="/{!payment.paymentId}">{!payment.Index}</apex:outputLink>
+                            </apex:column>
+                            <apex:column >
+                                <apex:facet name="header">Card Holder</apex:facet>
+                                <apex:outputText value="{!payment.CardHolder}"/>
+                            </apex:column>
+                            <apex:column >
+                                <apex:facet name="header">Pay Type</apex:facet>
+                                <apex:outputText value="{!payment.PayType}"/>
+                            </apex:column>
+                            <apex:column >
+                                <apex:facet name="header">Status</apex:facet>
+                                <apex:outputText value="{!payment.Status}"/>
+                            </apex:column>
+                            <apex:column >
+                                <apex:facet name="header">Pay Method</apex:facet>
+                                <apex:outputText value="{!payment.PayMethod}"/>
+                            </apex:column>
+                            <apex:column >
+                                <apex:facet name="header">Amount Collected</apex:facet>
+                                <apex:outputText value="{!payment.Amount}"/>
+                            </apex:column>
+                            <apex:column >
+                                <apex:facet name="header">Amount Due</apex:facet>
+                                <apex:outputText value="{!payment.AmountDue}"/>
+                            </apex:column>
+                            <apex:column >
+                                <apex:facet name="header">Amount Refund</apex:facet>
+                                <apex:outputText value="{!payment.RefundAmount}" rendered="{!payment.RefundAmount <> 0}"/>
+                            </apex:column>
+                            <apex:column >
+                                <apex:facet name="header">Collected Date</apex:facet>
+                                <apex:outputText value="{!payment.CollectedDate}"/>
+                            </apex:column>
+                            <apex:column >
+                                <apex:facet name="header">Due Date</apex:facet>
+                                <apex:outputText value="{!payment.DueDate}"/>
+                            </apex:column>
+                            <apex:column >
+                                <apex:facet name="header">Command</apex:facet>
+                                <apex:commandButton action="{!payment.Refund}" value="Refund" onclick="showRefundDialog('{!payment.PaymentId}', '{!payment.Amount - payment.RefundAmount}')" disabled="{!payment.IsCanRefund}" reRender="message, tsblock" status="displaying"/>          
+                                <apex:commandButton action="{!payment.tsPayWithDeposit}" value="Pay with Deposit" onclick="if(!confirm('Are you sure?'))return false;" rendered="{!payment.IsRenderPayWithDepositButton}" disabled="{!payment.IsDisabledPayDesButton}" reRender="message, tsblock" status="displaying"/>
+                                <apex:actionStatus id="displaying">
+                                    <apex:facet name="start"><img src="/img/loading.gif" alt="loading..."/></apex:facet>
+                                </apex:actionStatus>
+                            </apex:column>
+                        </apex:pageBlockTable>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem rendered="{!TSPayments.size == 0}">
+                    No records to display
+                    </apex:pageBlockSectionItem>
+                </apex:pageBlockSection>
+            </apex:pageBlock>
+        </apex:form>
+    </body>
+</apex:page>

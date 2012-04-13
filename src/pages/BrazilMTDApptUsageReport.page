@@ -1,0 +1,79 @@
+<apex:page controller="BrazilMTDApptUsageReportController">
+    <head>
+        <script type="text/javascript">
+        
+            function setFocusOnLoad() {}
+            
+            function changeButtonStatus(buttonElement, textValue, classValue)
+            {
+                buttonElement.className = classValue;
+                buttonElement.value = textValue;
+            }
+            
+            function openExportReportPage()
+            {
+                var selectListElement = document.getElementById("{!$Component.reportForm.filterBlock.filterSection.centerItem.centerName}");
+                var selectedIndex = selectListElement.selectedIndex;
+                var datepara = document.getElementById("{!$Component.reportForm.filterBlock.filterSection.dateItem.inputApptDateBox}").value;
+                var centerpara = selectListElement.options[selectedIndex].text;
+                window.open("/apex/BrazilMTDApptUsageReportExport?dateParameter=" + datepara + "&centerParameter=" + centerpara, "MTDApptUsageReport", "width=600,height=400,toolbar=no,status=no,directories=no,menubar=no,resizable=yes,scrollbars=yes");
+            }
+        </script>
+    </head>
+    <body>
+        <apex:sectionHeader subtitle="MTD Appt Usage Report"/>
+        <apex:form id="reportForm">
+            <apex:pageMessages id="cMessage" />
+            <apex:pageblock id="filterBlock">
+                <apex:pageblockSection id="filterSection" >
+                    <!-- Center -->
+                    <apex:pageblockSectionItem id="centerItem">
+                        <apex:outputLabel >Select a Geography</apex:outputLabel>
+                        <apex:outputpanel >
+                            <apex:selectList value="{!CenterName}" size="1" multiselect="false" id="centerName">
+                                <apex:selectOptions value="{!CenterList}" />
+                                <!-- apex:actionSupport action="{!resetTeamRoleList}" event="onchange" reRender="teamRoleId, cMessage" status="teamRoleStatus"/ -->
+                            </apex:selectList>
+                        </apex:outputpanel>
+                    </apex:pageblockSectionItem>
+                    <!-- Data -->
+                    <apex:pageblockSectionItem id="dateItem">
+                        <apex:outputLabel >Date</apex:outputLabel>
+                        <apex:inputText value="{!ApptReportDate}" onfocus="DatePicker.pickDate(true, this.id, false);" id="inputApptDateBox"/>
+                    </apex:pageblockSectionItem>
+                </apex:pageblockSection>
+                <apex:pageBlockButtons location="bottom" id="buttonSet">
+                    <apex:commandButton action="{!refresh}" value="Refresh" onclick="changeButtonStatus(this, 'Running ... ', 'btnDisabled');"/>
+                    <input type="button" value="Export" class="btn" onclick="openExportReportPage();" />
+                </apex:pageBlockButtons>
+            </apex:pageblock>
+            <apex:pageBlock id="reportTableBlock">
+                <apex:pageblockTable id="reportTable" columns="4" value="{!ApptUsageSituations}" var="ApptUsageSituation" columnsWidth="10%,30%,30%,30%" >
+                    <!-- Time -->
+                    <apex:column >
+                        <apex:facet name="header">Time</apex:facet>
+                        <apex:outputText value="{!ApptUsageSituation.TimeSlot}"></apex:outputText>
+                    </apex:column>
+                    <!-- Capacity -->
+                    <apex:column >
+                        <apex:facet name="header">Capacity</apex:facet>
+                        <apex:outputText value="{!ApptUsageSituation.Capacity}"></apex:outputText>
+                    </apex:column>
+                    <!-- Usage -->
+                    <apex:column >
+                        <apex:facet name="header">Usage</apex:facet>
+                        <apex:outputText value="{!ApptUsageSituation.Usage}"></apex:outputText>
+                    </apex:column>
+                    <!-- Usage percent -->
+                    <apex:column >
+                        <apex:facet name="header">Usage %</apex:facet>
+                        <apex:outputText value="{0, number, ###,###,###,###.##}">
+                            <apex:param value="{!ApptUsageSituation.UsagePercent}"/>
+                        </apex:outputText>
+                        <span>%</span>
+                    </apex:column>
+                </apex:pageblockTable>
+            </apex:pageBlock>
+        </apex:form>
+    </body>
+</apex:page>

@@ -1,0 +1,133 @@
+<apex:page controller="SATaskListReportController"
+	tabStyle="StudyAdvisorManager__tab">
+	<apex:sectionHeader title="Report" subtitle="Task List" />
+	<apex:form >
+		<apex:pageBlock >
+			<apex:pageBlockSection title="Search Filters" columns="2"
+				collapsible="false">
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel value="Status" for="statusFilter" />
+					<apex:selectList id="statusFilter" value="{!statusItem}" size="1"
+						style="width: 150px">
+						<apex:selectOption itemValue="" itemLabel=" " />
+						<apex:selectOption itemValue="Accomplished"
+							itemLabel="Accomplished" />
+						<apex:selectOption itemValue="Closed by System"
+							itemLabel="Closed by System" />
+						<apex:selectOption itemValue="Closed by Manager"
+							itemLabel="Closed by Manager" />
+						<apex:selectOption itemValue="On-Hold" itemLabel="On-Hold" />
+						<apex:selectOption itemValue="Open" itemLabel="Open" />
+						<apex:selectOption itemValue="Unaccomplished"
+							itemLabel="Unaccomplished" />
+					</apex:selectList>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel value="Study Advisor" for="saFilter" />
+					<apex:selectList id="saFilter" value="{!saItem}" size="1"
+						style="width: 150px">
+						<apex:selectOptions value="{!SAItems}" />
+					</apex:selectList>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel value="Country" for="countryFilter" />
+					<apex:selectList id="countryFilter" value="{!countryItem}" size="1"
+						style="width: 150px">
+						<apex:selectOptions value="{!CountryItems}" />
+					</apex:selectList>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel value="Language" for="languageFilter" />
+					<apex:selectList id="languageFilter" value="{!languageItem}"
+						size="1" style="width: 150px">
+						<apex:selectOptions value="{!LanguageItems}" />
+					</apex:selectList>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >                    
+                    <apex:outputPanel layout="none">
+                    	<label for="corporateFilter">Corporate</label>
+                    </apex:outputPanel> 
+                    <apex:outputPanel layout="none">                        	
+                    	<select id="corporateFilter" style="width:150px" onchange="document.getElementById('{!$Component.CorporateValue}').value=this.value;">
+	                     	<apex:repeat value="{!CorprateLists}" var="CorprateList">
+	                     		<apex:repeat value="{!CorprateList}" var="Corprate">                        			
+	                     			<apex:outputPanel layout="none" rendered="{!CorporateItem==Corprate.Value}">
+	                     				<option value="{!Corprate.Value}" selected="selected">{!Corprate.Label}</option>
+	                     			</apex:outputPanel>
+	                     			<apex:outputPanel layout="none" rendered="{!CorporateItem!=Corprate.Value}">
+	                     				<option value="{!Corprate.Value}">{!Corprate.Label}</option>
+	                     			</apex:outputPanel>
+	                     		</apex:repeat>
+	                     	</apex:repeat>
+	                    </select>  
+	                    <apex:inputHidden id="corporateValue" value="{!CorporateItem}"/>                        	
+                    </apex:outputPanel>                                              
+                </apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel />
+					<apex:outputpanel >
+						<apex:commandButton value="Search" action="{!search}"
+							status="loadingStatus" reRender="output" />
+						<apex:actionStatus id="loadingStatus">
+							<apex:facet name="start">
+								<img src="/img/loading.gif" alt="loading" />
+							</apex:facet>
+						</apex:actionStatus>
+					</apex:outputpanel>
+				</apex:pageBlockSectionItem>
+			</apex:pageBlockSection>
+			<br />
+			<apex:outputPanel id="output">
+				<apex:pageBlockTable value="{!Tasks}" var="item">
+					<apex:column headerValue="Action" styleClass="actionColumn">
+						<a href="/{!item.TaskId}" target="_blank" class="actionLink">View</a>
+					</apex:column>
+					<apex:column headerValue="Contact Name">
+						<a href="/{!item.ContactId}" target="_blank">{!item.ContactName}</a>
+					</apex:column>
+					<apex:column headerValue="Due Date">
+						<apex:outputText value="{0, Date, dd/MM/yyyy}">
+							<apex:param value="{!item.ActivityDate}" />
+						</apex:outputText>
+					</apex:column>
+					<apex:column headerValue="Complete Date">
+						<apex:outputText value="{0, Date, dd/MM/yyyy}">
+							<apex:param value="{!item.CompleteDate}" />
+						</apex:outputText>
+					</apex:column>
+					<apex:column headerValue="Status">
+	                    {!item.Status}
+	                </apex:column>
+					<apex:column headerValue="Corporate">
+	                    {!item.Corporate}
+	                </apex:column>
+					<apex:column headerValue="Country">
+	                    {!item.Country}
+	                </apex:column>
+					<apex:column headerValue="Language">
+	                    {!item.Language}
+	                </apex:column>
+				</apex:pageBlockTable>
+				<apex:panelGrid columns="4">
+					<apex:commandLink id="previousBtn" action="{!previous}"
+						value="< Previous " reRender="output"
+						rendered="{!CurrentPageIndex != 1}" status="linking" />
+					<apex:outputText rendered="{!(CurrentPageIndex != PageCount) && (PageCount != 0)}">&nbsp;|&nbsp;</apex:outputText>
+					<apex:commandLink id="nextBtn" action="{!next}" value=" Next >"
+						reRender="output"
+						rendered="{!(CurrentPageIndex != PageCount) && (PageCount != 0)}"
+						status="linking" />
+					<apex:actionStatus id="linking">
+						<apex:facet name="start">
+							<img src="/img/loading.gif" alt="loading..." />
+						</apex:facet>
+					</apex:actionStatus>
+				</apex:panelGrid>
+				<apex:outputPanel style="float:right">
+                	{!PageIndexShow}
+                </apex:outputPanel>
+				<div style="clear: both"></div>
+			</apex:outputPanel>
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>

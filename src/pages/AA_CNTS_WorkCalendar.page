@@ -1,0 +1,230 @@
+<apex:page controller="AA_CNTS_WorkCalen_Controller" id="AA_CNTS_WorkCalen" language="en" >
+    <html> 
+        <head> 
+            <style> 
+                .cal_calendar {font-size:10pt;font-family:verdana;padding:0px;margin:0px;border:none; border-collapse:collapse;} 
+                .cal_header {background-color:#CCCCCC;padding:0px;margin:0px;border:none; border-collapse:collapse;} 
+                .cal_cell {padding:2px;margin:1px;border:2px groove;text-align:center;width:3ex} 
+                .cal_labelcell {padding:2px;margin:1px;border:2px groove;text-align:center;} 
+                .cal_oddweek {background-color:#AAAACC;padding:0px;margin:0px;border:none; border-collapse:collapse;} 
+                .cal_evenweek {background-color:#CCCCEE;padding:0px;margin:0px;border:none; border-collapse:collapse;} 
+                .cal_day {width:3ex;text-align:center;padding:0px;margin:0px;border:none; border-collapse:collapse;cursor:hand;} 
+                .cal_today {color:black;font-weight:bold;width:3ex;padding:0px;margin:0px;border:none; border-collapse:collapse;} 
+                .cal_disabled {color:#999999;width:3ex;padding:0px;margin:0px;border:none; border-collapse:collapse;} 
+                .cal_common {color:black;width:3ex;padding:0px;margin:0px;border:none; border-collapse:collapse;} 
+                .cal_holiday {color:red;width:3ex;padding:0px;margin:0px;border:none; border-collapse:collapse;} 
+                .cal_event {background-color:yellow;color:red;width:3ex;padding:0px;margin:0px;border:none; border-collapse:collapse;} 
+            </style> 
+            <script src="/soap/ajax/12.0/connection.js" type="text/javascript"></script> 
+            <script src="/soap/ajax/12.0/apex.js" type="text/javascript"></script>
+            <apex:includeScript value="{!$Resource.AA_CNTS_WorkCalen_UI}"/>
+            <apex:includeScript value="{!$Resource.AA_CNTS_WorkCalen_Comm}"/>
+        </head> 
+        
+        <body> 
+            <apex:form >
+                <div id="divHead"> 
+                    School Name: 
+                    <apex:selectList id="chooseSchool" value="{!salesGroupId}" size="1" >
+                        <apex:actionSupport event="onchange" reRender="chooseSales" status="status" oncomplete="changeGroup();"/>
+                        <apex:selectOptions value="{!SalesGroupList}"/>
+                    </apex:selectList>
+                    <apex:actionStatus id="status" startText="Loading Sales Consultant..."></apex:actionStatus>
+                    Sales: 
+                    <apex:selectList size="1" id="chooseSales" onchange="changeSchoolSales();">
+                        <apex:selectOptions value="{!salesList}" />
+                    </apex:selectList>
+                    <input id="btnCreateCal" type="button" class="btn" value="Create Calendar" onclick="CreateCalendar();"/> 
+                    <div id="errorinfo" class="footer"></div> 
+                    <div id="debuginfo" style="border:1px dashed #CCC;background-color:#E7E7E7;color:#000;display:none;padding:5px;margin:30px;width:80%"></div> 
+                </div> 
+                <span style="vertical-align:top;"> 
+                    <fieldset style="width:780px;padding:5px;"> 
+                        <legend>Calendar with Events</legend> 
+                        <input type="text" name="tester2" id="tester2" value=""/> 
+                        <input type="text" name="tester2_day" id="tester2_day" value="" size="3" maxLength="2" /> 
+                        <select name="tester2_month" id="tester2_month"> 
+                            <option value="1">January</option> 
+                            <option value="2">February</option> 
+                            <option value="3">March</option> 
+                            <option value="4">April</option> 
+                            <option value="5">May</option> 
+                            <option value="6">June</option> 
+                            <option value="7">July</option> 
+                            <option value="8">August</option> 
+                            <option value="9">September</option> 
+                            <option value="10">October</option> 
+                            <option value="11">November</option> 
+                            <option value="12">December</option> 
+                        </select> 
+                        <input type="text" name="tester2_year" id="tester2_year" value="" size="5" maxLength="4"/> 
+                        <input id="btnGenerate" type="button" class="btn" value="Save" onClick="SaveResult();"/> 
+                        <div id="cal_tester2_display"></div> 
+                        <script type="text/javascript"> 
+                            sforce.connection.sessionId = "{!$Api.Session_ID}";
+                            ////////////////////////////////////////////////////////////////
+                            function debugInfo(msg) 
+                            { 
+                                var dataCtl = document.getElementById("debuginfo"); 
+                                if(msg != ""){ 
+                                    dataCtl.style.display= ""; 
+                                    dataCtl.innerHTML = msg+"<br>"; 
+                                } 
+                                else 
+                                { 
+                                    dataCtl.style.display= "none"; 
+                                } 
+                            } 
+                            
+                            //Communication with SFDC//////////////////////////////////////////////////////////////////////
+                            function SaveResult()
+                            {
+                                var salesId = null;
+                                //获取选中的销售的ID
+                                var obj = document.getElementById("{!$Component.chooseSales}");
+                                var indexSelected = obj.selectedIndex;
+                                var selectOption = obj.options[indexSelected].value;
+                                var salesAmount = obj.options.length;
+                                if(selectOption =="")
+                                {
+                                    alert("You must select a sales consultant before save data.");
+                                    return;
+                                }
+                                else
+                                {
+                                    salesId = selectOption;
+                            
+                                }
+                                var objSchool = document.getElementById("{!$Component.chooseSchool}");
+                                indexSelected = objSchool.selectedIndex;
+                                selectOption = objSchool.options[indexSelected].text;
+                                var schoolName = selectOption;
+                                var managerId = "{!$User.Id}";
+                                var dateString = document.getElementById("tester2").value;
+                                var arrDateString = dateString.split("/");
+                                //alert("salesConsultantDayTable:"+salesConsultantDayTable.keys());
+                                //prepareConData();
+                                StartSaveSalesData(arrDateString[0],arrDateString[1],arrDateString[2],schoolName,managerId,salesId,salesAmount);
+                                //遍历该销售生成的dayTable,以取得具体的在岗时间设置
+                                //为该销售生成在岗时间数据
+                            }
+                            
+                            var queryFailed = function(error) { 
+                                var msg = ''; 
+                                alert(error); 
+                                if(typeof(error)=='object') { 
+                                    for(e in error) { 
+                                        msg += e+": "+error[e]+" | "; 
+                                    } 
+                                } 
+                                else { 
+                                    msg = error; 
+                                } 
+                                var errorCtl = document.getElementById("errorinfo"); 
+                                errorCtl.style.display= ""; 
+                                errorCtl.innerHTML = msg+"<br>"; 
+                            }; 
+                            
+                            function renderCalendar (calendar)
+                            {
+                                dayOnString = "";
+                                weekEndString = "";
+                                salesConsultantDayTable = new HashTable();
+                                salesExistDataTable = new HashTable();
+                                weekEndDayTable = new HashTable();
+                                salesEnableDayArray = new Array();
+                                getSalesExistData(calendar);
+                            }
+                            
+                            function getSalesExistData(calendar)
+                            {
+                                
+                                var obj = document.getElementById("{!$Component.chooseSales}");
+                                var indexSelected = obj.selectedIndex;
+                                var selectOption = obj.options[indexSelected].value;
+                                var dateString = document.getElementById("tester2").value;
+                                //alert("datesreing:"+dateString);
+                                var arrDateString = dateString.split("/");
+                                salesId = selectOption;
+                                //alert("salesId:"+salesId);
+                                var sql = "select Id,Day_Status__c,day__c,year__c,month__c from Sales_Monthly_Details__c ";
+                                sql += " where Sales_Consultant__c='"+ salesId +"' ";
+                                sql += " and Year__c = '"+ arrDateString[0] +"' and Month__c='"+ arrDateString[1] +"'";
+                                //alert("sql:"+sql);
+                                var state = {Calendar:calendar};
+                                var callback = {
+                                    onSuccess: eventQueryCallback,
+                                    onFailure: queryFailures,
+                                    source: state
+                                };
+                                sforce.connection.query(sql,callback);
+                            }
+                            
+                            var eventQueryCallback = function(result,source){
+                                //alert("query done");
+                                var records = result.getArray("records"); 
+                                var record; 
+                                var strDate = "";
+                                if(records != null && records.length > 0)
+                                {
+                                    for(var i=0;i < records.length;i++)
+                                    {
+                                        record = records[i];
+                                        strDate = record.year__c+"/"+record.month__c+"/"+record.day__c;
+                                        salesExistDataTable.put(strDate,record.Day_Status__c);
+                                        //alert("Exist Data:"+strDate);
+                                    }
+                                }
+                                //alert("records:"+records);
+                                renderCalendarBody(source.Calendar);
+                            };
+                            
+                            function queryFailures(error,source) { 
+                                queryFailed(error);
+                                renderCalendarBody(source.Calendar);
+                            }
+                            
+                            function CreateCalendar(){
+                                //alert("{!$Component.chooseSales}");                                                                                            dayTable = new HashTable();
+                                var oSelect = document.getElementById("{!$Component.chooseSales}");
+                                //alert(oSelect)
+                                var indexSelected = oSelect.selectedIndex;
+                                var selectOption = oSelect.options[indexSelected].value;
+                                if(selectOption == "")
+                                {
+                                    alert("please select a sales user first.");
+                                    return;
+                                }
+                                cal2 = new Calendar ("cal2", "tester2", new Date());
+                                cal2.width = 780;
+                                cal2.eventDates = new Array(
+                                      new Array("2005/2/10", 1)
+                                    , new Array("2005/2/12", 2)
+                                    , new Array("2005/2/14", 3)
+                                );
+                                cal2.scrolling = false;
+                                cal2.selectEvent = function(eventId) {alert("cal2 Event: " + eventId);};
+                            
+                                renderCalendar(cal2);
+                                document.getElementById("btnGenerate").disabled = false;
+                            }
+                            
+                            function changeSchoolSales()
+                            {
+                                document.getElementById("cal_tester2_display").innerHTML = '';
+                                document.getElementById("btnGenerate").disabled = true;
+                            }
+                            
+                            function changeGroup()
+                            { 
+                                document.getElementById("cal_tester2_display").innerHTML = '';
+                                document.getElementById("btnGenerate").disabled = true;
+                            }
+                            
+                        </script> 
+                    </fieldset> 
+                </span> 
+            </apex:form>
+        </body> 
+    </html>
+</apex:page>

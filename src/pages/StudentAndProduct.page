@@ -1,0 +1,154 @@
+<apex:page controller="StudentAndProductController" id="page">
+    <apex:sectionHeader title="Add Products to Student"/>
+    <apex:form id="popForm">
+        <script type="text/javascript">
+            var StudentActualIds = '';
+            function addToStudentActualIds(checkBox, sId)
+            {
+                if(checkBox.checked)
+                {
+                    if(StudentActualIds.indexOf(sId) == -1)
+                    {
+                        StudentActualIds = StudentActualIds + ':' + sId;
+                    }
+                }
+                else
+                {
+                    if(StudentActualIds.indexOf(sId) != -1)
+                    {
+                        var tempString = ':' + sId;
+                        StudentActualIds = StudentActualIds.replace(tempString,'');
+                    }
+                }
+                //alert(StudentActualIds); 
+            }
+            
+            function toggleStudentsAll(checked)
+            {
+                for(var i = 0;; i++)
+                {
+                    var checkbox = document.getElementById("page:popForm:studentBlock:studentSection:studentTable:"+ i + ":check");
+                    var hiddenStudentId = document.getElementById("page:popForm:studentBlock:studentSection:studentTable:"+ i + ":checkHidden");
+                    if(checkbox == null)
+                    {
+                        break;
+                    }
+                    checkbox.checked = checked;
+                    if(hiddenStudentId != null)
+                    {
+                        addToStudentActualIds(checkbox, hiddenStudentId.value);
+                    }
+                }
+            }
+            
+            function hasStudentSelected()
+            {
+                for(var i = 0;; i++)
+                {
+                    var checkbox = document.getElementById("page:popForm:studentBlock:studentSection:studentTable:"+ i + ":check");
+                    if(checkbox == null)
+                    {
+                        break;
+                    }
+                    if(checkbox.checked)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            
+            function openAddProductWindow()
+            {
+                var addProductUrl = '/apex/TsAddProducts?studentActualIds=' + StudentActualIds;
+                window.open(addProductUrl, "AddProductsWindow", "height=220, width=650, top=150, left=300, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=no, status=no", true);
+            }
+        </script>
+        <apex:pageMessages id="messages"/>
+        <apex:pageBlock id="studentBlock">
+           <apex:pageblockSection columns="2" id="studentSection">
+               <!-- All students table -->
+               <apex:pageblockTable value="{!allStudents}" var="student" width="200px" id="studentTable" rules="all">
+                   <apex:facet name="caption"><b>All Students</b></apex:facet>
+                   <apex:column >
+                       <apex:facet name="header">
+                           <apex:inputCheckbox id="checkAll" onclick="toggleStudentsAll(this.checked);" value="{!allSelected}"/>
+                       </apex:facet>
+                       <apex:inputCheckbox value="{!student.Selected}" id="check" onclick="addToStudentActualIds(this, '{!student.Id}')" />
+                       <apex:inputhidden value="{!student.Id}" id="checkHidden"/>
+                   </apex:column>
+                   <apex:column headerValue="Name" value="{!student.Name}" style="text-decoration:underline;cursor:pointer" onclick="selectStudent('{!student.Id}');" />
+                   <apex:column headerValue="# Products Added" value="{!student.ProductsCount}" style="cursor:pointer" onclick="selectStudent('{!student.Id}');" />
+               </apex:pageblockTable>
+               <apex:outputPanel id="displayProducts">
+                    <table width="90%">
+                        <tr>
+                            <td><b>Student Name</b>: {!highlightedStudent.Name}</td>
+                            <td><b>Elite Card #</b>: {!highlightedStudent.EliteCard}</td>
+                        </tr>
+                        <tr>
+                            <td><b>Starting Level</b>: {!highlightedStudent.StartingLevel}</td>
+                            <td><b>Entry Center</b>: {!highlightedStudent.EntryCenter}</td>
+                        </tr>
+                    </table>
+                    <apex:outputPanel rendered="{!highlightedStudent.Products.size = 0}"><br/>No Products been added for this student.</apex:outputPanel>
+                    <apex:pageBlockTable value="{!highlightedStudent.Products}" var="product" rendered="{!highlightedStudent.Products.size > 0}" rules="all">
+                        <apex:column >
+                            <apex:commandLink value="Del" action="{!product.remove}" onclick="if(!confirm('Are you sure you want to remove {!product.Name} from {!highlightedStudent.Name}.'))return false;">
+                            <apex:param name="pid" value="{!product.StudentProductId}" />
+                            </apex:commandLink>
+                        </apex:column>
+                        <apex:column headerValue="Type" value="{!product.Family}" footerValue="Grand Total"/>
+                        <apex:column headerValue="Product Name" value="{!product.Name}"/>
+                        <apex:column headerValue="# Levels Purchased" value="{!product.LevelsPurchased}" />
+                        <apex:column >
+                            <apex:facet name="header">Product<br />Length</apex:facet>
+                            {!product.ProductLength}
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Free<br />Length</apex:facet>
+                            {!product.FreeLength}
+                        </apex:column>
+                        <apex:column headerValue="Marketing Length" value="{!product.MarketingLength}" />
+                        <apex:column headerValue="Guest Centers" value="{!product.BookingCenter}"/>
+                        <!--<apex:column headerValue="Unit Price">
+                        <apex:outputText value="{0, number, ####0.00}"><apex:param value="{!product.Price}"/></apex:outputText>
+                        </apex:column>
+                        <apex:column headerValue="Quantity" value="{!product.Quantity}"/>-->
+                        <apex:column headerValue="Subtotal">
+                            <apex:outputText value="{0, number, #####0.00}"><apex:param value="{!product.Amount}"/></apex:outputText>
+                            <apex:facet name="footer"><apex:outputText value="{0, number, #####0.00}"><apex:param value="{!highlightedStudent.TotalAmount}"/></apex:outputText></apex:facet>
+                        </apex:column>
+                    </apex:pageBlockTable>
+               </apex:outputPanel>
+               <apex:outputPanel >
+                   <input type="button" class="btn" value="Add Products"  onclick="if(hasStudentSelected()){ openAddProductWindow();}else{alert('Please have at least one student selected.');}" />
+                   <apex:commandButton action="{!cancel}" value="Back to Actual" />
+                   <apex:actionStatus id="displaying">
+                       <apex:facet name="start"><img src="/img/loading.gif" alt="loading..."/></apex:facet>
+                   </apex:actionStatus>
+               </apex:outputPanel>
+           </apex:pageblockSection>
+        </apex:pageBlock>
+        <!-- Action Function -->
+        <apex:actionFunction action="{!highlightStudent}" name="selectStudent" rerender="displayProducts, messages" status="displaying" >
+            <apex:param name="sid" value="" />
+        </apex:actionFunction>
+    </apex:form>
+    <script type="text/javascript" >
+        function findChecked()
+        {
+            for(var i = 0;; i++)
+            {
+                var checkbox = document.getElementById("page:popForm:studentBlock:studentSection:studentTable:"+ i + ":check");
+                if(checkbox == null)
+                {
+                    break;
+                }
+                var tempId = document.getElementById("page:popForm:studentBlock:studentSection:studentTable:"+ i + ":checkHidden").value;
+                addToStudentActualIds(checkbox, tempId);
+            }
+        }
+        findChecked();
+    </script>
+</apex:page>

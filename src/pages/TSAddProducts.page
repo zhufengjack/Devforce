@@ -1,0 +1,171 @@
+<apex:page controller="TSAddProductsController" tabStyle="Actual__c"  sideBar="false" showHeader="false" id="page" >
+    <head>
+        <script type="text/javascript"> 
+            var products = [
+                    <apex:repeat value="{!allProducts}" var="prd">
+{id: '{!prd.Id}', name: '{!prd.Name}', price: '<apex:outputText value="{0, number,####0.00}"><apex:param value="{!prd.Price}"/></apex:outputText>', standardLength: '{!prd.StandardLength}', freeLength: '{!prd.FreeLength}', marketingLength: '{!prd.MarketingLength}'},
+                    </apex:repeat>
+                    {}  
+                ];
+                products.find = function(id) 
+                {
+                    for(var i = 0; i < this.length; i++)
+                    {
+                        if(this[i].id == id)
+                        {
+                            return this[i];
+                        }
+                    }
+                    return null ;
+                }
+                products.getByFamily = function(family)
+                {
+                    var result = [];     
+                    for(var i = 0; i < this.length; i++)
+                    {
+                        if(this[i].family == family)
+                        {
+                            result.push(this[i]);
+                        }
+                    }
+                    return result;
+                } 
+                  
+            function productChanged(id)
+            { 
+                var priceFieldId = id.replace(/product/g, "price");
+                var priceField = document.getElementById(priceFieldId);
+                var sLengthFieldId = id.replace(/product/g, "standardLength");
+                var sLengthField = document.getElementById(sLengthFieldId);
+                //var mLengthFieldId = id.replace(/product/g, "MarketingLength");
+                //var mLengthField = document.getElementById(mLengthFieldId);
+                var fLengthFieldId = id.replace(/product/g, "FreeLength");
+                var fLengthField = document.getElementById(fLengthFieldId);
+                
+                var selectedProduct = products.find(document.getElementById(id).value);
+                if(selectedProduct != null)
+                {
+                    priceField.value = selectedProduct.price;
+                    sLengthField.value = selectedProduct.standardLength;
+                    //mLengthField.value = selectedProduct.marketingLength;
+                    fLengthField.value = selectedProduct.freeLength;
+                }
+                else
+                {
+                    priceField.value = "0.00";
+                }
+            }
+            
+            function numbersonly(myfield, e, dec)
+            {
+                var key;
+                var keychar;
+                
+                if (window.event)
+                {
+                   key = window.event.keyCode;
+                }
+                else if (e)
+                {
+                   key = e.which;
+                }
+                else
+                {
+                   return true;
+                }
+                keychar = String.fromCharCode(key);
+                
+                // control keys
+                if ((key==null) || (key==0) || (key==8) || (key==9) || (key==13) || (key==27) )
+                {
+                   return true;
+                }
+                // numbers
+                else if ((("0123456789").indexOf(keychar) > -1))
+                {
+                   return true;
+                }
+                // decimal point jump
+                else if (dec && (keychar == "."))
+                {
+                   myfield.form.elements[dec].focus();
+                   return false;
+                }
+                else
+                {
+                   return false;
+                }
+            }
+           
+            function refreshOpenerWindow()
+            {
+                window.opener.location =  window.opener.location;
+                window.close();
+            }
+        </script> 
+    </head>
+    <body > 
+    <apex:form id="popForm" >
+    <apex:pageMessages id="errorMessage" escape="false"/>
+    <apex:pageBlock id="block"> 
+        <apex:pageBlockButtons location="bottom">
+            <apex:commandButton value=" Save " action="{!save}" reRender="errorMessage" status="displaying1" />
+            <apex:commandButton value=" Close " onclick="window.close();" />
+            <apex:actionStatus id="displaying1">
+                <apex:facet name="start"><img src="/img/loading.gif" alt="loading..."/></apex:facet>
+            </apex:actionStatus>
+        </apex:pageBlockButtons>   
+        <apex:pageBlockSection title="New" collapsible="false" id="new" >
+            <apex:pageBlockSectionItem id="product">
+                <apex:outputLabel value="Product" />
+                <apex:selectList value="{!productId}" size="1" id="product" onchange="productChanged(this.id)" >
+                    <apex:selectOptions value="{!newProductItems}" />
+                </apex:selectList> 
+            </apex:pageBlockSectionItem> 
+            <apex:pageBlockSectionItem id="price">
+                <apex:outputLabel value="Price" />
+                <apex:inputText value="{!Price}" id="price" onkeypress="return numbersonly(this, event, true)"/>
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem id="standardLength">
+                <apex:outputLabel value="Standard Length" />
+                <apex:selectList value="{!StandardLength}" size="1" id="standardLength"  >
+                    <apex:selectOption itemLabel="0" itemValue="0" />
+                    <apex:selectOption itemLabel="1" itemValue="1" />
+                    <apex:selectOption itemLabel="12" itemValue="12" />
+                    <apex:selectOption itemLabel="24" itemValue="24" />
+                    <apex:selectOption itemLabel="36" itemValue="36" />
+                </apex:selectList>
+            </apex:pageBlockSectionItem>
+             <!-- apex:pageBlockSectionItem id="MarketingLength">
+                <apex:outputLabel value="Marketing Length" />
+                <apex:selectList value="{!MarketingLength}" size="1" id="MarketingLength"  >
+                    <apex:selectOption itemLabel="0" itemValue="0" />
+                    <apex:selectOption itemLabel="1" itemValue="1" />
+                    <apex:selectOption itemLabel="2" itemValue="2" />
+                    <apex:selectOption itemLabel="3" itemValue="3" />
+                    <apex:selectOption itemLabel="4" itemValue="4" />
+                </apex:selectList>
+            </apex:pageBlockSectionItem -->
+            <apex:pageblockSectionItem >
+                <apex:outputLabel >Quantity</apex:outputLabel>
+                <apex:outputText value="{!Quantity}" />
+            </apex:pageblockSectionItem>
+            <apex:pageBlockSectionItem id="FreeLength">
+                <apex:outputLabel value="Free Length" />
+                <apex:selectList value="{!FreeLength}" size="1" id="FreeLength"  >
+                    <apex:selectOption itemLabel="0" itemValue="0" />
+                    <apex:selectOption itemLabel="1" itemValue="1" />
+                    <apex:selectOption itemLabel="2" itemValue="2" />
+                    <apex:selectOption itemLabel="3" itemValue="3" />
+                    <apex:selectOption itemLabel="4" itemValue="4" />
+                </apex:selectList>
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem >
+                <apex:outputLabel value="Notes" />
+                <apex:inputText value="{!note}" />
+            </apex:pageBlockSectionItem>
+        </apex:pageBlockSection>
+    </apex:pageBlock>
+    </apex:form>
+    </body>
+</apex:page>

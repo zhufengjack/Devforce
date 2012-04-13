@@ -1,0 +1,227 @@
+<apex:page cache="false" showHeader="false" contentType="text/css">
+    
+    a {
+        outline: none;
+    }
+    
+    .tabNavigation { 
+
+    }
+    
+        .tab td.currentTab,
+        #tabBar td,
+        #tabBar div,
+        #tabBar td.currentTab primaryPalette,
+        #tabBar td.currentTab primaryPalette div,
+        #tabBar td.currentTab primaryPalette div a{
+        /*
+            background:none;
+            background-color:Light Steel Blue1;
+            border:none;
+            padding:0;
+            margin:0;
+        */
+        }
+    
+            #tabBar a {
+                text-decoration: none; 
+            }
+            
+            #tabBar a:hover { 
+              
+            }
+              
+            #tabBar .currentTab a {
+            
+            }
+        
+            #tabBar .last a {
+            
+            }
+    
+    body {
+
+    }
+      
+    .bodyDiv {  
+        min-height: 1500px;
+        width:1000px; /* If your portal is a different width change this */
+        left:0px;
+        margin:0pt auto;
+        position:relative;
+        text-align:left;  
+        border-bottom: 0; 
+    }
+
+    #bodyDiv, #container_pageFooter{ 
+        width:1000px; /* If your portal is a different width change this too */
+        left:0px;
+        margin:0pt auto;
+        position:relative;
+        text-align:left;
+    }
+    
+    .bodyDiv, #bodyDiv{
+        border: none;
+    }
+    
+    #ideaSubtabs ul#nav .ideasCurrentTab div a, .ideaViewCategory, .workspaceTab .bPageBlock .pbButton label, h1.search, h1.recent, .ideaViewStatus{
+        color: white;
+    }
+    
+/** Rounded Sidebar **/
+    
+    .sidebarModule{
+        background: none;
+        box-shadow: 0px 2px 6px #ccc;
+        -webkit-box-shadow: 0px 2px 6px #ccc;
+        -moz-box-shadow: 0px 2px 6px #ccc;
+        -moz-border-radius: 6px;
+        -webkit-border-radius: 6px;
+    }
+    
+        .sidebarModuleHeader{
+            -moz-border-radius-topleft: 6px;
+            -webkit-border-top-left-radius: 6px;
+            -moz-border-radius-topright: 6px;
+            -webkit-border-top-right-radius: 6px;
+        }
+        
+        .sidebarModuleBody{
+            -moz-border-radius-bottomleft: 6px;
+            -webkit-border-bottom-left-radius: 6px;
+            -moz-border-radius-bottomright: 6px;
+            -webkit-border-bottom-right-radius:  6px;
+        }
+        
+        .sidebarModuleBodyNoHeader{
+            -moz-border-radius-topleft: 6px;
+            -webkit-border-top-left-radius: 6px;
+            -moz-border-radius-topright: 6px;
+            -webkit-border-top-right-radius: 6px;
+        }
+        
+        .nestedModule .sidebarModuleBody{
+            margin: 0;
+            padding: 10px;
+        }
+
+
+/* The following CSS is for a 980px-wide portal. If your portal is bigger or smaller just add or subtract the difference (i.e. if your portal is 1000px there's a 20px difference so the width of the #wsTabs section below would become 765px). */
+
+    /* This section governs Content, Workspaces, and the Content Previews. Make sure the !important is after each attribute as shown below. */
+    #wsTabs{
+        width: 765px !important;
+    }
+
+    .x-tab-panel-body, .x-panel-noborder .x-panel-body-noborder {
+        width: 760px !important;
+    }
+            
+    #div_rendition_small {
+        width: 390px !important;
+    }
+
+
+    .x-panel-body dl, div.tabset dl.tabcontent dd.tc.on dl {
+        width: 400px;   
+    }
+    
+    .x-panel-body dt.chead, div.tabset dl.tabcontent dt.chead {
+        width: 374px;
+    }
+
+    
+    /* This section governs Ideas. */
+    .sectionHeaderWithCommunityNavLinks .bPageTitle {
+        width: 770px;
+    }
+      
+    .ideaNavCommunity  {
+        width: 760px;
+    }
+      
+    .communityIntro {
+        width: 770px;
+    }
+      
+    #ideaSubtabs {
+        width: 770px;
+    }
+      
+    .ideaBlock {
+        width: 770px;
+    }
+      
+    .ideaBody {
+        width: 625px;
+    }
+    
+    .ideaContentWidth {
+        width: 590px;
+    }
+    
+    .ideaSide {
+        padding: 0 17px 0 0;
+    }
+   
+    #ideaSubtabs ul#nav .ideasCurrentTab div a {
+        
+    }
+
+    .ideaViewCategory {
+        
+    }
+    
+    #ideaSubtabs .bg {
+    
+    }
+    
+/*This code is to reduce the font/header size on the old CustomerPortalWelcome VF page. Replace the current span code with these 4 in the VF page itself */  
+  /*
+  span {
+    font-size: 12px;
+  }
+  
+  .list .headerRow th, .list .headerRow th a {
+    font-size: 14px;
+  }
+  
+ .list tr.even th, .list tr.odd th, .list tr.even td, .list tr.odd td {
+    font-size: 12px;
+  }
+  
+  .bPageBlock .pbTitle {
+    font-size: 12px;
+  }
+  */
+  
+/** SDO Site - Knowledge **/
+
+    .pkbSearchBox {
+        background: transparent url() no-repeat scroll center center;
+        margin:10px 10px 6px 18px;
+        border: 1px solid #bbb;
+        box-shadow: 0px 2px 6px #ccc;
+        -webkit-box-shadow: 0px 2px 6px #ccc;
+        -moz-box-shadow: 0px 2px 6px #ccc;
+        -moz-border-radius: 6px;
+        -webkit-border-radius: 6px;
+    }
+    
+    .pkbResultPanel {
+        box-shadow: 0px 2px 6px #ccc;
+        -webkit-box-shadow: 0px 2px 6px #ccc;
+        -moz-box-shadow: 0px 2px 6px #ccc;
+        -moz-border-radius: 6px;
+        -webkit-border-radius: 6px;
+    }
+    
+        .pkbResultPanel .pkbResultInner{
+            -moz-border-radius: 6px;
+            -webkit-border-radius: 6px;
+        }
+        
+    @import url("../../apex/Site_SSE_Style"); 
+
+</apex:page>

@@ -1,0 +1,4 @@
+<apex:page tabStyle="Appt_Auto_Assignment__tab">
+    <apex:sectionHeader title="China Sales Appointment Allocation" subtitle="Home" /> 
+    <apex:listViews type="Sales_Team_Appointment_Allocation__c"/> 
+</apex:page>

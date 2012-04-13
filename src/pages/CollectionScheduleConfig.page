@@ -1,0 +1,208 @@
+<apex:page controller="CollectionScheduleConfigController">
+	<apex:sectionHeader title="Collection Schedule Config"/>
+    <apex:pageMessages id="message" escape="false"/>
+    <apex:form id="form">
+        <apex:pageBlock id="default" rendered="{!not(EditMode)}">         
+            <apex:pageBlockButtons >
+                <apex:commandButton action="{!edit}" value="Edit"/>
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection title="Configuration Name" collapsible="false" columns="2">
+             	<apex:facet name="header">
+	                    <span style="color:black">Configuration Name</span>
+	            </apex:facet>
+	            <apex:pageBlockSectionItem >
+						<apex:outputLabel value="Configuration Name"></apex:outputLabel>
+          				<apex:outputField value="{!Config.Name}"/> 
+				</apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="Phone Call Information" collapsible="true" columns="2">
+					<apex:facet name="header">
+		                    <span style="color:black">Subject = Send Email</span>
+		            </apex:facet>
+					<apex:pageBlockSectionItem >
+  							<apex:outputLabel value="First Time"></apex:outputLabel>
+             				<apex:outputField value="{!Config.First_Date_Of_Email_Task__c}"/>
+  					</apex:pageBlockSectionItem>
+  					<apex:pageBlockSectionItem >
+  							<apex:outputLabel value="Second Time"></apex:outputLabel>
+             				<apex:outputField value="{!Config.Second_Date_Of_Email_Task__c}"/>
+  					</apex:pageBlockSectionItem>
+  					<apex:pageBlockSectionItem >
+  							<apex:outputLabel value="Third Time"></apex:outputLabel>
+             				<apex:outputField value="{!Config.Third_Date_Of_Email_Task__c}"/>
+  					</apex:pageBlockSectionItem>
+  					<apex:pageBlockSectionItem >
+  							<apex:outputLabel value="Fourth Time"></apex:outputLabel>
+             				<apex:outputField value="{!Config.Fourth_Date_Of_Email_Task__c}"/>
+  					</apex:pageBlockSectionItem>
+  					<apex:pageBlockSectionItem >
+  							<apex:outputLabel value="Fifth Time"></apex:outputLabel>
+             				<apex:outputField value="{!Config.Fifth_Date_Of_Email_Task__c}"/>
+  					</apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="Phone Call Information" collapsible="true" columns="2">
+					<apex:facet name="header">
+		                    <span style="color:black">Subject = Send SMS</span>
+		            </apex:facet>
+					<apex:pageBlockSectionItem >
+  							<apex:outputLabel value="First Time"></apex:outputLabel>
+             				<apex:outputField value="{!Config.First_Date_Of_SMS_Task__c}"/>
+  					</apex:pageBlockSectionItem>
+  					<apex:pageBlockSectionItem >
+  							<apex:outputLabel value="Second Time"></apex:outputLabel>
+             				<apex:outputField value="{!Config.Second_Date_Of_SMS_Task__c}"/>
+  					</apex:pageBlockSectionItem>
+  					<apex:pageBlockSectionItem >
+  							<apex:outputLabel value="Third Time"></apex:outputLabel>
+             				<apex:outputField value="{!Config.Third_Date_Of_SMS_Task__c}"/>
+  					</apex:pageBlockSectionItem>
+  					<apex:pageBlockSectionItem >
+  							<apex:outputLabel value="Fourth Time"></apex:outputLabel>
+             				<apex:outputField value="{!Config.Fourth_Date_Of_SMS_Task__c}"/>
+  					</apex:pageBlockSectionItem>
+  					<apex:pageBlockSectionItem >
+  							<apex:outputLabel value="Fifth Time"></apex:outputLabel>
+             				<apex:outputField value="{!Config.Fifth_Date_Of_SMS_Task__c}"/>
+  					</apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="Phone Call Information" collapsible="true" columns="2">
+					<apex:facet name="header">
+		                    <span style="color:black">Subject = Phone Call</span>
+		            </apex:facet>
+					<apex:pageBlockSectionItem >
+  							<apex:outputLabel value="First Time"></apex:outputLabel>
+             				<apex:outputField value="{!Config.First_Date_Of_Phone_Task__c}"/> 
+  					</apex:pageBlockSectionItem>
+  					<apex:pageBlockSectionItem >
+  							<apex:outputLabel value="Second Time"></apex:outputLabel>
+             				<apex:outputField value="{!Config.Second_Date_Of_Phone_Task__c}"/>
+  					</apex:pageBlockSectionItem>
+  					<apex:pageBlockSectionItem >
+  							<apex:outputLabel value="Third Time"></apex:outputLabel>
+             				<apex:outputField value="{!Config.Third_Date_Of_Phone_Task__c}"/>
+  					</apex:pageBlockSectionItem>
+  					<apex:pageBlockSectionItem >
+  							<apex:outputLabel value="Fourth Time"></apex:outputLabel>
+             				<apex:outputField value="{!Config.Fourth_Date_Of_Phone_Task__c}"/>
+  					</apex:pageBlockSectionItem>
+  					<apex:pageBlockSectionItem >
+  							<apex:outputLabel value="Fifth Time"></apex:outputLabel>
+             				<apex:outputField value="{!Config.Fifth_Date_Of_Phone_Task__c}"/>
+  					</apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+            
+       </apex:pageBlock>
+       <apex:pageBlock id="edit" rendered="{!EditMode}"> 
+            <apex:pageBlockButtons >
+                <apex:commandButton action="{!Save}" value="Save" onclick="if(!confirm('Are you sure?'))return false;"/>
+                <apex:commandButton action="{!cancel}" value="Cancel" rendered="{!NOT(ISNULL(Config.Id))}" immediate="true"/>
+            </apex:pageBlockButtons>
+           	<apex:pageBlockSection title="Configuration Name" collapsible="false" columns="2">
+            		<apex:facet name="header">
+                    <span style="color:black">Configuration Name</span>
+	            </apex:facet>
+	            <apex:pageBlockSectionItem >
+						<apex:outputLabel value="Configuration Name"></apex:outputLabel>
+	         				<apex:inputText value="{!ConfigurationName}" required="true"/> 
+				</apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+       		<apex:pageBlockSection title="Send Email Information" collapsible="true" columns="2">
+				<apex:facet name="header">
+                 	<span style="color:black">Subject = Send Email</span>
+         		</apex:facet>
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel value="First Time"></apex:outputLabel>
+        				<apex:inputText value="{!EMail1}" onchange="validInput(this)"/>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+						<apex:outputLabel value="Second Time"></apex:outputLabel>
+	        				<apex:inputText value="{!EMail2}" onchange="validInput(this)"/>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel value="Third Time"></apex:outputLabel>
+        				<apex:inputText value="{!EMail3}" onchange="validInput(this)"/>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel value="Fourth Time"></apex:outputLabel>
+        				<apex:inputText value="{!EMail4}" onchange="validInput(this)"/>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel value="Fifth Time"></apex:outputLabel>
+        				<apex:inputText value="{!EMail5}" onchange="validInput(this)"/>
+				</apex:pageBlockSectionItem>
+			</apex:pageBlockSection>
+       		<apex:pageBlockSection title="Send SMS Information" collapsible="true" columns="2">
+				<apex:facet name="header">
+	                 <span style="color:black">Subject = Send SMS</span>
+			         </apex:facet>
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel value="First Time"></apex:outputLabel>
+        				<apex:inputText value="{!SMS1}" onchange="validInput(this)"/>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel value="Second Time"></apex:outputLabel>
+        				<apex:inputText value="{!SMS2}" onchange="validInput(this)"/>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel value="Third Time"></apex:outputLabel>
+        				<apex:inputText value="{!SMS3}" onchange="validInput(this)"/>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel value="Fourth Time"></apex:outputLabel>
+        				<apex:inputText value="{!SMS4}" onchange="validInput(this)"/>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel value="Fifth Time"></apex:outputLabel>
+        				<apex:inputText value="{!SMS5}" onchange="validInput(this)"/>
+				</apex:pageBlockSectionItem>
+       		</apex:pageBlockSection>
+       		<apex:pageBlockSection title="Phone Call Information" collapsible="true" columns="2">
+				<apex:facet name="header">
+                 	<span style="color:black">Subject = Phone Call</span>
+         		</apex:facet>
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel value="First Time"></apex:outputLabel>
+					<apex:inputText value="{!Phone1}" onchange="validInput(this)"/>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+						<apex:outputLabel value="Second Time"></apex:outputLabel>
+	        				<apex:inputText value="{!Phone2}" onchange="validInput(this)"/>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+						<apex:outputLabel value="Third Time"></apex:outputLabel>
+	        				<apex:inputText value="{!Phone3}" onchange="validInput(this)"/>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+						<apex:outputLabel value="Fourth Time"></apex:outputLabel>
+	        				<apex:inputText value="{!Phone4}" onchange="validInput(this)"/>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+						<apex:outputLabel value="Fifth Time"></apex:outputLabel>
+	        				<apex:inputText value="{!Phone5}" onchange="validInput(this)"/>
+				</apex:pageBlockSectionItem>
+   			</apex:pageBlockSection>            
+       </apex:pageBlock>
+       <script type="Text/javascript">
+       		function validInput(oNumDom)
+			{
+				var oNum = oNumDom.value;
+				if(oNum != null && oNum != '')
+				{
+					var strP=/^\d+$/;
+					if(!strP.test(oNum))
+					{
+						alert("You must enter a number.");
+						oNumDom.value = '';
+       					oNumDom.focus();
+					}
+					else if(parseInt(oNum) < 1 || parseInt(oNum) > 60)
+					{
+						alert("You can just input a number \r\nfrom: 1\r\nto: 60");
+						oNumDom.value = '';
+       					oNumDom.focus();
+					}
+				}
+			}
+       </script>
+    </apex:form>
+</apex:page>

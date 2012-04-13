@@ -1,0 +1,473 @@
+<!-- 
+Change Log:
+Pony Ma 2011-11-07 Do not display email template for internal comment
+Pony Ma 2011-11-18 Fixed a bug - Comment detail is not able to be open in IE, replaced apex output link with native a tag
+ -->
+<apex:page standardController="Case" extensions="OverrideCaseViewController" id="page" action="{!redirect}">
+    <apex:includeScript value="{!URLFOR($Resource.jQuery,'jquery-1.4.4.min.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.CKEditor,'ckeditor/ckeditor.js')}"/>
+    <style type="text/css">
+        .showExpandButton {
+            background: url("/img/alohaSkin/twisty_sprite.png") no-repeat scroll 0 0 transparent;
+        }
+        .hideExpandButton {
+            background: url("/img/alohaSkin/twisty_sprite.png") no-repeat scroll 0 -11px transparent;
+        }
+        .sortDescCustom {
+            background: url("/img/alohaSkin/sortArrows_sprite.png") no-repeat scroll 0 top transparent;
+            width:10px;
+            height:8px;
+        }
+        .sortAscCustom {
+            background: url("/img/alohaSkin/sortArrows_sprite.png") no-repeat scroll 0 0 transparent;
+            background-position: 0 -16px;
+            width:10px;
+            height:8px;
+        }
+    </style>
+    <script type="text/javascript">
+        function getQueryStringRegExp(name)
+        {
+            var reg = new RegExp("(^|\\?|&)"+ name +"=([^&]*)(\\s|&|$)", "i");
+            if (reg.test(location.href))
+            {
+                return unescape(RegExp.$2.replace(/\+/g, " "));
+            } 
+            return "";
+        }
+        
+        function loadReplySection()
+        {
+            var replied = getQueryStringRegExp('replied');
+            var existedLan = getQueryStringRegExp('lanEN');
+            
+            if($('input[id$="hiddenType"]').val()=='Internally'){
+            	internalComment=$('textarea[id$="commentBody"]').val();            	           
+                //use email template for outbound comment	
+                replyStudent=$('input[id$="commentBodyTemplate"]').val(); 
+                //alert(replyStudent);
+            }else{
+            	replyStudent=$('textarea[id$="commentBody"]').val();
+            	//do not use email template for internal comment    
+            	internalComment='';	
+            }            
+            
+            if({!IsShowReplayPanel} || existedLan != "" || $('span[id$="errorMessage"]').children().is('span')) //scorll to reply comment section if comment is draft or an error occured 
+            {
+                $('div[id$="replyBlockPanel"]').show();
+                var t = $('#replyButton').offset().top;
+                $(window).scrollTop(t);                
+            }
+            else if(replied == 'true')
+            {
+                var t = $('#replyButton').offset().top;
+                $(window).scrollTop(t);
+                $('div[id$="replyBlockPanel"]').hide();                
+            }
+            else 
+            {
+                $('div[id$="replyBlockPanel"]').hide();                
+            }            
+        }
+        
+        function collapseAll()
+        {
+            $('table[id$="commentTable"] tbody tr').each(function () {
+                $(this).find('td:eq(2) span:first').hide();
+                $(this).find('td:eq(2) span:last').show();
+                $(this).find('img[name="expandButton"]').removeClass().addClass('showExpandButton');
+            });
+        }
+        
+        function expandAll()
+        {
+            $('table[id$="commentTable"] tbody tr').each(function () {
+                 $(this).find('td:eq(2) span:first').show();
+                 $(this).find('td:eq(2) span:last').hide();
+                 $(this).find('img[name="expandButton"]').removeClass().addClass('hideExpandButton');
+            });
+        }
+        
+        function toggleButton()
+        {
+            var typeValue = $('span[id$="outputType"]').html();
+            if(typeValue == 'Outbound') {
+                $('input[id$="sendEmail"], #previewBtn, #addSolution').show();
+                $('input[id$="saveCommand"]').hide();
+                $('input[id$="enTemplate"]').parents('tr:eq(0)').show();
+            }
+            else {
+                $('input[id$="saveCommand"]').show();
+                $('input[id$="sendEmail"], #previewBtn, #addSolution').hide();  
+                $('input[id$="enTemplate"]').parents('tr:eq(0)').hide();
+            }
+        }
+        
+        function createdCollapseSpan(oTr)
+        {
+            var oTd = $(oTr).find('td:eq(2)');
+            var comment = $(oTd).find('span:eq(0)').html();
+            var tdWidth = $(oTd).width();
+            if(comment != null)
+            {
+                comment = getReplacedComment(comment);
+                if(comment.length >= (tdWidth/5))
+                {
+                    comment = comment.substring(0, tdWidth/5) + '....';
+                }
+            }
+            else
+            {
+                comment = '';
+            }
+            return '<span style="display:none">' + comment  + '</span>';
+        }
+        
+        function getReplacedComment(body)
+        {                      
+            var result = body.replace(/\r|\t|\n/g, ' ');
+            //remove property.
+            result = result.replace(/(<.*?)\s(?:\s*\w*?\s*=\s*".+?")*?\s*?(>)/gi, "$1$2");
+            //remove script.
+            result = result.replace(/<(script)[\s\S]*?\/(script)>/gi, "");
+            //remove html tag.
+            result = result.replace(/<(?:.|\s)*?>/g, "");
+            result = result.replace(/(&nbsp;)*/g, "");
+            //remove space.
+            result = result.replace(/\s{2,}/g, ' ');
+            return result;
+        }
+        
+        function sortOutByTitle(columnTitle, oDiv)
+        {
+            expandAll();
+            $('table[id$="commentTable"]').hide();
+            $('#waitingSearchDiv').show().parent().css('height', $('table[id$="commentTable"]').height()).css('border-width', 1);
+            clickedDivId = oDiv.id;
+            orderStyle = $(oDiv).find('img').attr('class');
+            sortOutByClickedTitle(columnTitle, !$(oDiv).find('img').is('.sortDescCustom'));   
+        }
+        
+        var orderStyle = 'sortAscCustom';
+        var clickedDivId = 'createdDateId';
+        
+        //content for internal comment which is displayed in editor
+    	var internalComment='';
+    	//content for reply student which is displayed in editor
+    	var replyStudent='';
+    	//record the button last clicked
+    	var btnLastClicked='';
+        
+        function bindExpandToTable()
+        {
+            $('#waitingSearchDiv').hide();
+            $('#waitingSearchDiv').parent().css('height','').css('border-width', 0);
+            $('table[id$="commentTable"] thead tr img').removeClass();
+            $('#' + clickedDivId).find('img').toggleClass('sortAscCustom', (orderStyle == 'sortDescCustom')).toggleClass('sortDescCustom', (orderStyle == 'sortAscCustom' || orderStyle == ''));
+            
+            $('table[id$="commentTable"] tbody tr').each(function(){
+                $(this).find('td:eq(2)').append(createdCollapseSpan(this));
+            });
+        }
+        
+        
+        $(document).ready(function () {
+                $("#page\\:form\\:block").parents(".apexp").add("#page\\:historyComponent .apexp").addClass("bRelatedList").removeClass('apexp');
+                $('span[id$="outputType"]').html($('input[id$="hiddenType"]').val());
+                
+                //config ckeditor
+                  CKEDITOR.replace('page:form:block:replyBlock:commentSection:commentbodySection:commentBody',
+                               { 
+                                language:'en',
+                                width:600,
+                                height:600,
+                                skin:'v2',
+                                fontSize_sizes:'8/8pt;9/9pt;10/10pt;11/11pt;12/12pt;14/14pt;16/16pt;18/18pt;20/20pt;22/22pt;24/24pt;26/26pt;28/28pt;36/36',
+                                removePlugins:'elementspath', 
+                                enterMode:CKEDITOR.ENTER_BR,
+                                toolbar :
+                                [  
+                                ['Bold','Italic','Underline','Strike','-','Subscript','Superscript'],['Font','FontSize'],['TextColor','BGColor'],['Source'], 
+                                '/',
+                                ['NumberedList','BulletedList','-','Outdent','Indent','Blockquote'],
+                                ['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock'],
+                                ['Link','Image','HorizontalRule','SpecialChar'],
+                                ['Cut','Copy','PasteText','PasteFromWord'], 
+                                ['Preview']
+                                ] 
+                    });
+
+                 toggleButton();
+                 bindExpandToTable();
+                 collapseAll();
+                
+                //bind event
+                //use preview button function of the ckeditor
+                 $('#previewBtn').click(function() {
+                     if($.browser.msie){
+                         $('.cke_button_preview').mouseup();
+                     }
+                     else{
+                         $('.cke_button_preview').click();
+                     }
+                 });
+                 
+                 $('#cancel').click(function () {
+                    $('div[id$="replyBlockPanel"]').hide();
+                 });
+                 
+                 $("#replyButton").click(function () {                                      	             	                 	                 	                 	               
+                    if(btnLastClicked=='' || btnLastClicked=='Internal Comment'){                    		   
+                 		var editor=CKEDITOR.instances["page:form:block:replyBlock:commentSection:commentbodySection:commentBody"];
+                 		                		          	
+                 		//save the current content for internal comment
+                 		if(btnLastClicked=='Internal Comment'){
+                 			//internalComment=editor.getData();
+                 			internalComment=editor.getSnapshot();	
+                 		}
+                 		try{
+                 			//load the content for reply student                   		                 		           		                                		
+                			editor.loadSnapshot(replyStudent);                		
+                		}catch(e){alert(e);}
+                 	}
+                 	//record the button clicked
+                 	btnLastClicked='Reply Student';
+                    
+                    $('div[id$="replyBlockPanel"]').show();
+                    $('span[id$="outputType"]').html('Outbound');
+                    $('input[id$="hiddenType"]').val('Outbound');
+                     toggleButton();  
+                                                            	                   
+                });
+                
+                $("#interCommentButton").click(function (){                	
+                 	if(btnLastClicked=='' || btnLastClicked=='Reply Student'){ 
+                 		var editor=CKEDITOR.instances["page:form:block:replyBlock:commentSection:commentbodySection:commentBody"]; 
+                 		                 		              		
+                 		//save the current content for reply student
+                 		if(btnLastClicked=='Reply Student'){
+                 			replyStudent=editor.getSnapshot();	
+                 		}
+                 		
+                 		//load the saved content for internal comment 
+                 		try{
+                 		//load the content for reply student                   		                 		             		                                		
+                			editor.loadSnapshot(internalComment);                		
+                		}catch(e){alert(e);}                		                               		
+                 	}
+                 	//record the button clicked
+                 	btnLastClicked='Internal Comment';                	
+                	                	                                	
+                    $('div[id$="replyBlockPanel"]').show();
+                    $('span[id$="outputType"]').html('Internally');
+                    $('input[id$="hiddenType"]').val('Internally');
+                     toggleButton();
+                });
+                
+                //expand all comment 
+                $('#commentExpandAll').click( function() {
+                    expandAll();
+                });
+                
+                //collapse all comment 
+                $('#commentCollapseAll').click( function() {
+                    collapseAll();
+                });
+                
+                $('#addSolution').click(function(){
+                    if(confirm("Are you sure to add your solution? Then, your " + '\n' + "message will be lost.") == true)
+                    {
+                        redirectToAddSolution();
+                    }
+                });
+                
+                $('table[id$="commentTable"] tbody tr').click(function (){
+                    if($(this).find('td:eq(2) span:eq(0)').css('display') == 'none')
+                    {
+                        $(this).find('td:eq(2) span:first').show();
+                        $(this).find('td:eq(2) span:last').hide();
+                        
+                    }
+                    else
+                    {
+                        $(this).find('td:eq(2) span:first').hide();
+                        $(this).find('td:eq(2) span:last').show();
+                    }
+                    $(this).find('img[name="expandButton"]').toggleClass('showExpandButton hideExpandButton');
+                });
+                
+        });
+        
+        $(window).load(function () {          		     		    
+                loadReplySection();
+        });
+    </script>
+    
+    <apex:detail inlineEdit="true" id="detail" relatedList="false"/>
+    
+    <apex:form id="form">
+        <apex:pageBlock title="Etown Case Comments" id="block">
+            <apex:pageBlockButtons location="top">
+                <input type="button" class="btn" value="Reply Student" id="replyButton" />
+                <input type="button" class="btn" value="Internal Comment" id="interCommentButton" />   
+            </apex:pageBlockButtons>
+            <div style="margin:-5px 0px 5px 0px; color: red">
+                <label>(Note: please select your solution if you want to use it to your email.)</label>
+            </div>
+            <apex:pageMessages id="errorMessage"/>
+            <apex:outputpanel layout="block" style="display:none" id="replyBlockPanel">
+                <apex:pageBlock title="New Case Comments" mode="maindetail" id="replyBlock">
+                    <apex:pageBlockButtons location="bottom">
+                        <input type="button" id="addSolution" name="solution" title="Add Solution" class="btn" value="Add Solution" />
+                         <input type="button" id="previewBtn" name="preview" title="Preview (New Window)" class="btn" value="Preview" />                       
+                        <apex:commandButton id="sendEmail" action="{!sendEmail}" value="Send Email" onclick="if(confirm('Are you sure to send email to students?')){return true;} else{return false;}"/>
+                        <apex:commandButton action="{!saveInternalCase}" value="Save" styleClass="$" id="saveCommand"/>
+                        <input id="cancel" type="button" title="Cancel" value="Cancel" class="btn" />
+                    </apex:pageBlockButtons>
+                    <apex:pageBlockSection columns="1" id="commentSection">
+                        <apex:pageBlockSectionItem >
+                            <apex:outputPanel >Type</apex:outputPanel>
+                            <apex:outputPanel >
+                                <apex:outputText value="{!Comment.Type__c}" id="outputType"/>
+                                <apex:inputHidden value="{!Comment.Type__c}" id="hiddenType"/>
+                            </apex:outputPanel>
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                            <apex:outputPanel >Use EN Email Template</apex:outputPanel>
+                            <apex:outputPanel >
+                                <apex:inputField value="{!Comment.UseENTemplate__c}" id="enTemplate" onclick="refreshEmailTemplate(this.checked)"/>
+                                <apex:outputPanel > (Note: If you want to send your message in English email template, please tick the box.)
+                                    <apex:actionStatus id="loadingStatus">
+                                        <apex:facet name="start">
+                                            <img src="/img/loading.gif" alt="loading" />
+                                        </apex:facet>
+                                    </apex:actionStatus>
+                                </apex:outputPanel>
+                            </apex:outputPanel>
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem id="commentbodySection">
+                            <apex:outputLabel for="commentBody">Comment Body</apex:outputLabel>
+                            <apex:inputTextarea id="commentBody" value="{!Comment.CommentBody__c}"/>                            
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                            <apex:outputPanel >Attachment</apex:outputPanel>
+                            <apex:outputPanel >
+                                <apex:inputFile value="{!Attach.body}" filename="{!Attach.name}"/>
+                                <apex:commandButton value="Upload" action="{!uploadFile}" style="margin:0px 0px 0px 10px"/>
+                            </apex:outputPanel>
+                         </apex:pageBlockSectionItem>
+                         <apex:pageBlockSectionItem >
+                            <apex:outputPanel >File Name</apex:outputPanel>
+                            <apex:repeat value="{!Attachments}" var="att" >
+                                <apex:commandLink target="_blank" value="View" action="{!URLFOR($Action.Attachment.Download, att.Id)}" style="color: #015BA7; margin:0px 5px 0px 0px" />|
+                                <a href="/setup/own/deleteredirect.jsp?id={!Case.Id}&delID={!att.Id}&retURL=/apex/overridecaseview?id={!Case.Id}" style="color: #015BA7; margin:0px 5px 5px 0px" >Del</a>
+                                <apex:outputText value="{!att.Name}" /> 
+                                <br/>
+                                <div style="height:5px"></div>
+                            </apex:repeat>
+                         </apex:pageBlockSectionItem>
+                         <apex:pageBlockSectionItem >
+                         	<apex:inputHidden id="commentBodyTemplate" value="{!EmailTemplateContent}"/>                         	
+                         </apex:pageBlockSectionItem>
+                    </apex:pageBlockSection>
+                </apex:pageBlock>
+            </apex:outputpanel>
+            <apex:outputpanel layout="none" rendered="{!CaseComments.size > 0}">
+                <div style="padding:0px 2px 2px">
+                    <a id="commentExpandAll" href="javascript:void(0)">Expand All</a> |
+                    <a id="commentCollapseAll" href="javascript:void(0)">Collapse All</a>
+                </div>
+            </apex:outputpanel>
+            
+            <div style="position:relative; background-color: #F8F8F8; border-color: #EAEAEA; border-style: solid; border-width:0px;">
+                <apex:pageBlockTable value="{!CaseComments}" var="comment" rendered="{!CaseComments.size > 0}" id="commentTable">
+                    <apex:column width="90px">
+                        <apex:facet name="header">Name</apex:facet>
+                        <apex:outputPanel layout="block" style="width:90px">
+                            <img title="Show" name="expandButton" style="cursor:pointer;height:14px;width:14px;" class="hideExpandButton" alt="Show" src="/s.gif" />
+                             <a target="_blank" href="/{!comment.Id}">{!comment.Name}</a>                                                        
+                        </apex:outputPanel>
+                    </apex:column>
+                    <apex:column width="75px" >
+                        <apex:facet name="header">
+                            <div id="typeId" onclick="sortOutByTitle('Type__c', this)" name="sortColumn"  title="Type">
+                                <a href="javascript:void(0)" class="x-grid3-hd-btn">Type
+                                    <img src="/s.gif" />
+                                </a>
+                            </div>
+                        </apex:facet>
+                        <apex:outputField value="{!comment.Type__c}" />
+                    </apex:column>
+                    <apex:column value="{!comment.PlainTextBody__c}" style="width:100%"/>
+                    <apex:column width="85px">
+                        <apex:facet name="header" >Has Attachment</apex:facet>
+                        <apex:outputPanel rendered="{!comment.Attachments.Size > 0}">
+                            <img width="21" height="16" title="Checked" id="00NO0000000KSBQ_chkbox" class="checkImg" alt="Checked" src="/img/checkbox_checked.gif" />
+                        </apex:outputPanel>
+                        <apex:outputPanel rendered="{!comment.Attachments.Size = 0}">
+                            <img width="21" height="16" title="Not Checked" id="00NO0000000KaDF_chkbox" class="checkImg" alt="Not Checked" src="/img/checkbox_unchecked.gif" />
+                        </apex:outputPanel>
+                    </apex:column>
+                    <apex:column width="100px" >
+                        <apex:facet name="header">
+                            <div id="lastModifedDateId" onclick="sortOutByTitle('LastModifiedDate', this)" name="sortColumn"  title="Type">
+                                <a href="javascript:void(0)" class="x-grid3-hd-btn">Last Modified Date
+                                    <img src="/s.gif" />
+                                </a>
+                            </div>
+                        </apex:facet>
+                        <apex:outputField value="{!comment.LastModifiedDate}" />
+                    </apex:column>
+                    <apex:column width="90px">
+                        <apex:facet name="header">
+                            <div id="createdById" onclick="sortOutByTitle('CreatedById', this)" name="sortColumn"  title="Type">
+                                <a href="javascript:void(0)" class="x-grid3-hd-btn">Created By
+                                    <img src="/s.gif" />
+                                </a>
+                            </div>
+                        </apex:facet>
+                        <apex:outputField value="{!comment.CreatedById}" />
+                    </apex:column>
+                    <apex:column width="78px">
+                        <apex:facet name="header">
+                            <div id="createdDateId" onclick="sortOutByTitle('CreatedDate', this)" name="sortColumn"  title="Type">
+                                <a href="javascript:void(0)" class="x-grid3-hd-btn">Created Date
+                                    <img src="/s.gif"/>
+                                </a>
+                            </div>
+                        </apex:facet>
+                        <apex:outputField value="{!comment.CreatedDate}" />
+                    </apex:column>
+                </apex:pageBlockTable>
+                <div id="waitingSearchDiv" style="width: 100%; height:100%; display:none" class="waitingSearchDiv"> 
+                    <div style="padding:20px; text-align:center; top:3%" class="waitingHolder"> 
+                        <img alt="loading..." src="/img/loading.gif" class="waitingImage"/>
+                        <span class="waitingDescription">loading...</span> 
+                    </div>
+                </div>
+            </div>
+            <apex:outputPanel layout="none" rendered="{!CaseComments.size = 0}" >
+                <table cellspacing="0" cellpadding="0" border="0" class="list"> 
+                    <tr class="headerRow">
+                        <th class="noRowsHeader" scope="col">No records to display</th>
+                    </tr>
+                </table> 
+            </apex:outputPanel>
+        </apex:pageBlock>
+    </apex:form>
+    <apex:form >
+        <apex:actionFunction name="sortOutByClickedTitle" rerender="commentTable" immediate="true" oncomplete="bindExpandToTable()">
+            <apex:param name="firstParam" assignTo="{!SortKey}" value="" />
+            <apex:param name="secondParam" assignTo="{!IsDesc}" value="" />
+        </apex:actionFunction>
+        <apex:actionFunction name="refreshEmailTemplate" action="{!refreshEmailTemplate}" rerender="commentbodySection" status="loadingStatus" >
+            <apex:param name="isENTemplate" assignTo="{!IsENEmailTemplate}" value="" />
+        </apex:actionFunction>
+        <apex:actionFunction name="redirectToAddSolution" action="{!redirectToFindSolution}" />
+    </apex:form>
+    
+    <apex:relatedList list="CaseSolutions" />
+    <apex:relatedList list="Attachments" />
+    <apex:relatedList list="OpenActivities" />    
+    <c:HistoryList object="Case" recordId="{!Case.Id}" id="historyComponent"/>
+</apex:page>

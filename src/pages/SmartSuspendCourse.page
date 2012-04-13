@@ -1,0 +1,142 @@
+<apex:page id="page" controller="SmartSuspendCourseController" showHeader="false" tabStyle="Contact">
+    <apex:includeScript value="{!URLFOR($Resource.jQuery, 'jquery-1.4.4.min.js')}"/>
+    <script type="text/javascript">
+        $j = jQuery.noConflict();
+        function dataTransfer()
+        {
+            var suspendDate = $j('input[id$="suspensionDate"]').val();
+            var resumeDate = $j('input[id$="resumeDate"]').val();
+            $j("#savedSuspendDate").html(suspendDate);
+            $j("#savedResumeDate").html(resumeDate);
+            toggleInputDateSection();
+        }
+        function toggleInputDateSection()
+        {
+            $j('div[id$="submitBlock"]').toggle();
+            $j('#confirmSection').toggle();
+        }
+        function disableBtn()
+        {
+            $j(".btn").each(function () {
+                $j(this).css('display', 'none');
+                $j(this).parent().append('<input type="button"  name="inlineSubmitting" title="Submitting" class="btnDisabled" value="Submitting..."/>');      
+            });
+        }
+        function refreshOpenerWindow()
+        {
+            var openerUrl = "{!CurrentContactUrl}";  
+            window.opener.location = openerUrl; 
+            closeWindow();
+        }
+        function closeWindow()
+        {
+            window.close();
+        }
+        function hideApexMessage()
+        {
+            $j('span[id$="errorMessage"]').hide();
+        }
+    </script>
+    <apex:form id="form">
+        <div style="font-size:2.0em; margin:5px 5px"><h1> Suspend Course</h1></div>
+        <apex:pageMessages id="errorMessage"/>
+        <apex:outputPanel rendered="{!IsValidContactStatus}">
+        <apex:pageBlock id="submitBlock" rendered="{!ShowPage == 1}" mode="edit">
+            <apex:pageBlockButtons location="bottom"> 
+                <apex:commandButton action="{!submit}" value="Submit"/>
+                <input type="button" class="btn" onclick="closeWindow()" value="Cancel" />
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection id="section1" title="Suspend Course" columns="1" collapsible="false">
+                <apex:pageBlockSectionItem id="item1">
+                    <apex:outputPanel layout="block" style="width:120px">Suspension Date</apex:outputPanel>
+                    <apex:outputPanel layout="block" styleClass="requiredInput dateInput dateOnlyInput">
+                        <div class="requiredBlock"></div>
+                    <apex:inputText id="suspensionDate" value="{!Reschedule.SuspensionDateInputValue}" onfocus="hideApexMessage();DatePicker.pickDate(true, this.id, false);" required="true"/>
+                    <span class="dateFormat">[&nbsp;
+                        <a href="javascript:DatePicker.insertDate('{!DateToday}', 'page:form:submitBlock:section1:item1:suspensionDate', true);">{!DateToday}</a>
+                    &nbsp;]</span>
+                    </apex:outputPanel>
+                </apex:pageBlockSectionItem> 
+                <apex:pageBlockSectionItem id="item2">
+                    <apex:outputPanel layout="block" style="width:120px">Resume Date</apex:outputPanel>
+                    <apex:outputPanel layout="block" styleClass="requiredInput dateInput dateOnlyInput">
+                        <div class="requiredBlock"></div>
+                    <apex:inputText id="resumeDate" value="{!Reschedule.ResumeDateInputValue}" onfocus="hideApexMessage();DatePicker.pickDate(true, this.id, false);" required="true" />
+                    <span class="dateFormat">[&nbsp;
+                        <a href="javascript:DatePicker.insertDate('{!DateToday}', 'page:form:submitBlock:section1:item2:resumeDate', true);">{!DateToday}</a>
+                    &nbsp;]</span>
+                   </apex:outputPanel>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputPanel layout="block" style="width:120px">Suspend Reason</apex:outputPanel> 
+                    <apex:selectList value="{!Reschedule.SuspendReason}" size="1" style="width:150px" >
+                        <apex:selectOptions value="{!Reschedule.SuspendReasons}"/>
+                    </apex:selectList>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+        </apex:outputPanel>
+        <div style="display:none" id="confirmSection">
+            <apex:pageBlock id="confirmBlock" >
+                <apex:pageBlockButtons location="bottom">  
+                    <apex:commandButton value=" OK " action="{!confirmSubmit}" onclick="disableBtn()" />
+                    <input id="backBtn" type="button" class="btn" value="Back" onclick="toggleInputDateSection()" />
+                </apex:pageBlockButtons>  
+                <apex:pageBlockSection title="Suspend the access?" columns="1" collapsible="false">
+                    <apex:pageBlockSectionItem >
+                        <apex:outputPanel layout="block" style="width:120px">To suspend on:</apex:outputPanel>
+                        <label id="savedSuspendDate" ></label>
+                   </apex:pageBlockSectionItem> 
+                   <apex:pageBlockSectionItem >
+                        <apex:outputPanel layout="block" style="width:120px">To resume on:</apex:outputPanel>
+                        <label id="savedResumeDate" ></label>
+                   </apex:pageBlockSectionItem> 
+                </apex:pageBlockSection>   
+            </apex:pageBlock> 
+        </div>
+        <apex:pageBlock rendered="{!ShowPage == 2}">
+            <apex:pageBlockButtons location="bottom">
+                <input type="button" class="btn" value=" OK " style="margin:5% 10% 5% 15%" onclick="refreshOpenerWindow();"/>
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection title="Suspend the Access" columns="1" collapsible="false">
+                 <div style="font-size:1.2em">You have created a new suspension successfully!</div>
+                 <apex:pageBlockSectionItem >
+                    <apex:outputPanel layout="block" style="width:120px">Suspension Date</apex:outputPanel>
+                    <apex:outputText value="{!Reschedule.SuspensionDateInputValue}" />
+                 </apex:pageBlockSectionItem>
+                  <apex:pageBlockSectionItem >
+                    <apex:outputPanel layout="block" style="width:120px">Resume Date</apex:outputPanel>
+                    <apex:outputText value="{!Reschedule.ResumeDateInputValue}" />
+                 </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+        <apex:pageBlock rendered="{!ShowPage == 3}">
+            <apex:pageBlockButtons location="bottom">
+                <apex:commandButton action="{!tryAgain}" value="Try Again" onclick="disableBtn()" style="margin:5% 10% 5% 15%"/>
+            </apex:pageBlockButtons> 
+            <apex:pageBlockSection title="Suspend the Access" columns="1" collapsible="false">
+            <br/>
+            <p>Suspension failed, please click try again!</p>
+            </apex:pageBlockSection>    
+        </apex:pageBlock>
+        <apex:pageBlock rendered="{!ShowPage == 4}">
+            <apex:pageBlockButtons location="bottom">
+                <input type="button" class="btn" onclick="closeWindow()" value="Close" style="margin:5% 10% 5% 15%" />
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection title="Suspend Access" columns="1" collapsible="false">
+                 <apex:outputText value="{!EtownErrorMessage}" />
+                 <p>Suspension request failed, please contact administrator!</p> 
+            </apex:pageBlockSection>    
+        </apex:pageBlock>
+    </apex:form>
+    <script type="text/javascript">
+    if({!ShowConfirmPage})
+    {
+        dataTransfer();
+    }
+    if({!ShowPage != 1})
+    {
+        $j('#confirmSection').toggle();
+    }
+    </script>
+</apex:page>

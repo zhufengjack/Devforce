@@ -1,0 +1,180 @@
+<!-- 
+* Pony Ma 2012-02-17 Added a new section
+ -->
+<apex:page standardController="Contact" extensions="TeacherRelatedInfoController" showHeader="false" tabStyle="Contact">
+    <apex:form > 
+        <apex:pageBlock rendered="{!NOT(IsEditing)}" id="editBlock">
+            <apex:pageBlockButtons location="top">
+                <apex:commandButton action="{!edit}" value="Edit" /> 
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection title="Information" columns="2" collapsible="false">
+		    <apex:outputField value="{!TeacherInfo.Native_Language__c}"/> 
+		    <apex:outputField value="{!TeacherInfo.Probation_start_date__c}"/>
+		    <apex:outputField value="{!TeacherInfo.Other_Language__c}"/>
+		    <apex:outputField value="{!TeacherInfo.Available_date__c}"/>
+		    <apex:outputField value="{!TeacherInfo.Proficiency__c}"/>
+		    <apex:outputField value="{!TeacherInfo.CV_Source__c}"/> 
+		    <apex:outputField value="{!TeacherInfo.More_languages__c}"/> 
+		    <apex:outputField value="{!TeacherInfo.Referred_by__c}"/> 
+		    <apex:outputField value="{!TeacherInfo.Tertiary_qualification__c}"/>
+		    <apex:outputField value="{!TeacherInfo.Years_of_teaching__c}"/>
+		    <apex:outputField value="{!TeacherInfo.ESL_qualification__c}"/>
+		    <apex:outputField value="{!TeacherInfo.Teaching_Field__c}"/>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection columns="1" collapsible="false" title="Lessons Observed">
+                <apex:outputText rendered="{!Trainings.size = 0}">No Lessons Observed</apex:outputText>
+                <apex:pageBlockTable value="{!Trainings}" var="train" rendered="{!Trainings.size > 0}">
+                    <apex:column style="text-align:center">
+                        <apex:image value="{!IF(train.IsChecked, '/img/checkbox_checked.gif', '/img/checkbox_unchecked.gif')}" />
+                    </apex:column>
+                    <apex:column headerValue="Date">
+                        <apex:outputText value="{0, Date, MM/dd/yyyy}"><apex:param value="{!train.TrainingDate}" /></apex:outputText>
+                    </apex:column>
+                    <apex:column headerValue="Class Time (NYT)" value="{!train.ClassTime}" />
+                    <apex:column headerValue="Teacher Name" value="{!train.TeacherName}" />
+                </apex:pageBlockTable>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection columns="1" collapsible="false" title="Others">
+            	<apex:pageBlockSectionItem >
+            		<apex:panelGrid columns="6" cellspacing="2px">
+            			<apex:panelGroup >
+            				<apex:outputField value="{!TeacherInfo.Training_completed__c}"/>
+            				<apex:outputLabel value="{!$ObjectType.Teacher_related_information__c.Fields.Training_completed__c.Label}"/>            				
+            			</apex:panelGroup>
+            			<apex:panelGroup >
+            				<apex:outputField value="{!TeacherInfo.CSA__c}"/>
+            				<apex:outputLabel value="{!$ObjectType.Teacher_related_information__c.Fields.CSA__c.Label}"/>            				
+            			</apex:panelGroup>
+            			<apex:panelGroup >
+            				<apex:outputField value="{!TeacherInfo.NDA__c}"/>
+            				<apex:outputLabel value="{!$ObjectType.Teacher_related_information__c.Fields.NDA__c.Label}"/>            				
+            			</apex:panelGroup>
+            			<apex:panelGroup >
+            				<apex:outputField value="{!TeacherInfo.Bank_form__c}"/>
+            				<apex:outputLabel value="{!$ObjectType.Teacher_related_information__c.Fields.Bank_form__c.Label}"/>            				
+            			</apex:panelGroup>
+            			<apex:panelGroup >
+            				<apex:outputField value="{!TeacherInfo.Profile_updated__c}"/>
+            				<apex:outputLabel value="{!$ObjectType.Teacher_related_information__c.Fields.Profile_updated__c.Label}"/>            				
+            			</apex:panelGroup>
+            			<apex:panelGroup >
+            				<apex:outputField value="{!TeacherInfo.Profile_photo_uploaded__c}"/>
+            				<apex:outputLabel value="{!$ObjectType.Teacher_related_information__c.Fields.Profile_photo_uploaded__c.Label}"/>            				
+            			</apex:panelGroup>
+            			<apex:panelGroup >
+            				<apex:outputField value="{!TeacherInfo.Met_with_mentor__c}"/>
+            				<apex:outputLabel value="{!$ObjectType.Teacher_related_information__c.Fields.Met_with_mentor__c.Label}"/>            				
+            			</apex:panelGroup>
+            			<apex:panelGroup >
+            				<apex:outputField value="{!TeacherInfo.Observation_1__c}"/>
+            				<apex:outputLabel value="{!$ObjectType.Teacher_related_information__c.Fields.Observation_1__c.Label}"/>            				
+            			</apex:panelGroup>
+            			<apex:panelGroup >
+            				<apex:outputField value="{!TeacherInfo.Observation_2__c}"/>
+            				<apex:outputLabel value="{!$ObjectType.Teacher_related_information__c.Fields.Observation_2__c.Label}"/>            				
+            			</apex:panelGroup>
+            			<apex:panelGroup >
+            				<apex:outputField value="{!TeacherInfo.Observation_3__c}"/>
+            				<apex:outputLabel value="{!$ObjectType.Teacher_related_information__c.Fields.Observation_3__c.Label}"/>            				
+            			</apex:panelGroup>
+            			<apex:panelGroup >
+            				<apex:outputField value="{!TeacherInfo.Observation_4__c}"/>
+            				<apex:outputLabel value="{!$ObjectType.Teacher_related_information__c.Fields.Observation_4__c.Label}"/>            				
+            			</apex:panelGroup>
+            			<apex:panelGroup >
+            				<apex:outputField value="{!TeacherInfo.Observation_5__c}"/>
+            				<apex:outputLabel value="{!$ObjectType.Teacher_related_information__c.Fields.Observation_5__c.Label}"/>            				
+            			</apex:panelGroup>            			          			            		            			
+            		</apex:panelGrid>
+            	</apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+        </apex:pageBlock> 
+        <apex:pageBlock mode="edit" rendered="{!IsEditing}" id="saveBlock">
+            <apex:pageBlockButtons location="top">
+                <apex:commandButton action="{!save}" value="Save" />
+                <apex:commandButton action="{!cancel}" value="Cancel" />
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection collapsible="false">
+               <apex:inputField value="{!TeacherInfo.Native_Language__c}"/> 
+		    <apex:inputField value="{!TeacherInfo.Probation_start_date__c}"/>
+		    <apex:inputField value="{!TeacherInfo.Other_Language__c}"/>
+		    <apex:inputField value="{!TeacherInfo.Available_date__c}"/>
+		    <apex:inputField value="{!TeacherInfo.Proficiency__c}"/>
+		    <apex:inputField value="{!TeacherInfo.CV_Source__c}"/> 
+		    <apex:inputField value="{!TeacherInfo.More_languages__c}"/> 
+		    <apex:inputField value="{!TeacherInfo.Referred_by__c}"/> 
+		    <apex:inputField value="{!TeacherInfo.Tertiary_qualification__c}"/>
+		    <apex:inputField value="{!TeacherInfo.Years_of_teaching__c}"/>
+		    <apex:inputField value="{!TeacherInfo.ESL_qualification__c}"/>
+		    <apex:inputField value="{!TeacherInfo.Teaching_Field__c}"/>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection columns="1" collapsible="false" title="Lessons Observed">
+                <apex:outputText rendered="{!Trainings.size = 0}">No Lessons Observed</apex:outputText>
+                <apex:pageBlockTable value="{!Trainings}" var="train" rendered="{!Trainings.size > 0}">
+                    <apex:column style="text-align:center">
+                        <apex:image value="{!IF(train.IsChecked, '/img/checkbox_checked.gif', '/img/checkbox_unchecked.gif')}" />
+                    </apex:column>
+                    <apex:column headerValue="Date">
+                        <apex:outputText value="{0, Date, MM/dd/yyyy}"><apex:param value="{!train.TrainingDate}" /></apex:outputText>
+                    </apex:column>
+                    <apex:column headerValue="Class Time (NYT)" value="{!train.ClassTime}" />
+                    <apex:column headerValue="Teacher Name" value="{!train.TeacherName}"  />
+                </apex:pageBlockTable>
+            </apex:pageBlockSection>  
+            <apex:pageBlockSection columns="1" collapsible="false" title="Others">
+            	<apex:pageBlockSectionItem >
+            		<apex:panelGrid columns="6" cellspacing="5px">
+            			<apex:panelGroup >
+            				<apex:inputField value="{!TeacherInfo.Training_completed__c}"/>
+            				<apex:outputLabel value="{!$ObjectType.Teacher_related_information__c.Fields.Training_completed__c.Label}"/>            				
+            			</apex:panelGroup>
+            			<apex:panelGroup >
+            				<apex:inputField value="{!TeacherInfo.CSA__c}"/>
+            				<apex:outputLabel value="{!$ObjectType.Teacher_related_information__c.Fields.CSA__c.Label}"/>            				
+            			</apex:panelGroup>
+            			<apex:panelGroup >
+            				<apex:inputField value="{!TeacherInfo.NDA__c}"/>
+            				<apex:outputLabel value="{!$ObjectType.Teacher_related_information__c.Fields.NDA__c.Label}"/>            				
+            			</apex:panelGroup>
+            			<apex:panelGroup >
+            				<apex:inputField value="{!TeacherInfo.Bank_form__c}"/>
+            				<apex:outputLabel value="{!$ObjectType.Teacher_related_information__c.Fields.Bank_form__c.Label}"/>            				
+            			</apex:panelGroup>
+            			<apex:panelGroup >
+            				<apex:inputField value="{!TeacherInfo.Profile_updated__c}"/>
+            				<apex:outputLabel value="{!$ObjectType.Teacher_related_information__c.Fields.Profile_updated__c.Label}"/>            				
+            			</apex:panelGroup>
+            			<apex:panelGroup >
+            				<apex:inputField value="{!TeacherInfo.Profile_photo_uploaded__c}"/>
+            				<apex:outputLabel value="{!$ObjectType.Teacher_related_information__c.Fields.Profile_photo_uploaded__c.Label}"/>            				
+            			</apex:panelGroup>
+            			<apex:panelGroup >
+            				<apex:inputField value="{!TeacherInfo.Met_with_mentor__c}"/>
+            				<apex:outputLabel value="{!$ObjectType.Teacher_related_information__c.Fields.Met_with_mentor__c.Label}"/>            				
+            			</apex:panelGroup>
+            			<apex:panelGroup >
+            				<apex:inputField value="{!TeacherInfo.Observation_1__c}"/>
+            				<apex:outputLabel value="{!$ObjectType.Teacher_related_information__c.Fields.Observation_1__c.Label}"/>            				
+            			</apex:panelGroup>
+            			<apex:panelGroup >
+            				<apex:inputField value="{!TeacherInfo.Observation_2__c}"/>
+            				<apex:outputLabel value="{!$ObjectType.Teacher_related_information__c.Fields.Observation_2__c.Label}"/>            				
+            			</apex:panelGroup>
+            			<apex:panelGroup >
+            				<apex:inputField value="{!TeacherInfo.Observation_3__c}"/>
+            				<apex:outputLabel value="{!$ObjectType.Teacher_related_information__c.Fields.Observation_3__c.Label}"/>            				
+            			</apex:panelGroup>
+            			<apex:panelGroup >
+            				<apex:inputField value="{!TeacherInfo.Observation_4__c}"/>
+            				<apex:outputLabel value="{!$ObjectType.Teacher_related_information__c.Fields.Observation_4__c.Label}"/>            				
+            			</apex:panelGroup>
+            			<apex:panelGroup >
+            				<apex:inputField value="{!TeacherInfo.Observation_5__c}"/>
+            				<apex:outputLabel value="{!$ObjectType.Teacher_related_information__c.Fields.Observation_5__c.Label}"/>            				
+            			</apex:panelGroup>            			          			            		            			
+            		</apex:panelGrid>
+            	</apex:pageBlockSectionItem>
+            </apex:pageBlockSection>          
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

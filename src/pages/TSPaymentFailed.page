@@ -1,0 +1,2 @@
+<apex:page controller="TSPaymentFailedController" showHeader="false" action="{!processFailurePayment}" contentType="text/plain">{!ProcessResult}
+</apex:page>

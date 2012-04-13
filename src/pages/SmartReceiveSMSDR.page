@@ -1,0 +1,3 @@
+<apex:page controller="SmartReceiveSMSRequestController"  showHeader="false" sidebar="false" action="{!handleDR}" contentType="text/plain">
+    <apex:outputText value="{!Status}"/>
+</apex:page>

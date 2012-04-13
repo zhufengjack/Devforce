@@ -1,0 +1,83 @@
+<apex:page id="page" controller="SmartResumeCourseController" showHeader="false" tabStyle="Contact">
+	<apex:includeScript value="{!URLFOR($Resource.jQuery, 'jquery-1.4.4.min.js')}"/>
+    <script type="text/javascript">
+        $j = jQuery.noConflict();
+        function checkResumeNow(currentItem)
+        {
+            var domDate = $j('input[id$="resumeDate"]');
+            if(currentItem.checked)
+            {
+                domDate.val("{!DateToday}").attr("disabled", "disabled");
+            }
+            else
+            {
+                domDate.attr("disabled", ""); 
+            }
+        }
+        function disableBtn()
+        {
+	        $j(".btn:visible").each(function () {
+				$j(this).css('display', 'none');
+				$j(this).parent().append('<input type="button" name="inlineSubmitting" title="Submitting" class="btnDisabled" value="Submitting..."/>');      
+	        });
+        }
+        function hideApexMessage()
+        {
+       		$j('span[id$="errorMessage"]').hide();
+        }
+        function refreshOpenerWindow()
+      	{
+      		var openerUrl = "{!CurrentContactUrl}";  
+      		window.opener.location = openerUrl; 
+       		closeWindow();
+      	}
+      	function closeWindow()
+      	{
+      		window.close();
+      	}
+      	$j(function(){
+      		var domDate = $j('input[id$="resumeDate"]');
+      		if($j('input[id$="checkResume"]').checked)
+      		{
+      			domDate.val("{!DateToday}").attr("disabled", "disabled"); 
+      		}
+      		if("{!IsResumeSuccessed}".toLowerCase() == "true")
+       		{
+       			$j('input[id$="resumeBtn"]').attr("disabled", "disabled").addClass('btnDisabled');
+       			$j('input[id$="resumeBtn"]').hide();
+       			$j('#cancelBtn').hide();
+       			$j('#closeBtn').show();
+       		}
+      	})
+    </script>
+    <apex:form id="form">
+        <div style="font-size:2.0em; margin:5px 5px"><h1> Resume Course</h1></div>
+        <apex:pageBlock mode="edit" id="block">
+            <apex:pageBlockButtons location="bottom">  
+                <apex:commandButton action="{!submit}" value="Submit" onclick="disableBtn()" id="resumeBtn" disabled="{!IF(RescheduleStatus != 'Not start yet', true, false)}"/>
+                <input id="cancelBtn" type="button" class="btn" onclick="closeWindow()" value="Cancel" />
+                <input id="closeBtn" type="button" class="btn" onclick="refreshOpenerWindow()" value="Close" style="display: none"/>
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection title="Resume" columns="1" id="section" rendered="{!IF(RescheduleStatus = 'Not start yet', true, false)}">
+            	<apex:pageMessages id="errorMessage"/>
+                <apex:pageBlockSectionItem id="item1">
+                    <apex:outputPanel layout="block" style="width:120px">Resume Date</apex:outputPanel>
+                  	<apex:outputPanel layout="block" styleClass="requiredInput dateInput dateOnlyInput">
+                  		<div class="requiredBlock"></div>
+                    <apex:inputText id="resumeDate" value="{!Reschedule.ResumeDateInputValue}" onfocus="hideApexMessage();DatePicker.pickDate(true, this.id, false);" required="true"/>
+                    <span class="dateFormat">[&nbsp;
+                    	<a href="javascript:DatePicker.insertDate('{!DateToday}', 'page:form:block:section:item1:resumeDate', true);">{!DateToday}</a>
+                    &nbsp;]</span>
+                   </apex:outputPanel>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem id="item2">
+                   <apex:outputPanel layout="block" style="width:120px">Resume Now</apex:outputPanel>
+                   <apex:inputCheckBox value="{!ResumeNow}" id="checkResume" onclick="checkResumeNow(this)" disabled="{!Not(IsInProgress)}"/>
+                </apex:pageBlockSectionItem> 
+            </apex:pageBlockSection>    
+            <apex:pageBlockSection rendered="{!IF(RescheduleStatus != 'Not start yet', true, false)}" columns="1">
+            	Failed to resume, please check the status of student service
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

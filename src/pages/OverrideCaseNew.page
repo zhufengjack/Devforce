@@ -1,0 +1,296 @@
+<!-- 
+Pony Ma 2011-11-15 Try to auto populate the contact field if the case is created from contact page(get def_contact_id in URL)
+ -->
+<apex:page standardController="Case" extensions="OverrideCaseNewController" tabStyle="Case" action="{!redirect}" id="page">
+    <apex:includeScript value="{!URLFOR($Resource.jQuery,'jquery-1.4.4.min.js')}"/>
+    <apex:form id="form">
+        <script type="text/javascript">
+            var rules = [   {BU: 'Sma', Country: 'cn', Language: 'cs', Partner: 'Cool', PartnerText: 'Cool School'},
+                            {BU: 'B2C', Country: 'cn', Language: 'cs', Partner: 'Mini', PartnerText: 'Mini Center'},
+                            {BU: 'B2C', Country: 'cn', Language: 'cs', Partner: 'None', PartnerText: 'None'},
+                            {BU: 'Kid', Country: 'ru', Language: 'ru', Partner: 'Soch', PartnerText: 'Sochi 2014 Olympics'}];
+                            
+            function reOrderOption(bu, country, language)
+            {
+                var appOption = '';
+                var isPartnerExisted = false;
+                for(var i = 0; i < rules.length; i++)
+                {
+                    if(rules[i].BU == bu && rules[i].Country == country && rules[i].Language == language)
+                    {
+                        appOption += "<option value='" + rules[i].Partner + "'>" + rules[i].PartnerText + "</option>";
+                        isPartnerExisted = true;
+                    }
+                }
+                if(isPartnerExisted)
+                {
+                    $('select[id$=partnerList]').empty();
+                    $(appOption).prependTo('select[id$=partnerList]');
+                    $('select[id$=partnerList]').get(0).selectedIndex = 0;
+                    showPartnerList();
+                }
+                else
+                {
+                    hideParnterList();
+                }
+            }
+            
+            function refreshPartner()
+            {
+                var selectedBU = $('select[id$="buList"]').val();
+                var selectedCountry = $('select[id$="countryList"]').val();
+                var selectedLanguage = $('select[id$="languageList"]').val();
+                if(selectedBU != null && selectedCountry != null && selectedLanguage != null)
+                {
+                    reOrderOption(selectedBU, selectedCountry, selectedLanguage);
+                }
+            }
+            
+            function populateLanguageList()
+            {
+                $('select[id$="caseLanguage"]').empty();
+                var appOption = "<option value='" + $('select[id$="languageList"]').val() + "'>" + $('select[id$="languageList"]').find("option:selected").text() + "</option>";
+                $('select[id$="caseLanguage"]').append(appOption);
+            }
+            
+            function showPartnerList()
+            {
+                $('select[id$=partnerList]').closest('tr').show();
+            }
+            function hideParnterList()
+            {
+                $('select[id$=partnerList]').empty();
+                $('select[id$=partnerList]').append('<option value=""> </option>');
+                $('select[id$=partnerList]').closest('tr').hide();
+            }
+            
+            function resetPopupValue()
+            {
+                $('select[id$="buList"]').val($('#buBackupValue').val());
+                $('select[id$="countryList"]').val($('#countryBackupValue').val());
+                $('select[id$=partnerList]').val($('#partnerBackupValue').val());
+                closePop();
+            }
+            
+            function backupPopupValue()
+            {
+                $('#buBackupValue').val($('select[id$="buList"]').val());
+                $('#countryBackupValue').val($('select[id$="countryList"]').val());
+                $('#partnerBackupValue').val($('select[id$=partnerList]').val());
+            }
+            
+            function closePop()
+            {
+                $('#InlinEditDialog').css({"display":"none", "visibility":"hidden"});
+                $('#background').css("display", "none");
+                $('#SelectedCorporateInfo').css("display", "none");
+                $('#SelectedContact').css("display", "none");
+            }
+            
+            function showPop(id)
+            {
+                $('#InlinEditDialog').css({"display":"block", "visibility":"visible"});
+                $('#background').css("display", "block");
+                $('#' + id).css("display", "");
+            }
+            
+            function selectName(linkElem)
+            {
+                $('input[id$="contact"]').val(linkElem.innerHTML);
+                var nextSib = (linkElem.nextSibling.value != undefined) ? linkElem.nextSibling.value : linkElem.nextSibling.nextSibling.value;
+                $('input[id$="contactId"]').val(nextSib);
+                $('input[id$="hiddenContactName"]').val(linkElem.innerHTML);
+                closePop();
+            }
+            
+            function clearContactId()
+            {
+                $('input[id$="contactId"]').val("");
+            }
+            
+            function compareContactName()
+            {
+                if($('input[id$="hiddenContactName"]').val() != $('input[id$="contact"]').val())
+                {
+                    clearContactId();
+                }
+            }
+            $(document).ready(function(){
+            	//if the case is created from contact page, we need to auto populate the contact
+            	$('input[id$="hiddenContactName"]').val($('input[id$="contact"]').val());	
+            });
+        </script>
+        <style type="text/css">
+            .srch 
+            {
+                font-family: 'Arial','Helvetica',sans-serif;
+                font-size: 118%;
+                font-weight: bold;
+                padding: 4px 3px;
+            }
+        </style>
+        <apex:sectionHeader title="Case Edit" subtitle="New Case" />
+        <apex:pageMessages escape="false"/>
+        <apex:pageBlock mode="edit" id="block" >
+            <apex:pageBlockButtons title="Case Edit">
+                <apex:commandButton value="Save" action="{!save}" onclick="compareContactName()"/>
+                <apex:commandButton value="Save & New" action="{!saveAndNew}" onclick="compareContactName()"/>
+                <apex:commandButton value="Cancel" action="{!cancel}"/>
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection title="Case Information" id="caseSection">
+                <apex:outputField value="{!Case.OwnerId}"/>
+                <apex:inputHidden />
+                <apex:pageBlockSectionItem id="nameItem">
+                    <apex:outputLabel value="Contact"/>
+                    <apex:outputPanel styleClass="lookupInput">
+                        <apex:inputText value="{!ContactEmail}" id="contact" onchange="clearContactId()" style="margin:0px; width: 155px"/>
+                        <a href="JavaScript: openPopup('/apex/ContactLookup', '_blank', 800, 500, 'width=800,height=500,resizable=yes,toolbar=no,status=no,scrollbars=yes,menubar=no,directories=no,location=no,dependant=no', false, false)" id="contact_lkwgt" onclick="setLastMousePosition(event)" title="Contat Lookup (New Window)">
+                            <img src="/s.gif" class="lookupIcon" onblur="this.className = 'lookupIcon';" onmouseover="this.className = 'lookupIconOn';" onmouseout="this.className = 'lookupIcon';" />
+                        </a>
+                        <apex:inputHidden value="{!SelectedContactId}"  id="contactId"/>
+                        <apex:inputHidden id="hiddenContactName"/>
+                    </apex:outputPanel>
+                </apex:pageBlockSectionItem>
+                <apex:inputField value="{!Case.Status}" required="true" style="width: 140px"/>
+                <apex:pageBlockSectionItem >
+                    <apex:outputText value="Case Origin" />
+                    <apex:selectList size="1" value="{!Case.Origin}" style="width: 160px">
+                        <apex:selectOption itemValue="Phone Case" itemLabel="Phone Case" />
+                        <apex:selectOption itemValue="Email" itemLabel="Email" />
+                    </apex:selectList>
+                </apex:pageBlockSectionItem>
+                <apex:inputField value="{!Case.Category__c}" required="true" style="width: 140px"/>
+                <apex:pageBlockSectionItem >
+                    <apex:outputText value="Language" />
+                    <apex:selectList id="languageList" size="1" required="true" value="{!Case.LanguageCode__c}" style="width: 160px">
+                        <apex:selectOptions value="{!LanguageItems}" />
+                    </apex:selectList>
+                </apex:pageBlockSectionItem>
+                <apex:inputField value="{!Case.Subcategory__c}" required="true" style="width: 140px"/>
+            </apex:pageBlockSection>
+             
+            <div id="InlinEditDialog" class="overlayDialog inlineEditDialog" style="max-width: 550px; left:150px; top:-300px; visibility:hidden; display:none; position:relative;">
+                <div class="topRight" style="margin-bottom:0px;">
+                    <div class="topLeft">
+                        <img id="InlineEditDialogX" onmouseover="this.className='dialogCloseOn'" onmouseout="this.className='dialogClose'" onclick="resetPopupValue()" class="dialogClose" src="/s.gif" />
+                        <h2 id="InlineEditDialogTitle">Contacts</h2>
+                    </div>
+                </div> 
+                <div class="middle" style="margin-top:0px;">
+                    <div class="innerContent" id="InlineEditDialogContent">
+                        <div class="activeField">
+                            <div class="inlineEditCompoundDiv" style="text-align:left;">
+                                <div id="SelectedContact" style="display:none">
+                                    <apex:outputPanel layout="block" styleClass="srch">
+                                        Find more than one contact with inputed email address, please select one.
+                                    </apex:outputPanel>
+                                    <apex:pageBlock title="Contacts" tabStyle="Contact" mode="detail" >  
+                                        <apex:pageBlockTable value="{!Contacts}" var="con" id="table">
+                                            <apex:column headerValue="Name">
+                                                <a href="#" onclick="selectName(this)">{!con.Name}</a>
+                                                <input type="hidden" value="{!con.Id}" />
+                                            </apex:column>
+                                            <apex:column headerValue="Account Name">
+                                                <apex:outputText value="{!con.Account.Name}" />
+                                            </apex:column>
+                                            <apex:column headerValue="Phone">
+                                                <apex:outputText value="{!con.Phone}" />
+                                            </apex:column> 
+                                            <apex:column headerValue="Email">
+                                                <apex:outputText value="{!con.Email}" />
+                                            </apex:column> 
+                                            <apex:column headerValue="Contact Owner">
+                                                <apex:outputText value="{!con.Owner.Name}" />
+                                            </apex:column> 
+                                        </apex:pageBlockTable>
+                                    </apex:pageBlock>
+                                </div>
+                                <div  id="SelectedCorporateInfo" style="display:none">
+                                    <apex:pageBlock tabStyle="Contact" mode="detail" id="cBlock">
+                                        <apex:pageBlockSection columns="1">
+                                            <apex:pageBlockSectionItem >
+                                                <apex:outputLabel for="buList" style="font-weight:bold">BU </apex:outputLabel>
+                                                <apex:outputPanel >
+                                                    <apex:selectList id="buList" style="width: 200px" value="{!ContactInfo.BU__c}" size="1" onchange="refreshPartner()">
+                                                        <apex:selectOptions value="{!BuItems}" />
+                                                    </apex:selectList>
+                                                    <input id="buBackupValue" type="hidden" value="" />
+                                                </apex:outputPanel>
+                                            </apex:pageBlockSectionItem>
+                                            <apex:pageBlockSectionItem >
+                                                <apex:outputLabel for="countryList" style="font-weight:bold">Country </apex:outputLabel>
+                                                <apex:outputPanel >
+                                                    <apex:selectList id="countryList" style="width:200px" value="{!ContactInfo.CountryCode__c}" size="1" onchange="refreshPartner()">
+                                                        <apex:selectOption itemValue="" itemLabel=" " />
+                                                        <apex:selectOption itemValue="br" itemLabel="Brazil" />
+                                                        <apex:selectOption itemValue="cn" itemLabel="China" />
+                                                        <apex:selectOption itemValue="fr" itemLabel="France" />
+                                                        <apex:selectOption itemValue="de" itemLabel="Germany" />
+                                                        <apex:selectOption itemValue="hk" itemLabel="Hong Kong" />
+                                                        <apex:selectOption itemValue="it" itemLabel="Italy" />
+                                                        <apex:selectOption itemValue="kr" itemLabel="Korea" />
+                                                        <apex:selectOption itemValue="jp" itemLabel="Japan" />
+                                                        <apex:selectOption itemValue="mx" itemLabel="Mexico" />
+                                                        <apex:selectOption itemValue="es" itemLabel="Spain" />
+                                                        <apex:selectOption itemValue="tw" itemLabel="Taiwan" />
+                                                        <apex:selectOption itemValue="us" itemLabel="United States" />
+                                                        <apex:selectOption itemValue="" itemLabel="-----------" itemDisabled="true" />
+                                                        <apex:selectOptions value="{!CountryItems}" />
+                                                    </apex:selectList>
+                                                    <input id="countryBackupValue" type="hidden" value="" />
+                                                </apex:outputPanel>
+                                            </apex:pageBlockSectionItem>
+                                            <apex:pageBlockSectionItem >
+                                                <apex:outputLabel for="caseLanguage" style="font-weight:bold">Language </apex:outputLabel>
+                                                <apex:selectList id="caseLanguage" style="width:200px" value="{!TempLanguage}" size="1" >
+                                                    <apex:selectOptions value="{!LanguageItems}" />
+                                                </apex:selectList>
+                                            </apex:pageBlockSectionItem>
+                                            <apex:pageBlockSectionItem >
+                                                <apex:outputLabel for="partnerList" style="font-weight:bold">Partner </apex:outputLabel>
+                                                <apex:outputPanel >
+                                                    <apex:selectList id="partnerList" style="width:200px" value="{!ContactInfo.PartnerCode__c}" size="1">
+                                                        <apex:selectOption itemValue="" itemLabel=" " />
+                                                        <apex:selectOption itemValue="Cool" itemLabel="Cool School" />
+                                                        <apex:selectOption itemValue="Mini" itemLabel="Mini Center" />
+                                                        <apex:selectOption itemValue="None" itemLabel="None" />
+                                                        <apex:selectOption itemValue="Soch" itemLabel="Sochi 2014 Olympics" />
+                                                    </apex:selectList>
+                                                    <input id="partnerBackupValue" type="hidden" value="" />
+                                                </apex:outputPanel>
+                                            </apex:pageBlockSectionItem>
+                                        </apex:pageBlockSection>
+                                        <div style="padding:10px 200px">
+                                            <input type="button" value="OK" class="btn" style="width: 30px" onclick="closePop()"/>
+                                        </div>
+                                        <apex:actionStatus id="displaying">
+                                            <apex:facet name="start"><img src="/img/loading.gif" alt="loading..."/></apex:facet>
+                                        </apex:actionStatus>
+                                    </apex:pageBlock>
+                                </div>
+                            </div> 
+                        </div>
+                    </div>
+                </div>
+                <div class="bottomRight">
+                    <div class="bottomLeft"></div>
+                </div>
+            </div>
+            <div class="overlayBackground" id="background" style="width: 3289px; height: 1293px; display: none; position: fixed"></div>
+        </apex:pageBlock>
+        <script type="text/javascript">
+            if({!SavedStep} == 1)
+            {
+                showPop('SelectedContact')
+            }
+            if({!SavedStep} == 2)
+            {
+                backupPopupValue();
+                populateLanguageList();
+                hideParnterList();
+                refreshPartner();
+                showPop('SelectedCorporateInfo');
+            }                        
+        </script>
+    </apex:form>
+</apex:page>

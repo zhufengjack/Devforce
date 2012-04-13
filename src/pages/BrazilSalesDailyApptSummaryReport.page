@@ -1,0 +1,77 @@
+<apex:page controller="BrazilSalesDailyApptReportController" showHeader="true">
+    <header>
+        <script type="text/javascript">
+            function setFocusOnLoad() {}
+            
+            function changeButtonStatus(buttonElement, textValue, classValue)
+            {
+                buttonElement.className = classValue;
+                buttonElement.value = textValue;
+            }
+        </script>
+        <style type="text/css">
+            
+        </style>
+    </header>
+    <body>
+        <apex:form id="form">
+            <apex:sectionHeader subtitle="Sales Daily Appt Summary Table"/>
+            <apex:pageMessages id="cMessage" />
+            <apex:pageblock id="filterBlock">
+                <apex:pageBlockSection columns="2" id="filterSection">
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel >Select a Geography</apex:outputLabel>
+                        <apex:outputpanel >
+                            <apex:selectList value="{!CenterName}" size="1" multiselect="false">
+                                <apex:selectOptions value="{!CenterList}" />
+                                <apex:actionSupport action="{!resetTeamRoleList}" event="onchange" reRender="teamRoleId, cMessage" status="teamRoleStatus"/>
+                            </apex:selectList>
+                        </apex:outputpanel>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel >Select a sales team</apex:outputLabel>
+                        <apex:outPutPanel >
+                            <apex:selectList value="{!teamRoleId}" id="teamRoleId" size="1" multiselect="false">
+                                <apex:selectOptions value="{!teamRoleList}" />
+                            </apex:selectList>
+                            <apex:actionStatus id="teamRoleStatus">
+                                <apex:facet name="start"><img src="/img/loading.gif" alt="loading..."/></apex:facet> 
+                            </apex:actionStatus>
+                        </apex:outPutPanel>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem id="apptDateItem">
+                        <apex:outputLabel >Date</apex:outputLabel>
+                        <apex:inputText value="{!ApptReportDate}" onfocus="DatePicker.pickDate(true, this.id, false);" id="inputApptDateBox"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem />
+                </apex:pageBlockSection>
+                <apex:pageblockButtons location="bottom" >
+                    <apex:commandButton action="{!runReport}" value="Run" onclick="changeButtonStatus(this, 'Running ... ', 'btnDisabled');"/>
+                </apex:pageblockButtons>
+            </apex:pageblock>
+            <apex:pageBlock id="apptTableBlock">
+                <apex:pageBlockTable id="apptTable" columns="4" value="{!ApptSummaries}" var="summaryInfo">
+                    <apex:column id="salesColumn">
+                        <apex:facet name="header">Sales Consultant</apex:facet>
+                        <apex:outputText value="{!summaryInfo.SalesName}" />
+                    </apex:column>
+                    <apex:column id="targetColumn">
+                        <apex:facet name="header">Appt Target</apex:facet>
+                        <apex:outputText value="{!summaryInfo.ApptTarget}" />
+                    </apex:column>
+                    <apex:column id="scheduledColumn">
+                        <apex:facet name="header">Appt Scheduled</apex:facet>
+                        <apex:outputText value="{!summaryInfo.ApptScheduled}" />
+                    </apex:column>
+                    <apex:column id="percentColumn">
+                        <apex:facet name="header">Assignment %</apex:facet>
+                        <apex:outputText value="{0, number, ###,###,###,###.##}">
+                            <apex:param value="{!summaryInfo.AssignmentPercent}"/>
+                        </apex:outputText>
+                        <span>%</span>
+                    </apex:column>
+                </apex:pageBlockTable>
+            </apex:pageBlock>
+        </apex:form>
+    </body>
+</apex:page>

@@ -1,0 +1,51 @@
+<apex:page controller="SAOverdueTaskReportController" tabStyle="StudyAdvisorManager__tab">
+	<apex:sectionHeader title="Report" subtitle="Overdue Task Report – by Study Advisor"/>
+	<apex:form >
+		<apex:pageBlock >
+			<apex:pageBlockSection >
+				<apex:pageBlockSectionItem >
+					<apex:outputPanel >
+						<apex:selectRadio value="{!IsTaskBySA}" layout="lineDirection" onclick="generateInJavascript()">
+							<apex:selectOption itemLabel="By SA" itemValue="true"/>
+							<apex:selectOption itemLabel="By Days" itemValue="false"/>
+						</apex:selectRadio>
+						<apex:actionFunction action="{!generate}" name="generateInJavascript" rerender="output" status="loading"/>
+						<apex:actionStatus id="loading">
+		                     <apex:facet name="start">
+		                         <img src="/img/loading.gif" alt="loading" />
+		                     </apex:facet>
+		                </apex:actionStatus>
+					</apex:outputPanel>
+					
+					<apex:inputHidden />
+				</apex:pageBlockSectionItem>
+			</apex:pageBlockSection>
+			<apex:pageBlockSection id="output" columns="1">
+				<apex:pageblockTable value="{!OverdueSATasks}" var="item" style="width: 60%" rendered="{!IsTaskBySA}">
+			        <apex:column >
+			            <apex:facet name="header">Name</apex:facet>
+			            <apex:facet name="footer">Total</apex:facet>
+			            {!item.SAName}
+			        </apex:column>
+			        <apex:column > 
+			            <apex:facet name="header"># Overdue Tasks</apex:facet>
+			            <apex:facet name="footer">{!SATaskCount}</apex:facet>
+			            {!NULLVALUE(item.TaskNum, 0)}
+			        </apex:column>
+			    </apex:pageblockTable>
+			    <apex:pageblockTable value="{!OverdueDaysTasks}" var="item" style="width: 60%" rendered="{!!IsTaskBySA}">
+			    	<apex:column >
+			    		<apex:facet name="header">Days</apex:facet>
+			    		<apex:facet name="footer">Total</apex:facet>
+			    		{!item.OverdueDays}
+			    	</apex:column>
+			    	<apex:column >
+			    		<apex:facet name="header"># Overdue Tasks</apex:facet>
+			    		<apex:facet name="footer">{!OverdueDaysTaskCount}</apex:facet>
+			    		{!NullValue(item.TaskNum, 0)}
+			    	</apex:column>
+			    </apex:pageblockTable>
+		    </apex:pageBlockSection>
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>

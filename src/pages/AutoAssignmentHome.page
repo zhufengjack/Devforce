@@ -1,0 +1,67 @@
+<apex:page title="Auto Assignment Home">
+    <apex:stylesheet value="{!URLFOR($Resource.AutoAssignmentStyle, 'res/css/main.css')}" />
+    <apex:includeScript value="{!URLFOR($Resource.AutoAssignmentStyle, 'res/js/jquery-1.4.2.min.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.AutoAssignmentStyle, 'res/js/linkContrl.js')}"/>
+    <apex:sectionHeader title="Auto Assignment Home" />
+    
+    <script type="text/javascript">
+        function popWindow(popupUrl, wWidth, wHeight, name)
+        {
+            if(!name)
+            {
+                name = "_blank";
+            }
+            window.open(popupUrl, name , "toolbar=yes, location=yes, directories=no, status=no, menubar=yes, scrollbars=yes, resizable=no, copyhistory=yes, width="+wWidth+", height="+wHeight);
+        }
+    </script>
+    
+    <apex:variable var="IsAdmin"  value="{!CONTAINS(LOWER($Profile.Name), 'system administrator new')}" />
+    
+    <div class="linksCon">
+        <apex:outputPanel rendered="{!OR($Profile.Name='EF China Sales Manager new', $Profile.Name='EF China Telemarketing Director',  IsAdmin)}" layout="none"><a class="color1" href="#" onclick="popWindow('/servlet/servlet.Integration?lid=01N40000000Dqk4&ic=1', 500, 700)">China Smart - Allocation</a></apex:outputPanel>
+        <apex:outputPanel rendered="{!OR($Profile.Name='EF China Telesales Director', $Profile.Name='EF China Telesales Manager', IsAdmin)}" layout="none"><a class="color1" href="#" onclick="popWindow('/servlet/servlet.Integration?lid=01N40000000H2SJ&ic=1', 500, 700)">China TS - Allocation</a></apex:outputPanel>
+        <apex:outputPanel rendered="{!OR($UserRole.Name='Mexico Management', IsAdmin)}" layout="none"><a class="color1" href="#" onclick="popWindow('/servlet/servlet.Integration?lid=01N90000000U6Cg&ic=1', 500, 700)">MX - Allocation</a></apex:outputPanel>
+        <div class="clearfix"></div>
+        
+        <apex:outputPanel rendered="{!OR($Profile.Name='EF China Sales Manager new', $Profile.Name='EF China Telemarketing Director', IsAdmin)}" layout="none"><a class="color2" href="#" onclick="popWindow('/servlet/servlet.Integration?lid=01N40000000Dqk6&ic=1',  815, 700, 'SmartCalendar')">China Smart - Calendar</a></apex:outputPanel>
+        <apex:outputPanel rendered="{!OR($Profile.Name='EF China Telesales Director', $Profile.Name='EF China Telesales Manager', IsAdmin)}" layout="none"><a class="color2" href="/apex/AA_CNTS_WorkCalendar">China TS - Calendar</a></apex:outputPanel>
+        <apex:outputPanel rendered="{!OR($UserRole.Name='Mexico Management', IsAdmin)}" layout="none"><a class="color2" href="/apex/BR_MXWorkCalendar">MX - Calendar</a></apex:outputPanel>
+        <div class="clearfix"></div>
+        
+        <apex:outputPanel rendered="{!OR($Profile.Name='EF China Sales Manager new', IsAdmin)}" layout="none"><a class="color3" href="#" onclick="popWindow('/apex/SalesAvailabilityView', 500, 700)">China Smart - Assignment Report</a></apex:outputPanel>
+        <apex:outputPanel rendered="{!OR($Profile.Name='EF China Telesales Director', $Profile.Name='EF China Telesales Manager', IsAdmin)}" layout="none"><a class="color3" href="#" onclick="popWindow('/apex/SalesAvailabilityView_CNTS', 500, 700)">China TS - Assignment Report</a></apex:outputPanel>
+        <apex:outputPanel rendered="{!OR($UserRole.Name='Mexico Management', IsAdmin)}" layout="none"><a class="color3" href="#" onclick="popWindow('/apex/BR_MXSalesAvailabilityView', 500, 700)">MX - Assignment Report</a></apex:outputPanel>
+        <div class="clearfix"></div>
+        
+        <!--<apex:outputPanel rendered="{!OR($Profile.Name='EF China Telemarketing Director', IsAdmin)}" layout="none"><a class="color4" href="/apex/ApptMaxTargetList"  target="_blank">China Appointment Max Target</a></apex:outputPanel>
+        <div class="clearfix"></div>-->
+        
+        <!-- Brazil -->
+        <apex:outputPanel rendered="{!OR($Profile.Name='Europe and Americas Manager', $Profile.Name='EF Brazil Country Manager',  IsAdmin)}" layout="none"><a class="color1" target="_blank" href="/apex/BrazilgroupWorkCalendar">BR - Calendar</a></apex:outputPanel>
+        <apex:variable value="{!OR($Profile.Name='EF Brazil Country Manager', $Profile.Name='EF Brazil Sales Lead', $Profile.Name='EF Brazil TM Lead', $Profile.Name='EF Brazil TM User')}" var="brazilDailySalesAvailabilityReportProfile"/>
+        <apex:outputPanel rendered="{!OR($Profile.Name='Europe and Americas Manager', brazilDailySalesAvailabilityReportProfile, IsAdmin)}" layout="none"><a class="color1" target="_blank" href="/apex/BrazilDailySalesAvailabilityReport">BR - Appt Summary View For TM</a></apex:outputPanel>
+        <apex:variable value="{!OR($Profile.Name='EF Brazil Country Manager', $Profile.Name='EF Brazil TM Lead')}"  var="MTDProfile"/>
+        <apex:outputPanel rendered="{!OR($Profile.Name='Europe and Americas Manager', MTDProfile, IsAdmin)}" layout="none"><a class="color1" target="_blank" href="/apex/BrazilMTDApptUsageReport">BR - MTD Appt Usage Report</a></apex:outputPanel>
+        <apex:variable value="{!OR($Profile.Name='EF Brazil Country Manager', $Profile.Name='EF Brazil Sales Lead', $Profile.Name='EF Brazil TM Lead')}" var="brazilDailyApptReportProfile"/>
+        <apex:outputPanel rendered="{!OR($Profile.Name='Europe and Americas Manager', brazilDailyApptReportProfile, IsAdmin)}" layout="none"><a class="color1" target="_blank" href="/apex/brazilsalesDailyApptSummaryReport">BR - Sales Daily Appt Summary Table</a></apex:outputPanel>
+        <div class="clearfix"></div>
+        <!-- Brazil End -->
+        <apex:outputPanel rendered="{!OR($Profile.Name='EF China Telemarketing Director', IsAdmin)}" layout="none"><a class="color4" href="/apex/AutoAssignmentQueueList">Auto Assignment Queue</a></apex:outputPanel>
+        <div class="clearfix"></div>
+        
+        <apex:outputPanel rendered="{!OR($Profile.Name='EF China Telemarketing Director', IsAdmin)}" layout="none"><a class="color5" href="/apex/ChinaApptAutoAssignNotifyList">China Auto Assign Notify</a></apex:outputPanel>
+        <div class="clearfix"></div>
+        
+        <apex:outputPanel rendered="{!IsAdmin}" layout="none"><a class="color6" href="/apex/ChinaSalesMonthlyScheduleSummaryList">China Sales Monthly Schedule Summary</a></apex:outputPanel>
+        <div class="clearfix"></div>
+        
+        <apex:outputPanel rendered="{!IsAdmin}" layout="none"><a class="color7" href="/apex/ChinaSalesAppointmentAllocationList">Sales Team&apos;s Appointment Allocation</a></apex:outputPanel>
+        <div class="clearfix"></div>
+        
+        <apex:outputPanel rendered="{!IsAdmin}" layout="none"><a class="color8" href="/apex/ChinaSmaSalesMonthlyScheduleDetailsList">Smart Sales monthly Schedule Details</a></apex:outputPanel>
+        <div class="clearfix"></div>
+        
+        <apex:outputPanel rendered="{!OR($Profile.Name='EF China Regional Sales Director', IsAdmin)}" layout="none"><a class="color1" href="/apex/RSDWorkCalendar">China Smart - School Day Off</a></apex:outputPanel>
+        <div class="clearfix"></div>
+    </div>
+</apex:page>

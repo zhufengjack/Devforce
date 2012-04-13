@@ -1,0 +1,4 @@
+<apex:component controller="SchoolAddressController" access="global">
+	<apex:attribute name="schoolName" description="school name" type="String" assignTo="{!SchoolName}"/>
+	<apex:outputText value="{!SchoolAddress}"/>
+</apex:component>

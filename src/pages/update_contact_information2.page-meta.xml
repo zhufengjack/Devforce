@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApexPage xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>23.0</apiVersion>
+    <description>Override standard opportunity view to add in the VF page of snyc email, mobile and phone in opportunity object.</description>
+    <label>Update_contact_information</label>
+</ApexPage>

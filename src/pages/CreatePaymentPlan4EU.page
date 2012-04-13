@@ -1,0 +1,66 @@
+<apex:page controller="CreatePaymentPlanController4EU">
+    <apex:outputPanel id="Messages">
+        <apex:pageMessages />
+    </apex:outputPanel>
+    <apex:form id="form">
+         <apex:pageBlock id="block" rendered="{!NewActual != null}">
+            <apex:pageBlockButtons location="bottom">
+                <apex:commandButton action="{!Save}" value="Save" status="status"/>
+                <apex:commandButton value="Cancel" action="{!Cancel}" />  
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection columns="2">
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Final Price:"></apex:outputLabel>
+                     <apex:outputText value="{!NewActual.Final_Price__c}"></apex:outputText>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Payment Type:"></apex:outputLabel>
+                    <apex:outputText value="{!NewActual.Payment_Type__c}"></apex:outputText>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection columns="1">
+                <apex:facet name="header">
+                	<span style="color:black">First Payment</span>
+                </apex:facet>
+                <apex:pageBlockSectionItem >
+                     <apex:pageBlockTable value="{!FirstPaymentRecords}" var="payment">
+                        <apex:column width="20%">
+                            <apex:facet name="header">Index</apex:facet>
+                            <apex:outputText value="{!payment.Installment__c}"></apex:outputText>
+                        </apex:column>
+                        <apex:column width="40%">
+                            <apex:facet name="header">Amount Due</apex:facet>
+                            <apex:outputField value="{!payment.Amount_Due__c}"></apex:outputField>
+                        </apex:column>
+                        <apex:column width="40%">
+                            <apex:facet name="header">Due Date</apex:facet>
+                            <apex:outputField value="{!payment.Due_Date__c}"></apex:outputField>
+                        </apex:column>
+                     </apex:pageBlockTable>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection columns="1">
+            	<apex:facet name="header">
+                	<span style="color:black">Remaining Payments</span>
+                </apex:facet>
+                <apex:pageBlockSectionItem >
+                     <apex:pageBlockTable value="{!RemainPaymentRecords}" var="payment">
+                        <apex:column width="20%">
+                            <apex:facet name="header">Index</apex:facet>
+                            <apex:outputText value="{!payment.Installment__c}"></apex:outputText>
+                        </apex:column>
+                        <apex:column width="40%">
+                            <apex:facet name="header">Amount Due</apex:facet>
+                            <apex:inputField value="{!payment.Amount_Due__c}"></apex:inputField>
+                        </apex:column>
+                        <apex:column width="40%">
+                            <apex:facet name="header">Due Date</apex:facet>
+                            <apex:inputField value="{!payment.Due_Date__c}"></apex:inputField>
+                        </apex:column>
+                     </apex:pageBlockTable>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+         </apex:pageBlock>
+    </apex:form>
+    <apex:outputPanel rendered="{!NewActual = null}"><a href="/{!$CurrentPage.Parameters.oppId}"><b>Back to Opportunity</b></a></apex:outputPanel>
+</apex:page>

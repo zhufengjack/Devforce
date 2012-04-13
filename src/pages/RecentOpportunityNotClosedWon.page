@@ -1,0 +1,9 @@
+<apex:page controller="ReturnToPreviousPage">
+    <apex:form > 
+          <apex:outputLabel >请确定stage=close won,才可以建新的Opportunity </apex:outputLabel>
+          </p>
+          <apex:outputLabel >Click</apex:outputLabel>
+          <apex:commandLink action="{!previousPage}" value="here"/> 
+          <apex:outputLabel >to go back to the previous page. </apex:outputLabel>
+    </apex:form>
+</apex:page>

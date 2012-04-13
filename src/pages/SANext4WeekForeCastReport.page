@@ -1,0 +1,40 @@
+<apex:page controller="SANext4WeekForecastReportController" tabStyle="StudyAdvisorManager__tab">
+    <apex:sectionHeader title="Report" subtitle="Next 4-week forecast "/>
+    <apex:form >
+        <apex:pageBlock >                              
+            <apex:outputPanel >             
+                <apex:outputLabel id="filter" value="Study Advisor:" for="saList"/>&nbsp;&nbsp;                 
+                <apex:selectList id="saList" value="{!SAdvisor}" size="1">
+                    <apex:actionSupport event="onchange" action="{!generate}" rerender="output" status="loadingStatus"/>
+                    <apex:selectOptions value="{!saItems}"/>
+                </apex:selectList>
+                <apex:actionStatus id="loadingStatus">
+                     <apex:facet name="start">
+                         <img src="/img/loading.gif" alt="loading" />
+                     </apex:facet>
+                </apex:actionStatus>                                
+            </apex:outputPanel><br/><br/>           
+            <apex:outputPanel id="output">
+                <table border="1" style="border: 1px solid #666; text-align: center; width: 600px" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <th style="text-align: center">&nbsp;</th>
+                        <th style="text-align: center">{!DateWeek1}</th>
+                        <th style="text-align: center">{!DateWeek2}</th>
+                        <th style="text-align: center">{!DateWeek3}</th>
+                        <th style="text-align: center">{!DateWeek4}</th>
+                    </tr>
+                    <tr>
+                        <td>Task #</td>
+                        <td>{!DataWeek1}</td>
+                        <td>{!DataWeek2}</td>
+                        <td>{!DataWeek3}</td>
+                        <td>{!DataWeek4}</td>
+                    </tr>
+                </table>
+                <br/><br/><br/>
+                <apex:image url="{!ChartURL}" alt="Sample chart" rendered="{!isChartShow}"/>
+            </apex:outputPanel>            
+        </apex:pageBlock>
+    </apex:form>
+    
+</apex:page>

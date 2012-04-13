@@ -1,0 +1,30 @@
+<apex:page title="Study Advisor Manager">
+    <apex:stylesheet value="{!URLFOR($Resource.AutoAssignmentStyle, 'res/css/main.css')}" />
+    <apex:includeScript value="{!URLFOR($Resource.AutoAssignmentStyle, 'res/js/jquery-1.4.2.min.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.AutoAssignmentStyle, 'res/js/linkContrl.js')}"/>
+    <apex:sectionHeader title="Study Advisor Manager" />
+    
+    <apex:variable var="IsAdmin"  value="{!CONTAINS(LOWER($Profile.Name), 'system administrator new')}" />
+    <apex:variable var="IsSAAdmin" value="{!CONTAINS($Profile.Name, 'Englishtown Study advisor admin')}"/>
+    <apex:variable var="IsSAManager" value="{!CONTAINS($Profile.Name, 'Englishtown study advisor manager')}"/>
+    <apex:variable var="IsSA" value="{!CONTAINS($Profile.Name, 'Englishtown Study Advisor')}"/>
+    
+    <div class="linksCon">
+        <!-- apex:outputPanel rendered="{!OR(IsAdmin, IsSAAdmin,  IsSAManager, IsSA)}"  layout="none"><a class="color1" href="/apex/ClaimAssignAdvisingTask" >Claim Task</a></apex:outputPanel -->
+        <apex:outputPanel rendered="{!OR(IsAdmin, IsSAAdmin,  IsSAManager)}" layout="none"><a class="color1" href="/apex/ClaimAssignAdvisingTask" >Assign Task</a></apex:outputPanel>
+        <div class="clearfix" />
+        <apex:outputPanel rendered="{!OR(IsAdmin, IsSAAdmin,  IsSAManager)}" layout="none"><a class="color2" href="/apex/TaskAssignmentRuleEditor" >Edit Task Assignment Rule</a></apex:outputPanel>
+        <div class="clearfix"></div>
+        <apex:outputPanel rendered="{!OR(IsAdmin, IsSAAdmin,  IsSAManager)}" layout="none"><a class="color3" href="/apex/sastatusreport">Report: Status by Advisor</a></apex:outputPanel>
+        <div class="clearfix"></div>
+        <apex:outputPanel rendered="{!OR(IsAdmin, IsSAAdmin,  IsSAManager)}" layout="none"><a class="color4" href="/apex/saattemptbycallresultreport" >Report: Attempt by Call Result</a></apex:outputPanel>
+        <div class="clearfix"></div>
+        <apex:outputPanel rendered="{!OR(IsAdmin, IsSAAdmin,  IsSAManager)}" layout="none"><a class="color5" href="/apex/sanext4weekforecastreport" >Report: Next 4-week forecast</a></apex:outputPanel>
+        <div class="clearfix"></div>
+        <apex:outputPanel rendered="{!OR(IsAdmin, IsSAAdmin,  IsSAManager)}" layout="none"><a class="color6" href="/apex/SATaskCompletionReport" >Report: Task Completion with Success Rate</a></apex:outputPanel>
+        <div class="clearfix"></div>
+        <apex:outputPanel rendered="{!OR(IsAdmin, IsSAAdmin,  IsSAManager)}" layout="none"><a class="color7" href="/apex/SAOverdueTaskReport" >Report: Overdue Task</a></apex:outputPanel>
+        <div class="clearfix"></div>
+        <apex:outputPanel rendered="{!OR(IsAdmin, IsSAAdmin,  IsSAManager)}" layout="none"><a class="color8" href="/apex/SATaskListReport" >Report: Task List</a></apex:outputPanel>
+    </div>
+</apex:page>

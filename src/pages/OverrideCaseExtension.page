@@ -1,0 +1,68 @@
+<apex:page standardController="Case" extensions="OverrideCaseExtensionController" tabStyle="Case" id="extension" renderAs="html">
+
+<style type="text/css">
+ .qalabel { width:50%; }
+</style>
+
+<apex:outputText value="{!msg}"></apex:outputText>
+    <apex:pageBlock >
+        <apex:pageBlockSection title="Question With Answer"  rendered="{!IF(qa != '', true, false)}" columns="2">
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Office "/>
+                    <apex:outputText value="{!qa.SurfingFromHome}"></apex:outputText>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Access before"/>
+                    <apex:outputText value="{!qa.AccessEVC}"></apex:outputText>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Level/Unit/Page/URL"/>
+                    <apex:outputText value="{!qa.LevelUnitPage}"></apex:outputText>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Level/Unit"/>
+                    <apex:outputText value="{!qa.LevelUnit}"></apex:outputText>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Teacher"/>
+                    <apex:outputText value="{!qa.Teacher}"></apex:outputText>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Error message"/>
+                    <apex:outputText value="{!qa.ErrorMessage}"></apex:outputText>
+                </apex:pageBlockSectionItem>
+        </apex:pageBlockSection>
+        <apex:pageBlockSection title="Technology Check" rendered="{!IF(tc != '', true, false)}" columns="3" >
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Os"/>
+                    <apex:outputText value="{!tc.Os}"></apex:outputText>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Browser"/>
+                    <apex:outputText value="{!tc.Browser}"></apex:outputText>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="JVM"/>
+                    <apex:outputText value="{!tc.JVM}"></apex:outputText>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Flash"/>
+                    <apex:outputText value="{!tc.Flash}" ></apex:outputText>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="ASR"/>
+                    <apex:outputText value="{!tc.ASR}" ></apex:outputText>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Server"/>
+                    <apex:outputText value="{!tc.Server}" ></apex:outputText>
+                </apex:pageBlockSectionItem>                                
+        </apex:pageBlockSection>
+        <apex:pageBlockSection title="Error URL" rendered="{!IF(tc != '', true, false)}" columns="1" >
+        		<apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Error URL"/>
+                    <apex:outputText value="{!tc.TechnicalErrorTextUrl}"></apex:outputText>
+                </apex:pageBlockSectionItem>
+        </apex:pageBlockSection>
+    </apex:pageBlock>
+</apex:page>

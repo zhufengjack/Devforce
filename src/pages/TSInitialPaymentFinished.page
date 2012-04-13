@@ -1,0 +1,2 @@
+<apex:page controller="TSInitialPaymentFinishedController" showHeader="false" action="{!processInitialSuccessPayment}" contentType="text/plain">{!ProcessResult}
+</apex:page>

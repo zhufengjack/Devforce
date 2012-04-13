@@ -1,0 +1,138 @@
+<apex:page controller="RSDWorkCalendarController" id="RSDWorkCalen" language="en">
+    <head> 
+        <style> 
+            .cal_calendar {font-size:10pt;font-family:verdana;padding:0px;margin:0px;border:none; border-collapse:collapse;} 
+            .cal_header {background-color:#CCCCCC;padding:0px;margin:0px;border:none; border-collapse:collapse;} 
+            .cal_cell {padding:2px;margin:1px;border:2px groove;text-align:center;width:3ex} 
+            .cal_labelcell {padding:2px;margin:1px;border:2px groove;text-align:center;} 
+            .cal_oddweek {background-color:#AAAACC;padding:0px;margin:0px;border:none; border-collapse:collapse;} 
+            .cal_evenweek {background-color:#CCCCEE;padding:0px;margin:0px;border:none; border-collapse:collapse;} 
+            .cal_day {width:3ex;text-align:center;padding:0px;margin:0px;border:none; border-collapse:collapse;cursor:hand;} 
+            .cal_today {color:black;font-weight:bold;width:3ex;padding:0px;margin:0px;border:none; border-collapse:collapse;} 
+            .cal_disabled {color:#999999;width:3ex;padding:0px;margin:0px;border:none; border-collapse:collapse;} 
+            .cal_common {color:black;width:3ex;padding:0px;margin:0px;border:none; border-collapse:collapse;} 
+            .cal_holiday {color:red;width:3ex;padding:0px;margin:0px;border:none; border-collapse:collapse;} 
+            .cal_event {background-color:yellow;color:red;width:3ex;padding:0px;margin:0px;border:none; border-collapse:collapse;} 
+        </style> 
+        <script src="/soap/ajax/19.0/connection.js" type="text/javascript"></script> 
+        <script src="/soap/ajax/19.0/apex.js" type="text/javascript"></script>
+        <apex:includeScript value="{!$Resource.RSDWorkCalendar}"/>
+    </head> 
+    <body> 
+        <apex:form id="calendarForm">
+            <apex:inputHidden id="dateString" value="{!HolidayDateString}"/>
+            <apex:pageMessages id="pMessage"></apex:pageMessages>
+            <div id="divHead"> 
+                School Name: 
+                <apex:selectList id="chooseSchool" value="{!SelectSchoolName}" size="1" >
+                    <apex:selectOptions value="{!schoolList}"/>
+                </apex:selectList>
+                <apex:actionStatus id="status" startText="Loading Sales Consultant..."></apex:actionStatus>
+                <input id="btnCreateCal" type="button" class="btn" value="Create Calendar" onclick="CreateCalendar();"/> 
+                <div id="errorinfo" class="footer"></div> 
+                <div id="debuginfo" style="border:1px dashed #CCC;background-color:#E7E7E7;color:#000;display:none;padding:5px;margin:30px;width:80%"></div> 
+            </div> 
+            <span style="vertical-align:top;"> 
+                <fieldset style="width:780px;padding:5px;"> 
+                    <legend>Calendar with Events</legend> 
+                    <input type="text" name="tester2" id="tester2" value=""/> 
+                    <input type="text" name="tester2_day" id="tester2_day" value="" size="3" maxLength="2" /> 
+                    <select name="tester2_month" id="tester2_month"> 
+                        <option value="1">January</option> 
+                        <option value="2">February</option> 
+                        <option value="3">March</option> 
+                        <option value="4">April</option> 
+                        <option value="5">May</option> 
+                        <option value="6">June</option> 
+                        <option value="7">July</option> 
+                        <option value="8">August</option> 
+                        <option value="9">September</option> 
+                        <option value="10">October</option> 
+                        <option value="11">November</option> 
+                        <option value="12">December</option> 
+                    </select> 
+                    <input type="text" name="tester2_year" id="tester2_year" value="" size="5" maxLength="4"/> 
+                    <apex:commandButton action="{!save}" value="Save" onclick="SaveResult();" reRender="pMessage" oncomplete="debugInfo('');"/>
+                    <div id="cal_tester2_display"></div> 
+                    <script type="text/javascript"> 
+                        sforce.connection.sessionId = "{!$Api.Session_ID}";
+                        function SaveResult()
+                        {
+                            deleteHolidayIds = new Array();
+                            var schoolNameElement = document.getElementById("{!$Component.chooseSchool}");
+                            var indexSelected = schoolNameElement.selectedIndex;
+                            var schoolName = schoolNameElement.options[indexSelected].value;
+                            if(schoolName == "")
+                            {
+                                alert("You must select a school before save data.");
+                                return;
+                            }
+                            
+                            var dateString = document.getElementById("tester2").value;
+                            var arrDateString = dateString.split("/");
+                            var monthValue = arrDateString[1]; //processMonthValue(arrDateString[1]);
+                            var yearValue = arrDateString[0];
+                            var holidayDateString = '';
+                            holidayDateString = "Year=" + yearValue + ":Month=" + monthValue;
+                            holidayDateString = holidayDateString + ":" + generateCurrentDateString();
+                            holidayDateString = holidayDateString + generateHolidayString(); 
+                            var hiddenDateStringElement = document.getElementById("{!$Component.dateString}");
+                            hiddenDateStringElement.value = holidayDateString;
+                            debugInfo("Waiting......");
+                        }
+                        
+                        function getSalesExistData(calendar)
+                        {
+                            var schoolNameElement = document.getElementById("{!$Component.chooseSchool}");
+                            var indexSelected = schoolNameElement.selectedIndex;
+                            var schoolName = schoolNameElement.options[indexSelected].value;
+                            var dateString = document.getElementById("tester2").value;
+                            var arrDateString = dateString.split("/");
+                            var monthValue = processMonthValue(arrDateString[1]);
+                            var nextMonthValue = processNextMonthValue(arrDateString[1]);
+                            var yearValue = arrDateString[0];
+                            var nextYearValue = processNextYearValue(arrDateString[0], arrDateString[1]);
+                        
+                            var sqlDateStart = yearValue + "-" + monthValue + "-01";
+                            var sqlDateEnd = nextYearValue + "-" + nextMonthValue + "-01";
+                            var holidayName = "Smart Day Off " + schoolName;
+                            var sqlString = "select Id, Name, ActivityDate from Holiday where ActivityDate >= " + sqlDateStart + " and ActivityDate < " + sqlDateEnd + " and Name = '" + holidayName + "'";
+                           
+                            var state = {Calendar : calendar};
+                            var callback = {
+                                onSuccess : holidayQueryCallback,
+                                onFailure : queryFailures,
+                                source : state  
+                            }
+                            sforce.connection.query(sqlString, callback);   
+                        }
+                        
+                        function CreateCalendar()
+                        {   
+                            dayTable = new HashTable();
+                            var oSelect = document.getElementById("{!$Component.chooseSchool}");
+                            var indexSelected = oSelect.selectedIndex;
+                            var selectOption = oSelect.options[indexSelected].value;
+                            if(selectOption == "")
+                            {
+                                alert("please select a sales user first.");
+                                return;
+                            }
+                            cal2 = new Calendar ("cal2", "tester2", new Date());
+                            cal2.width = 780;
+                            cal2.eventDates = new Array(
+                                  new Array("2005/2/10", 1)
+                                , new Array("2005/2/12", 2)
+                                , new Array("2005/2/14", 3)
+                            );
+                            cal2.scrolling = false;
+                            cal2.selectEvent = function(eventId) {alert("cal2 Event: " + eventId);};
+                        
+                            renderCalendar(cal2);
+                        }
+                    </script> 
+                </fieldset> 
+            </span> 
+        </apex:form>
+    </body> 
+</apex:page>

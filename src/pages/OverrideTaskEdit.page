@@ -1,0 +1,115 @@
+<apex:page standardController="Task" extensions="OverrideTaskEditController" tabStyle="Contact" action="{!checkTaskRecordType}" Id="taskEditPage">
+    <script type="text/javascript">
+       function checkEmailMessageArea()
+       {
+           var emailMessageAreaId = "{!$Component.editForm.editBlock.emailSection.emailSectionItem.emailMessage}";
+           var emailMessage = document.getElementById(emailMessageAreaId).value;
+           if(emailMessage.length == 0)
+           {
+               alert("Email message is null.");
+               return false;
+           }
+           else
+           {
+               return true;
+           }
+       }
+       
+       function confirmTerminateAdvisorService()
+       {
+           return confirm("Are you sure you want to terminate the advising service for this student?");
+       }
+    </script>
+    <apex:form id="editForm">
+        <apex:sectionHeader title="Task" subtitle="{!currentTask.Subject}"/>
+        <apex:pageMessages id="cPageMessage"/>
+        <apex:outputPanel layout="none" rendered="{!NOT(IsClosedTask)}">
+            <apex:pageblock title="Task Edit" id="editBlock" >
+                <apex:pageblockButtons location="bottom">
+                    <apex:commandButton value="Save" action="{!save}" status="displaying1"/>
+                    <apex:actionStatus id="displaying1">
+                        <apex:facet name="start"><img src="/img/loading.gif" alt="loading..."/></apex:facet>
+                    </apex:actionStatus> 
+                </apex:pageblockButtons>
+                <apex:pageblockSection title="Task Information" collapsible="false" > 
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel >Assign To</apex:outputLabel>
+                        <apex:inputField value="{!currentTask.OwnerId}" />
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel >Status</apex:outputLabel>
+                        <apex:outputPanel >
+                            <apex:outputText value="{!currentTask.Status}" rendered="{!NOT(IsAdminOrManager)}"></apex:outputText>
+                            <apex:selectList value="{!TaskStatus}" rendered="{!IsAdminOrManager}" size="1" multiselect="false">
+                                <apex:selectOptions value="{!TaskStatusList}" />
+                            </apex:selectList>
+                        </apex:outputPanel>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel >Subject</apex:outputLabel>
+                        <apex:outputPanel >
+                            <apex:outputText value="{!currentTask.subject}" rendered="{!NOT(IsAdminOrManager)}"/>
+                            <apex:inputField value="{!currentTask.subject}" rendered="{!IsAdminOrManager}"/>
+                        </apex:outputPanel>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel >Name</apex:outputLabel>
+                        <apex:outputLink value="/{!Student.Id}" target="_blank" >{!Student.Name}</apex:outputLink>
+                    </apex:pageblockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel >Phone</apex:outputLabel>
+                        <apex:outputField value="{!Student.Phone}"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel >Email</apex:outputLabel>
+                        <apex:outputField value="{!Student.Email}"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel >Due Date</apex:outputLabel>
+                        <apex:outputPanel >
+                            <apex:outputField value="{!currentTask.ActivityDate}" rendered="{!NOT(IsAdminOrManager)}"/>
+                            <apex:inputField value="{!currentTask.ActivityDate}" rendered="{!IsAdminOrManager}"/>
+                        </apex:outputPanel>
+                    </apex:pageBlockSectionItem>
+                </apex:pageblockSection>
+            </apex:pageBlock>
+            <apex:pageBlock >
+                <apex:pageblockButtons location="bottom">
+                    <apex:inputCheckbox value="{!SendEmail}" /><apex:outputLabel >Send Email</apex:outputLabel>
+                    <apex:commandButton value="Close Task" action="{!closeTaskWithFollowup}" status="displaying2"/>
+                    <apex:commandLink value="Terminate Advisor Service" action="{!closeTaskWithoutFollowup}" rendered="{!ShowCloseButton}" style="color:red;" onclick="return confirmTerminateAdvisorService();" status="displaying2"/>
+                    <apex:actionStatus id="displaying2">
+                        <apex:facet name="start"><img src="/img/loading.gif" alt="loading..."/></apex:facet>
+                    </apex:actionStatus> 
+                </apex:pageblockButtons>
+                <apex:pageblockSection title="Teacher Feedback" collapsible="false">
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel >Call Result</apex:outputLabel>
+                        <apex:selectList value="{!TaskCallResult}" multiselect="false" size="1">
+                            <apex:selectOptions value="{!TaskCallResultList}"/>
+                        </apex:selectList>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel >Due Date of Next Task</apex:outputLabel>
+                        <apex:inputField value="{!tempTask.ActivityDate}"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel >Comments</apex:outputLabel>
+                        <apex:inputField value="{!currentTask.Description}" style="height:100px;width:400px;"/>
+                    </apex:pageBlockSectionItem>
+                </apex:pageblockSection>
+                <apex:pageBlockSection title="Send Email" collapsible="false" columns="2" id="emailSection">
+                    <apex:pageBlockSectionItem id="emailSectionItem">
+                            <apex:outputLabel >Message</apex:outputLabel>
+                            <apex:outputPanel >
+                                <apex:inputTextarea value="{!EmailMessageBoday}" style="height:100px;width:400px;" id="emailMessage"/>
+                                <br/>
+                                <br/>
+                            </apex:outputPanel>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem />
+                </apex:pageBlockSection> 
+            </apex:pageblock>
+        </apex:outputPanel>
+    </apex:form> 
+</apex:page>

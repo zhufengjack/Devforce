@@ -1,0 +1,37 @@
+<apex:page sideBar="false" showHeader="false" Controller="SmartTaskListController" id="page">
+    <apex:form id="form">
+        <apex:pageBlock tabStyle="Task" id="block">
+            <apex:pageBlockTable value="{!Tasks}" var="tas" id="table">
+                <apex:column headerValue="IsDone" >
+                    <apex:inputCheckbox value="{!tas.isDone}" disabled="true" />
+                </apex:column>
+                    <apex:column headerValue="Subject">
+                        <a href = "/{!tas.taskId}" target ="_blank" > {!tas.taskSubject}</a>
+                    </apex:column> 
+                    <apex:column headerValue="Opportunity Name">
+                        <a href = "/{!tas.OppId}"  target = "_blank" > {!tas.taskRelatedName} </a>
+                    </apex:column>        
+                    <apex:column headerValue="Opportunity Stage">
+                        <apex:outputText value="{!tas.OppStage}" />
+                    </apex:column> 
+                    <apex:column headerValue="Event Appt Status">
+                        <apex:outputText value="{!tas.TaskAppStatus}" />
+                    </apex:column> 
+                    <apex:column headerValue="Mobile">
+                        <apex:outputText value="{!tas.Mobile}" />
+                    </apex:column> 
+                    <apex:column headerValue="Comments">
+                        <apex:outputText value="{!tas.taskComments}" />
+                    </apex:column>
+                </apex:pageBlockTable>
+                <apex:outputPanel rendered="{!IF(Tasks.size = 0, true, false)}" layout="block" style="background-color:#FFF;border-width:0px 1px 1px 1px; border-style:solid;border-color: #D4DADC;color: #000;text-align:center;padding:10px">
+                    You have no open event scheduled today.
+                </apex:outputPanel>   
+            </apex:pageBlock>
+    </apex:form>
+    <script type="text/javascript">
+        document.getElementById("page:form:block").className = "";
+        document.getElementById("page:form:block").style.padding = "6px";
+        document.getElementById("page:form:block:table").style.width = "100%";
+    </script>
+</apex:page>

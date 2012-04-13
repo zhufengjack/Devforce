@@ -1,0 +1,194 @@
+<apex:page controller="StudyAdviseTaskListController" showHeader="false" id="StudyAdviseTaskListPage" >
+    <header>
+        <apex:includeScript value="/soap/ajax/19.0/connection.js"/>
+        <apex:includeScript value="/soap/ajax/19.0/apex.js"/>
+        <script type="text/javascript">
+            sforce.connection.sessionId = "{!$Api.Session_ID}";
+            function redirectToParent(urlParam)
+            { 
+               window.parent.location = urlParam;
+            }
+        </script>
+        <script type="text/javascript">
+            function changePageBlockStyle()
+            {
+                document.getElementById("{!$Component.advisorTableForm.advisorTableBlock}").className = "bPageBlock secondaryPalette cbPageBlock";
+                //document.getElementById("{!$Component.advisorTableForm.advisorTableBlock}").style.height = "182px";
+                document.getElementById("{!$Component.advisorTableForm.advisorTableBlock}").style.marginBottom = "0px";
+                document.getElementById("{!$Component.advisorTableForm.advisorTableBlock}").style.padding = "6px";
+                document.getElementById("{!$Component.advisorTableForm.advisorTableBlock.taskTable}").style.width = "100%"; 
+            }
+            
+            var taskIds = [];
+            
+            function handleSuccess(result)
+            {
+                for(var i = 0; i < result.length; i++)
+                {
+                    var taskIdCalledBefore = result[i].split(":");
+                    document.getElementById(taskIdCalledBefore[0]).innerHTML = taskIdCalledBefore[1];
+                    document.getElementById("Load" + taskIdCalledBefore[0]).style.display = "none";
+                    if(taskIdCalledBefore[1] > 0)
+                    {   
+                        document.getElementById("calledBy" + taskIdCalledBefore[0]).style.display = '';
+                    }
+                }
+            }
+            
+            var callback = {onSuccess: handleSuccess, onFailure: handleFailure};
+            
+            function log(message) 
+            { 
+                alert(message);
+            }
+            function handleFailure(error, source)
+            {
+                log("An error has occurred when got called before parameter :" + error); 
+                for(var i = 0; i < source.length; i++)
+                {
+                    document.getElementById(source[i]).innerHTML = "Error";
+                    document.getElementById("Load" + source[i]).style.display = "none";
+                } 
+            }
+            function processCalledBeforeNumber()
+            {
+                var taskIdSet = '';
+                var j = 0;
+                var invokeWebserviceTaskSize = 10;
+                var tempIdSet = [];
+                for(var i = 0; i < taskIds.length - 1; i++)
+                {
+                    tempIdSet[tempIdSet.length] = taskIds[i].taskId;
+                    taskIdSet += taskIds[i].taskId;
+                    taskIdSet += ':';
+                    j++
+                    if(j == invokeWebserviceTaskSize)
+                    { 
+                        sforce.apex.execute("StudyAdviseTaskListController", "calculateCalledBeforeNumber", {taskIds : taskIdSet},{onSuccess: handleSuccess, onFailure: handleFailure, source: tempIdSet});
+                        j = 0;
+                        taskIdSet = '';
+                        tempIdSet = [];
+                    }
+                }
+                if(taskIdSet != null && taskIdSet != '')
+                {
+                    sforce.apex.execute("StudyAdviseTaskListController", "calculateCalledBeforeNumber", {taskIds : taskIdSet}, {onSuccess: handleSuccess, onFailure: handleFailure, source: tempIdSet});
+                }
+            }
+        </script>
+        <style type="text/css">
+            .cbPageBlock 
+            {
+                border-top:3px solid #1797C0;
+            }
+        </style>
+    </header>
+    <body onload="changePageBlockStyle();processCalledBeforeNumber();">
+        <apex:form id="advisorTableForm">
+            <apex:pagemessages id="cPageMessage" />
+            <apex:pageBlock id="advisorTableBlock">
+                <div class="pbHeader">
+                    <table border="0" cellpadding="0" cellspacing="0">
+                        <tbody>
+                            <tr>
+                                <td class="pbTitle"><img src="/s.gif" alt="" width="1" height="1" class="minWidth" title="" /><h3>My Tasks</h3></td>
+                                <td class="pbButton"></td>
+                                <td class="pbHelp">
+                                    <apex:outputLabel ><span style="padding-right:10px;">Task Status</span></apex:outputLabel>
+                                    <apex:outputPanel >
+                                        <apex:selectList value="{!FilterTaskStatus}" multiselect="false" size="1">
+                                            <apex:selectOptions value="{!TaskStatusList}" />
+                                            <apex:actionSupport action="{!filterTaskByStatus}" status="displaying" event="onchange" reRender="taskTablePanel, cPageMessage" oncomplete="processCalledBeforeNumber()"/>
+                                        </apex:selectList>
+                                        <apex:actionStatus id="displaying">
+                                            <apex:facet name="start"><img src="/img/loading.gif" alt="loading..." /></apex:facet>
+                                        </apex:actionStatus>
+                                    </apex:outputPanel>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div> 
+                <apex:outputPanel id="taskTablePanel">
+                    <apex:pageBlockTable value="{!TaskEntities}" var="taskEntity" rows="{!tableSize}" first="{!startIndex}" id="taskTable" width="100%">  
+                        <apex:column >
+                            <apex:facet name="header">Subject</apex:facet>
+                            <apex:outputLink value="/{!taskEntity.taskId}" onclick="redirectToParent(this.href);">{!taskEntity.Subject}</apex:outputLink>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Contact Name</apex:facet>
+                            <apex:outputLink value="/{!taskEntity.ContactId}"  target="_blank">{!taskEntity.ContactName}</apex:outputLink>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Called Before</apex:facet>
+                            <apex:outputPanel >
+                                <span id="{!taskEntity.taskId}" />
+                                <span id="Load{!taskEntity.taskId}">Loading...</span>
+                            </apex:outputPanel>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Called By</apex:facet>
+                            <span id="calledBy{!taskEntity.taskId}" style="display:none;">
+                                <apex:outputText value="{!taskEntity.CalledBy}" ></apex:outputText>
+                            </span>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Due Date</apex:facet>
+                            <apex:outputText value="{!taskEntity.DueDate}"></apex:outputText>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Telephone</apex:facet>
+                            <apex:outputLink value="skype:{!taskEntity.Telephone}">{!taskEntity.Telephone}</apex:outputLink>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">MobilePhone</apex:facet>
+                            <apex:outputLink value="skype:{!taskEntity.MobilePhone}">{!taskEntity.MobilePhone}</apex:outputLink>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Country</apex:facet>
+                            <apex:outputText value="{!taskEntity.Country}"></apex:outputText>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Local Time</apex:facet>
+                            <apex:outputText value="{!taskEntity.LocalTime}"></apex:outputText>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Corporate</apex:facet>
+                            <apex:outputText value="{!taskEntity.Corporate}"></apex:outputText>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Preferred Language</apex:facet>
+                            <apex:outputText value="{!taskEntity.Language}"></apex:outputText>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Level</apex:facet>
+                            <apex:outputText value="{!taskEntity.Level}"></apex:outputText>
+                        </apex:column>
+                    </apex:pageBlockTable>
+                    <apex:outputPanel rendered="{!IF(TaskEntities.size = 0, true, false)}" layout="block" style="background-color:#FFF;border-width:0px 1px 1px 1px; border-style:solid;border-color: #D4DADC;color: #000;text-align:center;padding:10px">
+                        No Tasks.
+                    </apex:outputPanel> 
+                    <apex:outputPanel rendered="{!DisplayPreviousAndNextPanel}" layout="block" id="previousNextCommand" style="padding-top:5px;">
+                        <apex:commandLink action="{!previous}" value="<< Previous" reRender="taskTable, previousNextCommand,taskIdsRefresh" status="previousNextStatus" rendered="{!PreviousButtonDisplay}" oncomplete="processCalledBeforeNumber()" style="text-decoration: none;"/>
+                        <apex:outputText value="<< Previous" rendered="{!NOT(PreviousButtonDisplay)}" style="color: #A8A8A8;"></apex:outputText>
+                        &nbsp;|&nbsp;
+                        <apex:commandLink action="{!next}" value="Next >>" reRender="taskTable,previousNextCommand,taskIdsRefresh" status="previousNextStatus" rendered="{!NextButtonDisplay}" oncomplete="processCalledBeforeNumber()" style="text-decoration: none;"/>
+                        <apex:outputText value="Next >>" rendered="{!NOT(NextButtonDisplay)}" style="color: #A8A8A8;"></apex:outputText>
+                        <apex:actionStatus id="previousNextStatus">
+                            <apex:facet name="start"><img src="/img/loading.gif" alt="loading..."/></apex:facet>
+                        </apex:actionStatus>
+                    </apex:outputPanel>
+                    <apex:outputPanel layout="block" id="taskIdsRefresh">
+                        <script>
+                            taskIds = [
+                            <apex:repeat value="{!TaskEntities}" var="taskEntity" rows="{!tableSize}" first="{!startIndex}">
+                                {taskId : '{!taskEntity.taskId}'},
+                            </apex:repeat>
+                            {}];
+                        </script>
+                    </apex:outputPanel>
+                </apex:outputPanel>  
+            </apex:pageBlock>
+        </apex:form>
+    </body>
+</apex:page>

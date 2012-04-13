@@ -1,0 +1,264 @@
+<apex:page standardController="StudentActual__c" extensions="OverrideStudentActualPageController" tabStyle="StudentActual__c" action="{!checkStudentActualRecordType}" id="page">
+         <script type="text/javascript">
+        String.prototype.trim = function()
+        {
+            return this.replace(/(^\s*)|(\s*$)/g,"");
+        }
+        function showRefundDialog(paymentId, amount)
+        {
+            var url = "/apex/RefundDialog?paymentId=" + paymentId + "&amount=" + amount;
+            var refundWin =  window.open (url, 'newwindow', 'height=420, width=580, top=150, left=300, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=no, status=no') ;
+           refundWin.focus();
+        }
+        function reloadSelf()
+        {
+            window.location.reload();
+        }
+        
+        function showStudentProductRefundDialog(studentProductId)
+        {
+            var newWind = window.open('/apex/StudentProductRefundDialog?id=' + studentProductId, 'newStudentProductRefundDialog',  'height=410, width=530, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no' );
+           newWind.focus();
+        }
+        
+        function Cancel(actualId, paymentId, method, traceNo, amount)
+        {
+            var cancelType = -1;
+            //Cancel的同时需要创建一条Refund记录，ActiveX空间中已经创建了刷卡Cancel的Refund数据
+            if(paymentId == null || paymentId == "")
+            {
+                alert("Can not load payment data.");
+                return;
+             }
+             if(method == null)
+             {
+                alert("This payment method cannot support this action.");
+                return;
+             }
+             else if(method.toLowerCase() != 'pos' && method != 'ONLINE PAYMENT-99BILL')
+             {
+                alert("This payment method(\""+ method +"\") cannot support this action.");
+                return;
+             }
+             cancelType == 0;
+             if(method == 'ONLINE PAYMENT-99BILL')
+             {
+                  cancelType = 1;
+             }
+             if(traceNo.trim() == "" || traceNo.trim() == "null")
+             {
+                  alert("You cannot cancel this transaction.");
+                  return;
+             }
+             else
+             {
+                 if(traceNo.trim().length != 6)
+                 {
+                    alert("The trace number length must be 6.");
+                 }
+                 else
+                 {
+                     var confirm = window.confirm("Do you want to cancel this transaction?");
+                     if(confirm)
+                     {
+                          //如果为当天的交易可以取消，如果不是则不能
+                          amount = amount*100;
+                          var control = document.getElementById("commCtrl");
+                          var strSessionId = "{!$Api.Session_ID}";
+                          var strServerUrl = "{!$Api.Partner_Server_URL_130}";
+                          control.SessionId = strSessionId;
+                          control.ServerUrl = strServerUrl;
+                          control.ActualId = paymentId;
+                          control.Amount = amount.toString();
+                          control.OrginTraceNo = traceNo.trim();
+                          control.PaymentId = paymentId;
+                          if(cancelType == -1)
+                          {
+                             control.StartCommTrans(strSessionId);
+                          }
+                          else if(cancelType == 1)
+                          {
+                             var orderId = actualId;
+                             control.ActualId = orderId;
+                             control.CancelNinenineBillCommTrans(6,orderId,traceNo.trim(),"","",strSessionId);
+                          }
+                      }
+                  }
+              }
+          }
+
+        function numbersonly(myfield, e, dec)
+        {
+            var key;
+            var keychar;
+            
+            if (window.event)
+            {
+               key = window.event.keyCode;
+            }
+            else if (e)
+            {
+               key = e.which;
+            }
+            else
+            {
+               return true;
+            }
+            keychar = String.fromCharCode(key);
+            
+            // control keys
+            if ((key==null) || (key==0) || (key==8) || (key==9) || (key==13) || (key==27) )
+            {
+               return true;
+            }
+            // numbers
+            else if ((("0123456789").indexOf(keychar) > -1))
+            {
+               return true;
+            }
+            // decimal point jump
+            else if (dec && (keychar == "."))
+            {
+               myfield.form.elements[dec].focus();
+               return false;
+            }
+            else
+            {
+               return false;
+            }
+        }
+        function isNumber(oNum)
+        {
+          if(!oNum) 
+          return false;
+          var strP=/^\d+(\.\d+)?$/;
+          if(!strP.test(oNum)) 
+          return false;
+          try
+          {
+            if(parseFloat(oNum)!=oNum) 
+            return false;
+          }
+          catch(ex)
+          {
+            return false;
+          }
+          return true;
+       }
+     </script>
+     
+        <apex:sectionHeader title="{!StudentActual.Name}"/>
+        <apex:pageMessages id="message" escape="false"/>
+        <apex:detail subject="{!StudentActual.Id}" relatedList="true" title="false"/>
+        
+      <apex:form >
+        <apex:pageBlock title="Student's Products">
+            <apex:pageBlockTable columns="9" value="{!StudentProducts}" var="studentProduct">
+                <apex:column >
+                    <apex:facet name="header">Product Name</apex:facet>
+                    <apex:outputLink value="/{!studentProduct.Id}" >{!studentProduct.Name}</apex:outputLink>
+                </apex:column>
+                <apex:column >
+                    <apex:facet name="header">Product</apex:facet>
+                     <apex:outputLink value="/{!studentProduct.Product__c}" >{!studentProduct.Product__r.Name}</apex:outputLink>
+                </apex:column>
+                <apex:column >
+                    <apex:facet name="header"># Levels Purchased</apex:facet>
+                    <apex:outputText > {!studentProduct.LevelsPurchased__c}</apex:outputText>
+                </apex:column>
+                <apex:column >
+                    <apex:facet name="header">Standard Length</apex:facet>
+                    <apex:outputText >{!studentProduct.StandardLength__c}</apex:outputText>
+                </apex:column>
+                <apex:column >
+                    <apex:facet name="header">Free Length</apex:facet>
+                    <apex:outputText >{!studentProduct.FreeLength__c}</apex:outputText>
+                </apex:column>
+                <apex:column >
+                    <apex:facet name="header">Marketing Length</apex:facet>
+                    <apex:outputText >{!studentProduct.MarketingLength__c}</apex:outputText>
+                </apex:column>
+                <apex:column >
+                    <apex:facet name="header">Quantity</apex:facet>
+                    <apex:outputText value="{0, number, ####0}"><apex:param value="{!studentProduct.Quantity__c}" /></apex:outputText>
+                </apex:column>
+                <apex:column >
+                    <apex:facet name="header">Status</apex:facet>
+                    <apex:outputText >{!studentProduct.Status__c}</apex:outputText>
+                </apex:column>
+                <apex:column >
+                    <apex:facet name="header" >Command</apex:facet>
+                    <apex:commandButton value="Refund" onclick="showStudentProductRefundDialog('{!studentProduct.Id}');" reRender="message" disabled="{!IF(OR(ISBLANK(studentProduct.Refund_Amount__c), studentProduct.Refund_Amount__c = 0), false, true)}"/>
+                 </apex:column>
+            </apex:pageBlockTable>
+        </apex:pageBlock>
+        
+        
+        <apex:pageBlock title="Payment Details">           
+            <apex:pageBlockSection columns="1">
+                <apex:pageBlockSectionItem >
+                    <apex:pageBlockTable value="{!Payments}" var="payment" id="payDateTable"> 
+                        <apex:column >
+                            <apex:facet name="header">NO.</apex:facet>
+                            <apex:outputLink value="/{!payment.paymentId}">{!payment.Index}</apex:outputLink>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Student Name</apex:facet>
+                            <apex:outputText value="{!payment.StudentActualName}"/>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Amount</apex:facet>
+                            <apex:outputText value="{!payment.Amount}"/>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Refund Amount</apex:facet>
+                            <apex:outputText value="{!payment.RefundAmount}"/>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Pay Method</apex:facet>
+                            <apex:outputText value="{!payment.PayMethod}"/>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Trace No</apex:facet>
+                            <apex:outputText value="{!payment.TraceNo}"/>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Holder</apex:facet>
+                            <apex:outputText value="{!payment.CardHolder}"/>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Card No.</apex:facet>
+                            <apex:outputText value="{!payment.CardNo}"/>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Bank Name</apex:facet>
+                            <apex:outputText value="{!payment.bankName}"/>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Due Date</apex:facet>
+                            <apex:outputText value="{!payment.DueDate}"/>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Card Exp Date</apex:facet>
+                            <apex:outputText value="{!payment.CardExpDate}"/>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Pay Type</apex:facet>
+                            <apex:outputText value="{!payment.PayType}"/> 
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Command</apex:facet>
+                            <apex:commandButton action="{!payment.Refund}" value="Refund" onclick="showRefundDialog('{!payment.PaymentId}', '{!payment.Amount}')" disabled="{!payment.IsCanRefund}" reRender="message"/>
+                            <apex:commandButton action="{!payment.Cancel}" value="Cancel"  rendered="{!payment.IsRenderCancelButton}" onclick="return Cancel('{!payment.ActualId}', '{!payment.PaymentId}','{!payment.PayMethod}', '{!payment.TraceNo}', '{!payment.Amount}');" disabled="{!payment.IsCanCancel}" reRender="message"/>             
+                            <apex:commandButton action="{!payment.PayWithDeposit}" value="Pay with Deposit" onclick="if(!confirm('Are you sure?'))return false;" rendered="{!payment.IsRenderPayWithDepositButton}" disabled="{!payment.IsDisabledPayDesButton}" reRender="message"/>
+                        </apex:column>
+                    </apex:pageBlockTable>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>        
+        </apex:pageBlock>
+        <div id="controler">
+            <OBJECT id="commCtrl" name="commCtrl" classid="clsid:b792c02f-2640-4e50-ac62-831464c975a8">
+            </OBJECT>
+        </div>
+     </apex:form>
+</apex:page>

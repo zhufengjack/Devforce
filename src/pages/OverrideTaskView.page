@@ -1,0 +1,495 @@
+<apex:page standardController="Task" extensions="OverrideTaskViewController" tabStyle="Contact" action="{!checkTaskRecordType}" id="taskViewPage">
+    <script type="text/javascript">
+        function twistPersonalInfoSection(element)
+        {
+            var divElement = document.getElementById("{!$Component.taskViewForm.otherInfoBlock.personalInfoSection.personalInfoPanel}");
+            if(element.className == "cShowSectionArea")
+            {
+                var hiddenValue = document.getElementById("{!$Component.taskViewForm.otherInfoBlock.personalInfoSection.RefreshPersonalInfoSection}").value;
+                if(hiddenValue != "true")
+                {   
+                    getPersonalInfo();
+                }
+                
+                element.className = "cHideSectionArea";
+                divElement.style.display = '';
+            }
+            else if(element.className == "cHideSectionArea")
+            {
+                divElement.style.display = 'none';
+                element.className = "cShowSectionArea";
+            } 
+        }
+        
+        function twistEnrollmentsSection(element)
+        {
+            var divElement = document.getElementById("{!$Component.taskViewForm.otherInfoBlock.enrollmentsSection.enrollmentsInfoPanel}");
+            if(element.className == "cShowSectionArea")
+            {
+                var hiddenValue = document.getElementById("{!$Component.taskViewForm.otherInfoBlock.enrollmentsSection.RefreshEnrollmentsSection}").value;
+                if(hiddenValue != "true")
+                {
+                    getEnrollments();
+                }
+                divElement.style.display = '';
+                element.className = "cHideSectionArea";
+            }
+            else if(element.className == "cHideSectionArea")
+            {
+                divElement.style.display = 'none';
+                element.className = "cShowSectionArea";
+            }
+        }
+        
+        function twistHistoryInfoSection(element)
+        {
+            var divElement = document.getElementById("{!$Component.taskViewForm.otherInfoBlock.historySection.historyPanel}");
+            if(element.className == "cShowSectionArea")
+            {
+                var hiddenValue = document.getElementById("{!$Component.taskViewForm.otherInfoBlock.historySection.RefreshHistorySection}").value;
+                if(hiddenValue != "true")
+                {
+                    getHistory();
+                }
+                divElement.style.display = '';
+                element.className = "cHideSectionArea";
+            }
+            else if(element.className == "cHideSectionArea")
+            {
+                divElement.style.display = 'none';
+                element.className = "cShowSectionArea";
+            }
+        }
+        
+        function twistOldHistoryInfoSection(element)
+        {
+            var divElement = document.getElementById("{!$Component.taskViewForm.otherInfoBlock.oldHistorySection.oldHistoryPanel}");
+            if(element.className == "cShowSectionArea")
+            {
+                var hiddenValue = document.getElementById("{!$Component.taskViewForm.otherInfoBlock.oldHistorySection.RefreshOldHistorySection}").value;
+                if(hiddenValue != "true")
+                {
+                    getOldHistory();
+                }
+                divElement.style.display = '';
+                element.className = "cHideSectionArea";
+            }
+            else if(element.className == "cHideSectionArea")
+            {
+                divElement.style.display = 'none';
+                element.className = "cShowSectionArea";
+            }
+        }
+        
+        function twistPerformanceSection(element)
+        {
+            var divElement = document.getElementById("{!$Component.taskViewPage.taskViewForm.otherInfoBlock.performanceSection.performancePanel}");
+            if(element.className == "cShowSectionArea")
+            {
+                divElement.style.display = '';
+                element.className = "cHideSectionArea";
+            }
+            else if(element.className == 'cHideSectionArea')
+            {
+                divElement.style.display = 'none';
+                element.className = "cShowSectionArea";
+            }
+        }
+        
+        function diplayInitalArea(refreshPanelId)
+        {
+            document.getElementById(refreshPanelId).style.display = '';
+        }
+        
+    </script>
+    <style type="text/css">
+        .cShowSectionArea {
+            background: transparent url('/img/alohaSkin/twisty_sprite.png') 0 0 no-repeat;
+            background-position: 1px -23px;
+        }
+        .cHideSectionArea {
+            background: transparent url('/img/alohaSkin/twisty_sprite.png') 0 -11px no-repeat;
+            background-position: 1px -36px;
+        }
+        .personalTable{
+            width:100%; 
+            border-collapse:collapse;
+            border-spacing:0;
+            border: 1px solid black;
+        }
+        .personalTable td{  
+            border: 1px solid black;
+            height:25px;
+            width:12.5%;
+        }
+        .personalLabelTd
+        {
+            text-align:right;
+            padding-right:5px;
+            font-weight: bold;
+            color: #4A4A56;
+        }
+        .personalValueTd
+        {
+            text-align:left;    
+            padding-left:5px;
+        }
+        .highlightTd
+        {
+            color:red;
+        }
+    </style>
+    <apex:form >
+        <apex:actionFunction action="{!PersonalInfoSection.getPersonalInfoFromEtown}" name="getPersonalInfo" reRender="personalInfoPanel" status="personalInfoStatus" oncomplete="diplayInitalArea('{!$Component.taskViewForm.otherInfoBlock.personalInfoSection.personalInfoPanel}');" />
+    </apex:form>
+    <apex:form >
+        <apex:actionFunction action="{!EnrollmentSection.getEnrollmentsFromEtown}" name="getEnrollments" reRender="enrollmentsInfoPanel" status="enrollmentsStatus" oncomplete="diplayInitalArea('{!$Component.taskViewForm.otherInfoBlock.enrollmentsSection.enrollmentsInfoPanel}');"/>
+    </apex:form>
+    <apex:form >
+        <apex:actionFunction action="{!HistorySection.getHistory}" name="getHistory" reRender="historyPanel" status="historyStatus" oncomplete="diplayInitalArea('{!$Component.taskViewForm.otherInfoBlock.historySection.historyPanel}');"/>
+    </apex:form>
+    <apex:form >
+        <apex:actionFunction action="{!OldHistorySection.getOldHistoryFromEtown}" name="getOldHistory" reRender="oldHistoryPanel" status="oldHistoryStatus" oncomplete="diplayInitalArea('{!$Component.taskViewForm.otherInfoBlock.oldHistorySection.oldHistoryPanel}');"/>
+    </apex:form>
+    <apex:form >
+        <apex:actionFunction action="{!PerformanceSection.getPerformanceLink}" name="getPerformanceLink" reRender="performancePanel" status="performanceStatus" oncomplete="diplayInitalArea('{!$Component.taskViewPage.taskViewForm.otherInfoBlock.performanceSection.performancePanel}');"/>
+    </apex:form>
+    <apex:form id="taskViewForm">
+        <!-- apex:sectionHeader title="Task" subtitle="{!TaskDetail.currentTask.Subject}"/ -->
+        <apex:pageMessages />
+        <apex:inputHidden value="{!TaskDetail.ShowEditButton}" id="ShowEditButton"/>
+        <apex:detail id="taskDetail" subject="{!Task.Id}"/>
+        <apex:pageblock id="otherInfoBlock" rendered="{!TaskDetail.ShowAdditionalSection}">
+            <!-- Personal Information -->
+            <apex:pageblockSection collapsible="false" columns="1" id="personalInfoSection">
+                <apex:facet name="header">
+                    <img src="/s.gif" alt="" class="cShowSectionArea"  onclick="twistPersonalInfoSection(this);" style="cursor:pointer;" title="" />
+                    Personal Info
+                </apex:facet>
+                <apex:outputPanel layout="block" id="personalInfoPanel" style="display:none;">
+                    <apex:inputhidden value="{!PersonalInfoSection.RefreshPersonalInfoSection}" id="RefreshPersonalInfoSection"/>
+                    <apex:actionStatus id="personalInfoStatus">
+                        <apex:facet name="start"><img src="/img/loading.gif" alt="loading..."/></apex:facet>
+                    </apex:actionStatus>
+                    <!-- Error Message -->
+                    <apex:outputPanel layout="block" styleClass="message errorM3" rendered="{!PersonalInfoSection.PersonalInfoErrorMessageDisplay}">
+                        <table border="0" cellpadding="0" cellspacing="0" class="messageTable" style="padding:0px;margin:0px;">
+                            <tbody>
+                                <tr valign="top">
+                                    <td>
+                                        <img alt="ERROR" src="/s.gif" class="msgIcon" title="ERROR" />
+                                    </td>
+                                    <td class="messageCell">
+                                        <div id="" class="messageText">
+                                            <span id="" style="color:#cc0000">
+                                                    <h4>Error:</h4>
+                                            </span>
+                                            {!PersonalInfoSection.PersonalInfoErrorMessage}<br/>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </apex:outputPanel>
+                    <!-- Personal Information -->
+                    <!-- Personal information table -->
+                    <table class="personalTable">
+                        <tr>
+                           <td class="personalLabelTd">Etown Username</td><td class="personalValueTd">{!PersonalInfoSection.PersonalInfo.Username}</td>
+                           <td class="personalLabelTd">Corporate</td><td class="personalValueTd">{!PersonalInfoSection.PersonalInfo.Corporate}</td>
+                           <td class="personalLabelTd">Division</td><td class="personalValueTd">{!PersonalInfoSection.PersonalInfo.Division}</td>
+                           <td class="personalLabelTd">Partner</td><td class="personalValueTd">{!PersonalInfoSection.PersonalInfo.Partner}</td>
+                        </tr>
+                        <tr>
+                           <td class="personalLabelTd">Etown MemberId</td><td class="personalValueTd">{!PersonalInfoSection.PersonalInfo.MemberID}</td>
+                           <td class="personalLabelTd">Study Pace</td><td class="personalValueTd">{!PersonalInfoSection.PersonalInfo.StudyPace}</td>
+                           <td class="personalLabelTd">Study Focus</td><td class="personalValueTd">{!PersonalInfoSection.PersonalInfo.StudyFocus}</td>
+                           <td class="personalLabelTd">Study Goal</td><td class="personalValueTd">{!PersonalInfoSection.PersonalInfo.StudyGoal}</td>
+                        </tr>
+                        <tr>
+                           <td class="personalLabelTd">Password</td><td class="personalValueTd">{!PersonalInfoSection.PersonalInfo.Password}</td>
+                           <td class="personalLabelTd">Current Level</td><td class="personalValueTd">{!PersonalInfoSection.PersonalInfo.CurrentLevel}</td>
+                           <td class="personalLabelTd">Starting Level</td><td class="personalValueTd">{!PersonalInfoSection.PersonalInfo.StartingLevel}</td>
+                           <td class="personalLabelTd">Achieved Level</td><td class="personalValueTd">{!PersonalInfoSection.PersonalInfo.AchievedLevel}</td>
+                        </tr>
+                        <tr>
+                           <td class="personalLabelTd">Sub Start Date</td><td class="personalValueTd">{!PersonalInfoSection.PersonalInfo.SubStartDate}</td>
+                           <td class="personalLabelTd">Unit Completed</td><td class="personalValueTd">{!PersonalInfoSection.PersonalInfo.UnitCompleted}</td>
+                           <td class="personalLabelTd">Conversation Class</td><td class="personalValueTd">{!PersonalInfoSection.PersonalInfo.ConversationClass}</td>
+                           <td class="personalLabelTd">Private Lesson</td><td class="personalValueTd">{!PersonalInfoSection.PersonalInfo.PrivateLesson}</td>
+                        </tr>
+                        <tr>
+                           <td class="personalLabelTd" style="{!IF(PersonalInfoSection.PersonalInfo.HighLightSubEndDate, 'color:red;', '')}">Sub End Date</td><td class="personalValueTd" style="{!IF(PersonalInfoSection.PersonalInfo.HighLightSubEndDate, 'color:red;', '')}">{!PersonalInfoSection.PersonalInfo.SubEndDate}<div style="{!IF(PersonalInfoSection.PersonalInfo.HighLightSubEndDate, 'display:block;', 'display:none;')}">EXPIRED!</div></td>
+                           <td class="personalLabelTd">Writing</td><td class="personalValueTd">{!PersonalInfoSection.PersonalInfo.Writing}</td>
+                           <td class="personalLabelTd">Study Hours</td><td class="personalValueTd">{!PersonalInfoSection.PersonalInfo.StudyHours}</td>
+                           <td class="personalLabelTd">Preferred Language</td><td class="personalValueTd">{!PersonalInfoSection.PersonalInfo.Preferredlanguage}</td>
+                        </tr>
+                        <tr>
+                           <td class="personalLabelTd">Local Time</td><td class="personalValueTd">{!PersonalInfoSection.LocalTime}<span style="color:red;"><apex:outputText rendered="{!PersonalInfoSection.DisplayLocalTimeMessage}">Timezone not provided.</apex:outputText></span></td>
+                           <td class="personalLabelTd">Gender</td><td class="personalValueTd">{!PersonalInfoSection.Gender}</td>
+                           <td class="personalLabelTd">Mobile</td><td class="personalValueTd">{!TaskDetail.MobilePhone}</td>
+                           <td class="personalLabelTd">Last Visit Date</td><td class="personalValueTd">{!PersonalInfoSection.PersonalInfo.LastVisitDate}</td>
+                        </tr>
+                     </table>
+                </apex:outputPanel>
+            </apex:pageblockSection>
+            <!-- Enrollments -->
+            <apex:pageblockSection collapsible="false" columns="1" id="enrollmentsSection">
+                <apex:facet name="header">
+                    <img src="/s.gif" alt="" class="cShowSectionArea"  onclick="twistEnrollmentsSection(this);" style="cursor:pointer;" title="" />
+                    Enrollments
+                </apex:facet>
+                <apex:outputPanel layout="block" id="enrollmentsInfoPanel" style="display:none;">
+                    <apex:inputhidden value="{!EnrollmentSection.RefreshEnrollmentsSection}" id="RefreshEnrollmentsSection"/>
+                    <apex:actionStatus id="enrollmentsStatus">
+                        <apex:facet name="start"><img src="/img/loading.gif" alt="loading..."/></apex:facet>
+                    </apex:actionStatus>
+                    <!-- Error Message -->
+                    <apex:outputPanel layout="block" styleClass="message errorM3" rendered="{!EnrollmentSection.EnrollmentsErrorMessageDisplay}">
+                        <table border="0" cellpadding="0" cellspacing="0" class="messageTable" style="padding:0px;margin:0px;">
+                            <tbody>
+                                <tr valign="top">
+                                    <td>
+                                        <img alt="ERROR" src="/s.gif" class="msgIcon" title="ERROR" />
+                                    </td>
+                                    <td class="messageCell">
+                                        <div id="" class="messageText">
+                                            <span id="" style="color:#cc0000">
+                                                    <h4>Error:</h4>
+                                            </span>
+                                            {!EnrollmentSection.EnrollmentsErrorMessage}<br/>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </apex:outputPanel>
+                    <apex:pageBlockTable value="{!EnrollmentSection.Enrollments}" var="enrollment" columns="6" rows="{!EnrollmentSection.tableSize}" first="{!EnrollmentSection.firstRowIndex}" id="enrollmentsTable">
+                        <apex:column >
+                            <apex:facet name="header">Course</apex:facet>
+                            <apex:outputText value="{!enrollment.CourseName}"></apex:outputText>
+                        </apex:column>
+                        <apex:column > 
+                            <apex:facet name="header">ID</apex:facet>
+                            <apex:outputText value="{!enrollment.CourseId}"></apex:outputText>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Courseware</apex:facet>
+                            <apex:outputText value="{!enrollment.Courseware}"></apex:outputText>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Started</apex:facet>
+                            <apex:outputText value="{!enrollment.StartDate}"></apex:outputText>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Completed</apex:facet>
+                            <apex:outputText value="{!enrollment.CompletedDate}"></apex:outputText>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Grade</apex:facet>
+                            <apex:outputText value="{!enrollment.Grade}"></apex:outputText>
+                        </apex:column>
+                    </apex:pageBlockTable>
+                    <apex:outputPanel style="text-decoration: none;" layout="block" id="previousNextCommand">
+                        <apex:commandLink action="{!EnrollmentSection.previousTable}" value="<< Previous" reRender="enrollmentsTable, previousNextCommand" status="previousNextStatus" rendered="{!EnrollmentSection.PreviousButtonDisplay}" style="text-decoration: none;"/>
+                        <apex:outputText value="<< Previous" rendered="{!NOT(EnrollmentSection.PreviousButtonDisplay)}" style="color: #A8A8A8;"></apex:outputText>
+                        &nbsp;|&nbsp;
+                        <apex:commandLink action="{!EnrollmentSection.nextTable}" value="Next >>" reRender="enrollmentsTable, previousNextCommand" status="previousNextStatus" rendered="{!EnrollmentSection.NextButtonDisplay}" style="text-decoration: none;"/>
+                        <apex:outputText value="Next >>" rendered="{!NOT(EnrollmentSection.NextButtonDisplay)}" style="color: #A8A8A8;"></apex:outputText>
+                        <apex:actionStatus id="previousNextStatus">
+                            <apex:facet name="start"><img src="/img/loading.gif" alt="loading..."/></apex:facet>
+                        </apex:actionStatus>
+                    </apex:outputPanel>
+                </apex:outputPanel>
+            </apex:pageblockSection>
+            <!-- Performance -->
+            <apex:pageblockSection collapsible="false" columns="1" id="performanceSection">
+                <apex:facet name="header">
+                    <img src="/s.gif" alt="" class="cHideSectionArea"  onclick="twistPerformanceSection(this);" style="cursor:pointer;" title="" />
+                    Performance
+                </apex:facet>
+                <apex:outputPanel layout="block" id="performancePanel" >
+                    <apex:outputPanel layout="block" style="">
+                        <apex:outputLink value="{!PerformanceSection.EtownDomain}/ReportingCenter/ProgressReport.ashx?memberid={!PerformanceSection.MemberId}&utc={!PerformanceSection.utcDateString}&Token={!PerformanceSection.digestMessage}" rendered="{!PerformanceSection.DisplayLink}"  target="_blank">Performance Card</apex:outputLink>
+                    </apex:outputPanel>
+                </apex:outputPanel>
+            </apex:pageblockSection>
+            <!-- History -->
+            <apex:pageblockSection collapsible="false" columns="1" id="historySection">
+                <apex:facet name="header">
+                    <img src="/s.gif" alt="" class="cShowSectionArea"  onclick="twistHistoryInfoSection(this);" style="cursor:pointer;" title="" />
+                    History
+                </apex:facet>
+                <apex:outputPanel layout="block" id="historyPanel" style="display:none;">
+                    <apex:inputhidden value="{!HistorySection.RefreshHistorySection}" id="RefreshHistorySection"/>
+                    <apex:actionStatus id="historyStatus">
+                        <apex:facet name="start"><img src="/img/loading.gif" alt="loading..."/></apex:facet>
+                    </apex:actionStatus>
+                    <!-- Error Message -->
+                    <apex:outputPanel layout="block" styleClass="message errorM3" rendered="{!HistorySection.HistoryErrorMessageDisplay}">
+                        <table border="0" cellpadding="0" cellspacing="0" class="messageTable" style="padding:0px;margin:0px;">
+                            <tbody>
+                                <tr valign="top">
+                                    <td>
+                                        <img alt="ERROR" src="/s.gif" class="msgIcon" title="ERROR" />
+                                    </td>
+                                    <td class="messageCell">
+                                        <div id="" class="messageText">
+                                            <span id="" style="color:#cc0000">
+                                                    <h4>Error:</h4>
+                                            </span>
+                                            {!HistorySection.HistoryErrorMessage}<br/>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </apex:outputPanel>
+                    <!-- History table task and case -->
+                    <!-- Task table -->
+                    <br/>
+                    <h1>Tasks</h1>
+                    <apex:pageblockTable value="{!HistorySection.HistoryTasks}" var="taskInfo" columns="6">
+                        <apex:column width="10">
+                            <apex:facet name="header">IsClosed</apex:facet>
+                            <apex:image value="/img/checkbox_checked.gif" rendered="{!taskInfo.IsClosed}"/>
+                            <apex:image value="/img/checkbox_unchecked.gif" rendered="{!NOT(taskInfo.IsClosed)}"/>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Subject</apex:facet>
+							<div class="mouseOverInfoOuter" onfocus="addMouseOver(this)" onmouseover="addMouseOver(this)">
+								<apex:outputLink value="/{!taskInfo.TaskId}" >{!taskInfo.Subject}</apex:outputLink>
+								<div class="mouseOverInfo" style="opacity: 0; dispaly: none;" >{!IF(taskInfo.Description == NULL, 'No Comment', taskInfo.Description)}</div>
+							</div>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Due Date</apex:facet>
+                            <apex:outputText value="{!taskInfo.DueDate}"></apex:outputText>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Status</apex:facet>
+                            <apex:outputText value="{!taskInfo.Status}"></apex:outputText>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Call Result</apex:facet>
+                            <apex:outputText value="{!taskInfo.CallResult}"></apex:outputText>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">AssginTo</apex:facet>
+                            <apex:outputText value="{!taskInfo.AssginTo}"></apex:outputText>
+                        </apex:column>
+                    </apex:pageblockTable>
+                    <br/>
+                    <!-- Case Table -->
+                    <h1>Cases</h1>
+                    <apex:pageBlockTable value="{!HistorySection.HistoryCases}" var="caseInfo" columns="7">
+                        <apex:column width="10">
+                            <apex:facet name="header">IsClosed</apex:facet>
+                            <apex:image value="/img/checkbox_checked.gif" rendered="{!caseInfo.IsClosed}"/>
+                            <apex:image value="/img/checkbox_unchecked.gif" rendered="{!NOT(caseInfo.IsClosed)}"/>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Case Num</apex:facet>
+                            <apex:outputLink value="/{!caseInfo.CaseId}" >{!caseInfo.CaseNum}</apex:outputLink>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Subject</apex:facet>
+                            <apex:outputText value="{!caseInfo.Subject}"></apex:outputText>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Priority</apex:facet>
+                            <apex:outputText value="{!caseInfo.Priority}"></apex:outputText>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Status</apex:facet>
+                            <apex:outputText value="{!caseInfo.Status}"></apex:outputText>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">CreatedDate</apex:facet>
+                            <apex:outputText value="{!caseInfo.CreatedDate}"></apex:outputText>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Owner</apex:facet>
+                            <apex:outputText value="{!caseInfo.Owner}"></apex:outputText>
+                        </apex:column>
+                    </apex:pageBlockTable>
+                </apex:outputPanel>
+            </apex:pageblockSection>
+            <!-- Old History -->
+            <apex:pageblockSection collapsible="false" columns="1" id="oldHistorySection">
+                <apex:facet name="header">
+                    <img src="/s.gif" alt="" class="cShowSectionArea"  onclick="twistOldHistoryInfoSection(this);" style="cursor:pointer;" title="" />
+                    Old History
+                </apex:facet>
+                <apex:outputPanel layout="block" id="oldHistoryPanel" style="display:none;">
+                    <apex:inputhidden value="{!OldHistorySection.RefreshOldHistorySection}" id="RefreshOldHistorySection"/>
+                    <apex:actionStatus id="oldHistoryStatus">
+                        <apex:facet name="start"><img src="/img/loading.gif" alt="loading..."/></apex:facet>
+                    </apex:actionStatus>
+                    <!-- Error Message -->
+                    <apex:outputPanel layout="block" styleClass="message errorM3" rendered="{!OldHistorySection.OldHistoryErrorMessageDisplay}">
+                        <table border="0" cellpadding="0" cellspacing="0" class="messageTable" style="padding:0px;margin:0px;">
+                            <tbody>
+                                <tr valign="top">
+                                    <td>
+                                        <img alt="ERROR" src="/s.gif" class="msgIcon" title="ERROR" />
+                                    </td>
+                                    <td class="messageCell">
+                                        <div id="" class="messageText">
+                                            <span id="" style="color:#cc0000">
+                                                    <h4>Error:</h4>
+                                            </span>
+                                            {!OldHistorySection.OldHistoryErrorMessage}<br/>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </apex:outputPanel>
+                    <apex:pageBlockTable value="{!OldHistorySection.oldHistories}" var="oldHistory" columns="4" id="oldHistoryTable">
+                        <apex:column >
+                            <apex:facet name="header">Log Reason</apex:facet>
+                            <apex:outputText value="{!oldHistory.LogReason}"></apex:outputText>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Comment</apex:facet>
+                            <apex:outputText value="{!oldHistory.Comment}"></apex:outputText>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Log Date</apex:facet>
+                            <apex:outputText value="{!oldHistory.LogDate}"></apex:outputText>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Advisor Name</apex:facet>
+                            <apex:outputText value="{!oldHistory.AdvisorName}"></apex:outputText>
+                        </apex:column>
+                    </apex:pageBlockTable>
+                    <apex:outputPanel style="text-decoration: none;" layout="block" id="previousNextCommandOldHistory">
+                        <apex:commandLink action="{!OldHistorySection.previousTable}" value="<< Previous" reRender="oldHistoryTable, previousNextCommandOldHistory" status="oldHistoryPreviousNextStatus" rendered="{!OldHistorySection.PreviousButtonDisplay}" style="text-decoration: none;"/>
+                        <apex:outputText value="<< Previous" rendered="{!NOT(OldHistorySection.PreviousButtonDisplay)}" style="color: #A8A8A8;"></apex:outputText>
+                        &nbsp;|&nbsp;
+                        <apex:commandLink action="{!OldHistorySection.nextTable}" value="Next >>" reRender="oldHistoryTable, previousNextCommand" status="oldHistoryPreviousNextStatus" rendered="{!OldHistorySection.NextButtonDisplay}" style="text-decoration: none;"/>
+                        <apex:outputText value="Next >>" rendered="{!NOT(OldHistorySection.NextButtonDisplay)}" style="color: #A8A8A8;"></apex:outputText>
+                        <apex:actionStatus id="oldHistoryPreviousNextStatus">
+                            <apex:facet name="start"><img src="/img/loading.gif" alt="loading..."/></apex:facet>
+                        </apex:actionStatus>
+                    </apex:outputPanel>
+                </apex:outputPanel>
+            </apex:pageblockSection>
+        </apex:pageblock>
+    </apex:form>
+    <script type="text/javascript">
+        function hideEditButtonForClosedButton()
+        {
+            var topEditButton = document.getElementById("topButtonRow");
+            var bottomEditButton = document.getElementById("bottomButtonRow");
+            var showEditButton = document.getElementById("{!$Component.taskViewForm.ShowEditButton}").value;
+            if(showEditButton == "false")
+            {   
+                topEditButton.style.display = 'none';
+                bottomEditButton.style.display = 'none';
+            }
+        }
+        hideEditButtonForClosedButton();
+    </script>
+</apex:page>

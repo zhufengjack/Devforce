@@ -1,0 +1,38 @@
+<!-- 
+	Used to display some contact info on Case detail page in serviceforce.
+	Change Log:
+	Pony Ma	2011-11-17 Created
+ -->
+<apex:page standardController="Case" extensions="ContactDetailOncaseExt" showHeader="false" sidebar="false">	
+		<apex:form >
+		<apex:pageBlock >			
+			<apex:pageBlockSection title="Contact Detail" columns="1">
+				<!-- To display Contact Owner as label instead of name -->
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel value="Conatct Owner"/>
+					<apex:outputText value="{!CaseContact.Owner.Name}"/>
+				</apex:pageBlockSectionItem>
+				<apex:outputField value="{!CaseContact.Phone}"/>
+				<apex:outputField value="{!CaseContact.EtownMemberId__c}"/>
+				<apex:outputField value="{!CaseContact.CorporateCode__c}"/>
+				<apex:outputField value="{!CaseContact.PartnerCode__c}"/>
+				<apex:outputField value="{!CaseContact.DivisionCode__c}"/>						
+			</apex:pageBlockSection>		
+		</apex:pageBlock>
+		<apex:pageBlock title="Case History">				
+			<apex:pageBlockButtons rendered="{!PageCount>1}">
+				<apex:commandButton disabled="{!IsFirstPage}" value="Prev" action="{!prev}"/>
+				<apex:commandButton disabled="{!IsLastPage}" value="Next" action="{!next}"/>
+			</apex:pageBlockButtons>			
+			<apex:pageBlockTable value="{!ContactCases}" var="case" width="100%">
+				<apex:column >
+					<apex:facet name="header">Case Number</apex:facet>			
+					<a href="/{!case.Id}" target="_blank">{!case.CaseNumber}</a>
+				</apex:column>
+				<apex:column value="{!case.Subject}"/>
+				<apex:column value="{!case.Status}"/>
+				<apex:column value="{!case.OwnerId}"/>
+			</apex:pageBlockTable>				
+		</apex:pageBlock>
+	</apex:form>		
+</apex:page>

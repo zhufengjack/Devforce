@@ -1,0 +1,198 @@
+<apex:page controller="UltraSearchController" id="page">
+    <apex:includeScript value="{!URLFOR($Resource.PricingCalculationRes,'res/js/jquery-1.4.4.min.js')}"/>
+    <script type="text/javascript">
+        $j = jQuery.noConflict();
+        
+        function getLeadConvertStatus(leadId, oSpan) 
+        {
+            UltraSearchController.getLeadConvertInfo(leadId, function(result, event)
+                { 
+                	oSpan.css('color', '#000');
+                    if (event.status) 
+                    {
+                        oSpan.attr('innerHTML', result);
+                    } 
+                    else if (event.type === 'exception') 
+                    {
+                        oSpan.attr('innerHTML', event.message);  
+                    } 
+                    else 
+                    {
+                        oSpan.attr('innerHTML', event.message);  
+                    }
+                }, {escape:true});
+        }
+        
+       $j(document).ready(function() {
+	       $j('input[id$="leadId"]').each(function(){
+	        	var leadId = this.value;
+	        	var oSpan = $j('#' + this.id.replace(/:/gi,'\\:')).parents('tr .dataRow').find('td:last > span');
+	        	getLeadConvertStatus(leadId, oSpan);
+	        })
+       });
+    </script>
+    <apex:form id="form">
+        <apex:sectionHeader title="Ultra Search"/>
+        <apex:outputPanel id="Messages">
+            <apex:pageMessages />
+        </apex:outputPanel>
+        <apex:outputPanel id="panel">
+            <!-- Accounts -->
+            <apex:pageBlock title="Accounts" rendered="{!SearchResult.Accounts.size > 0}">
+                <apex:pageBlockTable value="{!SearchResult.Accounts}" var="account">
+                    <apex:column >
+                        <apex:facet name="header">Account Name</apex:facet>
+                        <apex:outputLink value="/{!account.Id}" >{!account.Name}</apex:outputLink>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Owner First Name</apex:facet>
+                         <apex:outputLink value="/{!account.OwnerId}" >{!account.Owner.FirstName}</apex:outputLink>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Billing State/Province</apex:facet>
+                        <apex:outputText > {!account.BillingState}</apex:outputText>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Created Date</apex:facet>
+                        <apex:outputText value="{0, date, yyyy-MM-dd}">
+                            <apex:param value="{!account.CreatedDate}" />
+                        </apex:outputText>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Activity-Last modified date</apex:facet>
+                        <apex:outputText value="{0, date, yyyy-MM-dd}">
+                            <apex:param value="{!account.Activity_last_modified_date__c}" />
+                        </apex:outputText>
+                    </apex:column>
+                </apex:pageBlockTable>
+            </apex:pageBlock>
+            <!-- Contacts -->
+            <apex:pageBlock title="Contacts" rendered="{!SearchResult.Contacts.size > 0}">
+                <apex:pageBlockTable value="{!SearchResult.Contacts}" var="contact">
+                    <apex:column >
+                        <apex:facet name="header">Name</apex:facet>
+                         <apex:outputLink value="/{!contact.Id}" >{!contact.Name}</apex:outputLink>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Account Name</apex:facet>
+                        <apex:outputLink value="/{!contact.AccountId}" >{!contact.Account.Name}</apex:outputLink>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Contact Owner Alias</apex:facet>
+                        <apex:outputLink value="/{!contact.OwnerId}" >{!contact.Owner.Alias}</apex:outputLink>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Created Date</apex:facet>
+                        <apex:outputText value="{0, date, yyyy-MM-dd}">
+                            <apex:param value="{!contact.CreatedDate}" />
+                        </apex:outputText>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Last Modified Date</apex:facet>
+                        <apex:outputText value="{0, date, yyyy-MM-dd}">
+                            <apex:param value="{!contact.lastModifiedDate}" />
+                        </apex:outputText>
+                    </apex:column>
+                </apex:pageBlockTable>
+            </apex:pageBlock>
+            <!-- Opportunities -->
+            <apex:pageBlock title="Opportunities" rendered="{!SearchResult.Opportunities.size > 0}">
+                <apex:pageBlockTable value="{!SearchResult.Opportunities}" var="opportunity">
+                    <!--<apex:column rendered="{!OR($UserRole.Name =='China Management', Contains(LOWER($Profile.Name), 'system administrator'))}">
+                        <apex:facet name="header">Action</apex:facet>
+                        <apex:outputLink value="/{!opportunity.Id}/e?retURL={!opportunity.Id}" >Edit</apex:outputLink>
+                    </apex:column>-->
+                    <apex:column >
+                        <apex:facet name="header">Opportunity Name</apex:facet>
+                         <apex:outputLink value="/{!opportunity.Id}" >{!opportunity.Name}</apex:outputLink>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Account Name</apex:facet>
+                        <apex:outputLink value="/{!opportunity.AccountId}" >{!opportunity.Account.Name}</apex:outputLink>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Owner Full Name</apex:facet>
+                         <apex:outputLink value="/{!opportunity.OwnerId}" >{!opportunity.Owner.Name}</apex:outputLink>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Sales Appt Location</apex:facet>
+                        <apex:outputText >{!opportunity.Location__c}</apex:outputText>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Stage</apex:facet>
+                        <apex:outputText >{!opportunity.StageName}</apex:outputText>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Initial Appt Date</apex:facet>
+                        <apex:outputText value="{0, date, yyyy-MM-dd hh:mm}">
+                            <apex:param value="{!opportunity.Initial_Appt_Date__c}" />
+                        </apex:outputText>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">First Show up</apex:facet>
+                        <apex:outputText value="{0, date, yyyy-MM-dd}">
+                            <apex:param value="{!opportunity.First_Visit__c}" />
+                        </apex:outputText>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Created Date</apex:facet>
+                        <apex:outputText value="{0, date, yyyy-MM-dd}">
+                            <apex:param value="{!opportunity.CreatedDate}" />
+                        </apex:outputText>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Last Modified Date</apex:facet>
+                        <apex:outputText value="{0, date, yyyy-MM-dd}">
+                            <apex:param value="{!opportunity.LastModifiedDate}" />
+                        </apex:outputText>
+                    </apex:column>                
+                </apex:pageBlockTable>
+            </apex:pageBlock>
+            <!-- Leads -->
+            <apex:pageBlock title="Leads" rendered="{!SearchResult.Leads.size > 0}" id="leadBlock">
+                <apex:pageBlockTable value="{!SearchResult.Leads}" var="lead" id="leadTable">
+                    <apex:column >
+                         <apex:inputHidden id="leadId" value="{!lead.Id}"/>
+                         <apex:facet name="header">Lead Name</apex:facet>
+                         <apex:outputLink value="/{!lead.Id}" >{!lead.Name}</apex:outputLink>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Create Date</apex:facet>
+                        <apex:outputText value="{0, date, yyyy-MM-dd}">
+                            <apex:param value="{!lead.CreatedDate}" />
+                        </apex:outputText>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">School</apex:facet>
+                        <apex:outputText >{!lead.School_of_Interest__c}</apex:outputText>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">CN/City</apex:facet>
+                        <apex:outputText >{!lead.CN_City__c}</apex:outputText>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Lead Status</apex:facet>
+                        <apex:outputText >{!lead.Status}</apex:outputText>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">P/AC</apex:facet>
+                        <apex:outputText >{!lead.Partner_Ad_Channel__c}</apex:outputText>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Last Modified Date</apex:facet>
+                        <apex:outputText value="{0, date, yyyy-MM-dd}">
+                            <apex:param value="{!lead.LastModifiedDate}" />
+                        </apex:outputText>
+                    </apex:column> 
+                    <apex:column style="width:20%">
+                        <apex:facet name="header" >Convert Status</apex:facet>
+                        <apex:outputPanel layout="inline" id="status" style="color:#7D7D84; width:150px">Checking...</apex:outputPanel>
+                    </apex:column>
+                </apex:pageBlockTable>
+            </apex:pageBlock>
+        </apex:outputPanel>
+        <apex:outputPanel rendered="{!AND(SearchResult.Opportunities.size == 0, SearchResult.Accounts.size == 0, SearchResult.Contacts.size == 0, SearchResult.Leads.size == 0)}">
+            No records found.
+        </apex:outputPanel>
+    </apex:form>
+</apex:page>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StaticResource xmlns="http://soap.sforce.com/2006/04/metadata">
+    <cacheControl>Private</cacheControl>
+    <contentType>application/zip</contentType>
+    <description>&lt;apex:includeScript value=&quot;{!URLFOR($Resource.jQuery, &apos;jquery-1.4.4.min.js&apos;)}&quot;/&gt;</description>
+</StaticResource>

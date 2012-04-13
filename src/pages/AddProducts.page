@@ -1,0 +1,624 @@
+<apex:page controller="AddProductsController" tabStyle="Actual__c" id="page" >
+    <apex:sectionHeader title="Add Products to Actual" />
+    <apex:form id="popForm">
+        <script type="text/javascript">
+            var amountInfos = [
+                <apex:repeat value="{!StudentAmountInfos}" var="amountInfo">
+                    {StudentActualId : '{!amountInfo.Id}', Name : '{!JSENCODE(amountInfo.Name)}', FinalPrice : '{!amountInfo.FinalPrice__c}', PaymentTotal :'{!amountInfo.CNPaymentTotal__c}'},
+                </apex:repeat>
+                {}
+            ];
+            var products = [
+                <apex:repeat value="{!allProducts}" var="prd">
+                    {id: '{!prd.Id}', name: '{!JSENCODE(prd.Name)}', price: '<apex:outputText value="{0, number,####0.00}"><apex:param value="{!prd.Price}"/></apex:outputText>', family: '{!JSENCODE(prd.Family)}', isLevel: '{!prd.IsLevel}'},
+                </apex:repeat>
+                {}
+            ];
+            products.find = function(id) 
+            {
+                for(var i = 0; i < this.length; i++)
+                {
+                    if(this[i].id == id)
+                    {
+                        return this[i];
+                    }
+                }
+                return null;
+            }
+            products.getByFamily = function(family)
+            {
+                var result = [];
+                for(var i = 0; i < this.length; i++)
+                {
+                    if(this[i].family == family)
+                    {
+                        result.push(this[i]);
+                    }
+                }
+                return result;
+            }
+            function productChanged(id)
+            {
+                var priceFieldId = id.replace(/product/g, "price");
+                var priceField = document.getElementById(priceFieldId);
+                var levelFieldId = id.replace(/product/g, "levelPurchase");
+                var levelField = document.getElementById(levelFieldId);
+                var sLengthFieldId = id.replace(/product/g, "standardLength");
+                var sLengthField = document.getElementById(sLengthFieldId);
+                var flengthFieldId = id.replace(/product/g, "freeLength");
+                var flengthField = document.getElementById(flengthFieldId);
+                //var mlengthFieldId = id.replace(/product/g, "marketingLength");
+                //var mlengthField = document.getElementById(mlengthFieldId);
+                var freeLevelId = id.replace(/product/g, "freelevel");
+                var freeLevelField = document.getElementById(freeLevelId);
+                
+                var selectedProduct = products.find(document.getElementById(id).value);
+                if(selectedProduct != null)
+                {
+                    priceField.value = selectedProduct.price;
+                    if(levelField != null)
+                    {
+                        levelField.style.display = (selectedProduct.isLevel != "true")?"none":"block";
+                    }
+                    if(freeLevelField != null)
+                    {
+                        freeLevelField.style.display = (selectedProduct.isLevel != "true")?"none":"block";
+                    }
+                    if(sLengthField != null)
+                    {
+                        if(selectedProduct.isLevel == 'false')
+                        {
+                            sLengthField.style.display = "block";
+                            if(selectedProduct.name.toUpperCase() == "HOME")
+                            {
+                                fillHomeLength(sLengthField);
+                            }
+                            else
+                            {
+                                fillSchoolAndIntensiveLength(sLengthField);
+                            }
+                        }
+                        else
+                        {
+                            sLengthField.style.display = "none";
+                        }
+                        
+                        sLengthField.style.display = (selectedProduct.isLevel == "true")?"none":"block";
+                       
+                        if(selectedProduct.name == 'Englishtown Lite')
+                        { 
+                            sLengthField.selectedIndex = 3;
+                            sLengthField.disabled = true;
+                            flengthField.selectedIndex = 0;
+                        }
+                        else if(selectedProduct.name == "Alumni Club")
+                        {
+                            levelField.selectedIndex = 1;
+                            flengthField.selectedIndex = 9;
+                        }
+                        else
+                        {
+                            sLengthField.disabled = false;
+                            flengthField.selectedIndex = 0;
+                        }
+                    }
+                }
+                else
+                {
+                    priceField.value = "0.00";
+                }
+            }
+            //fill the length select of the product HOME
+            function fillHomeLength(select)
+            {
+                select.options.length = 0;
+                select.options.add(new Option("0", "0"));
+                select.options.add(new Option("3", "3"));
+                select.options.add(new Option("6", "6"));
+                select.options.add(new Option("12", "12"));
+                select.options.add(new Option("18", "18"));
+                select.options.add(new Option("24", "24"));
+                select.options.add(new Option("30", "30"));
+                select.options.add(new Option("36", "36"));
+            }
+            //fill the length select of the products School-Corporate Silver/Gold V1/V2 and Intensive
+            function fillSchoolAndIntensiveLength(select)
+            {
+                select.options.length = 0;
+                
+                select.options.add(new Option("0", "0"));
+                select.options.add(new Option("1", "1"));
+                select.options.add(new Option("2", "2"));
+                select.options.add(new Option("3", "3"));
+                select.options.add(new Option("6", "6"));
+                select.options.add(new Option("9", "9"));
+                select.options.add(new Option("12", "12"));
+                select.options.add(new Option("15", "15"));
+                select.options.add(new Option("18", "18"));
+                select.options.add(new Option("21", "21"));
+                select.options.add(new Option("24", "24"));
+                select.options.add(new Option("27", "27"));
+                select.options.add(new Option("30", "30"));
+                select.options.add(new Option("33", "33"));
+                select.options.add(new Option("36", "36"));
+            }
+            function closePop()
+            {
+                document.getElementById("InlinEditDialog").style.visibility = "hidden";
+                document.getElementById("background").style.display = "none";
+            }
+            function showPop()
+            {
+                if(({!OR(CONTAINS($Profile.Name, 'China Finance'), CONTAINS($Profile.Name, 'B2B CR'))} == true ) && {!IsUpgrade})
+                {
+                    selectOldProducts();
+                } 
+ 
+                document.getElementById("InlinEditDialog").style.visibility = "visible";
+                document.getElementById("background").style.display = "block";
+                productChanged("page:popForm:studentBlock:new:product:product");
+                productChanged("page:popForm:studentBlock:ccb:unitprice:price");
+            }
+            function toggleStudentsAll(checked)
+            {
+                for(var i = 0;; i++)
+                {
+                    var checkbox = document.getElementById("page:popForm:studentBlock:studentSection:studentTable:"+ i + ":check");
+                    if(checkbox == null)
+                    {
+                        break;
+                    }
+                    checkbox.checked = checked;
+                }
+            }
+            function hasStudentSelected()
+            {
+                for(var i = 0;; i++)
+                {
+                    var checkbox = document.getElementById("page:popForm:studentBlock:studentSection:studentTable:"+ i + ":check");
+                    if(checkbox == null)
+                    {
+                        break;
+                    }
+                    if(checkbox.checked)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            function numbersonly(myfield, e, dec)
+            {
+                var key;
+                var keychar;
+                
+                if (window.event)
+                {
+                   key = window.event.keyCode;
+                }
+                else if (e)
+                {
+                   key = e.which;
+                }
+                else
+                {
+                   return true;
+                }
+                keychar = String.fromCharCode(key);
+                
+                // control keys
+                if ((key==null) || (key==0) || (key==8) || (key==9) || (key==13) || (key==27) )
+                {
+                   return true;
+                }
+                // numbers
+                else if ((("0123456789").indexOf(keychar) > -1))
+                {
+                   return true;
+                }
+                // decimal point jump
+                else if (dec && (keychar == "."))
+                {
+                   myfield.form.elements[dec].focus();
+                   return false;
+                }
+                else
+                {
+                   return false;
+                }
+            }
+            var StudentActualIds = '';
+            function addToStudentActualIds(checkBox, sId)
+            {
+                if(checkBox.checked)
+                {
+                    if(StudentActualIds.indexOf(sId) == -1)
+                    {
+                        StudentActualIds = StudentActualIds + ':' + sId;
+                    }
+                }
+                else
+                {
+                    if(StudentActualIds.indexOf(sId) != -1)
+                    {
+                        var tempString = ':' + sId;
+                        StudentActualIds = StudentActualIds.replace(tempString,'');
+                    }
+                }
+                //alert(StudentActualIds); 
+            }
+            
+            var allPrice = 0;
+            function calculatePrice()
+            {
+                allPrice = calculateStandard() - 0 + calculateNonStandard() - 0;
+                allPrice = calculateCCBPrice() - 0 + allPrice; 
+                var ids = StudentActualIds.split(':');
+                var resultMessage = '';
+               for(var i = 1; i < ids.length; i++)
+               {
+                   for(var j=0; j < amountInfos.length; j++)
+                   {
+                       var tempInfo = amountInfos[j];
+                       if(tempInfo.StudentActualId == ids[i])
+                       {  
+                           var finalPrice = tempInfo.FinalPrice - 0;
+                           var PaymentTotal = tempInfo.PaymentTotal - 0;
+
+                           if(PaymentTotal != (finalPrice + allPrice))
+                           {
+                               resultMessage += tempInfo.Name;
+                               resultMessage += '\n'
+                           }
+                       }
+                   }
+               }
+               if(resultMessage != '')
+               {
+                   var con = confirm('Final Price does not equal CN Payment Total, please double check! \n' +resultMessage );
+                   if(con)
+                   {
+                       return true;
+                   }
+                   else
+                   {
+                       return false;
+                   }
+               }
+                return true;
+            }
+            
+            function calculateStandard()
+            {
+                var result = 0; 
+                var standardProduct = document.getElementById('{!$Component.page.popForm.studentBlock.standard.product.product}'); 
+                var newProduct = document.getElementById('{!$Component.page.popForm.studentBlock.new.product.product}');  
+                if(standardProduct != null && standardProduct.value != '0' )
+                {
+                    var sprice = document.getElementById('{!$Component.page.popForm.studentBlock.standard:price.price}').value; 
+                    if(sprice != null)
+                    {
+                        result = sprice;
+                    }
+                }
+                else if(newProduct != null && newProduct.value != '0')
+                {
+                    var nPrice = document.getElementById('{!$Component.page.popForm.studentBlock.new.price.price}').value; 
+                    if(nPrice != null)
+                    {
+                        result = nPrice;
+                    }
+                }
+                return result;
+            }
+            
+            function calculateNonStandard()
+            {
+                var result = 0;
+                var idfix = '{!$Component.page.popForm.studentBlock.non.popTable}';
+                for(var i = 0; i < 5; i++)
+                {
+                    var product = document.getElementById(idfix + ':' +  i + ':product').value;
+                    var price = document.getElementById(idfix + ':' +  i + ':price').value;
+                    var qty = document.getElementById(idfix + ':' +  i + ':qty').value;
+                    if(product != null && product != '0')
+                    {   
+                        if(price == null || qty == null)
+                        {
+                            result += 0;
+                        }
+                        else
+                        {
+                            result += price * qty;
+                        }
+                    }
+                }
+                return result;
+            }
+            
+            function calculateCCBPrice()
+            {
+                var result = 0;
+                var ccbPriceElement = document.getElementById('{!$Component.page.popForm.studentBlock.ccb.unitprice.price}');
+                //var ccbMonthElement = document.getElementById('{!$Component.page.popForm.studentBlock.ccb.month.month}');
+                var price = ccbPriceElement.value;
+                //var ccbMonth = ccbMonthElement.value;
+                if(price != null)
+                {
+                    result += price;
+                }
+                return result;
+            }
+            
+        </script>
+        <apex:pagemessages id="messages" />
+        <apex:pageBlock id="studentBlock" mode="detail">
+            <apex:pageBlockSection columns="2" id="studentSection">
+                <apex:pageblockTable value="{!allStudents}" var="student" width="200px" id="studentTable" rules="all">
+                    <apex:column >
+                        <apex:inputCheckbox value="{!student.Selected}" id="check" onclick="addToStudentActualIds(this, '{!student.Id}')" />
+                        <apex:inputhidden value="{!student.Id}" id="checkHidden"/>
+                        <apex:facet name="header">
+                            <apex:inputCheckbox id="checkAll" onclick="toggleStudentsAll(this.checked)" value="{!allSelected}"/>
+                        </apex:facet>
+                    </apex:column>
+                    <apex:column headerValue="Name" value="{!student.Name}" style="text-decoration:underline;cursor:pointer" onclick="selectStudent('{!student.Id}')" />
+                    <apex:column headerValue="# Products Added" value="{!student.ProductsCount}" style="cursor:pointer" onclick="selectStudent('{!student.Id}')" />
+                    <apex:facet name="caption"><b>All Students</b></apex:facet>
+                </apex:pageblockTable>
+                
+                <apex:outputPanel id="display">
+                    <table width="90%">
+                        <tr>
+                            <td><b>Student Name</b>: {!highlightedStudent.Name}</td>
+                            <td><b>Elite Card #</b>: {!highlightedStudent.EliteCard}</td>
+                        </tr>
+                        <tr>
+                            <td><b>Starting Level</b>: {!highlightedStudent.StartingLevel}</td>
+                            <td><b>Entry Center</b>: {!highlightedStudent.EntryCenter}</td>
+                        </tr>
+                    </table>
+                    <apex:outputPanel rendered="{!highlightedStudent.Products.size = 0}"><br/>No Products been added for this student.</apex:outputPanel>
+                    <apex:pageBlockTable value="{!highlightedStudent.Products}" var="product" rendered="{!highlightedStudent.Products.size > 0}" rules="all">
+                        <apex:column >
+                            <apex:commandLink value="Del" action="{!product.remove}" onclick="if(!confirm('Are you sure you want to remove {!product.Name} from {!highlightedStudent.Name}.'))return false;">
+                                <apex:param name="pid" value="{!product.StudentProductId}" />
+                            </apex:commandLink>
+                        </apex:column>
+                        <apex:column headerValue="Type" value="{!product.Family}" footerValue="Grand Total"/>
+                        <apex:column headerValue="Product Name" value="{!product.Name}"/>
+                        <apex:column headerValue="# Levels Purchased" value="{!product.LevelsPurchased}" />
+                        <apex:column >
+                            <apex:facet name="header">Product<br />Length</apex:facet>
+                            {!product.ProductLength}
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Free<br />Length</apex:facet>
+                            {!product.FreeLength}
+                        </apex:column>
+                        <apex:column headerValue="Marketing Length" value="{!product.MarketingLength}" />
+                        <apex:column headerValue="Guest Centers" value="{!product.BookingCenter}"/>
+                        <!--<apex:column headerValue="Unit Price">
+                            <apex:outputText value="{0, number, ####0.00}"><apex:param value="{!product.Price}"/></apex:outputText>
+                        </apex:column>
+                        <apex:column headerValue="Quantity" value="{!product.Quantity}"/>-->
+                        <apex:column headerValue="Subtotal">
+                            <apex:outputText value="{0, number, #####0.00}"><apex:param value="{!product.Amount}"/></apex:outputText>
+                            <apex:facet name="footer"><apex:outputText value="{0, number, #####0.00}"><apex:param value="{!highlightedStudent.TotalAmount}"/></apex:outputText></apex:facet>
+                        </apex:column>
+                    </apex:pageBlockTable>
+                </apex:outputPanel>
+                <apex:outputPanel >
+                    <input type="button" class="btn" value="Add Products"  onclick="if(hasStudentSelected()){ showPop();}else{alert('Please have at least one student selected.');}" />
+                    <apex:commandButton action="{!cancel}" value="Back to Actual" />
+                    <apex:actionStatus id="displaying">
+                        <apex:facet name="start"><img src="/img/loading.gif" alt="loading..."/></apex:facet>
+                    </apex:actionStatus>
+                </apex:outputPanel>
+                <apex:actionFunction action="{!highlightStudent}" name="selectStudent" rerender="display, messages" status="displaying" >
+                    <apex:param name="sid" value="" />
+                </apex:actionFunction>
+                <apex:actionFunction action="{!selectOldProducts}" name="selectOldProducts" reRender="oldProductList, oldProductTable"   status="displaying2"/>
+            </apex:pageBlockSection>
+            <div id="InlinEditDialog" class="overlayDialog inlineEditDialog" style="max-width: 600px; display:block;left:100px; top:-300px;visibility:hidden;position:relative;">
+                <div class="topRight" style="margin-bottom:0px;">
+                    <div class="topLeft">
+                        <img id="InlineEditDialogX" onmouseover="this.className='dialogCloseOn'" onmouseout="this.className='dialogClose'" onclick="closePop()" class="dialogClose" src="/s.gif" />
+                        <h2 id="InlineEditDialogTitle">Products</h2>
+                    </div>
+                </div> 
+                <div class="middle" style="margin-top:0px;">
+                    <div class="innerContent" id="InlineEditDialogContent">
+                        <div class="activeField">
+                            <div class="inlineEditCompoundDiv" style="text-align:left;">
+                                <apex:pageBlockSection title="Standard Product" collapsible="true" id="standard" rendered="{!AND(NOT(IsAdditional), NOT(CONTAINS($Profile.Name, 'China Finance')), NOT(CONTAINS($Profile.Name, 'B2B CR')), NOT(CONTAINS(LOWER($Profile.Name), 'system administrator')))}">
+                                    <apex:pageBlockSectionItem id="product">
+                                        <apex:outputLabel value="Product" />
+                                        <apex:selectList value="{!standardProduct.Id}" size="1" id="product" onchange="productChanged(this.id)" id="product">
+                                            <apex:selectOptions value="{!standardProductItems}" />
+                                        </apex:selectList>
+                                    </apex:pageBlockSectionItem>
+                                    <apex:pageBlockSectionItem id="price">
+                                        <apex:outputLabel value="Price" />
+                                        <apex:inputText value="{!standardProduct.Price}" id="price" onkeypress="return numbersonly(this, event, true)"/>
+                                    </apex:pageBlockSectionItem>
+                                </apex:pageBlockSection>
+                                <apex:pageBlockSection title="New Product" collapsible="true" id="new" rendered="{!OR(CONTAINS($Profile.Name, 'China Finance'), CONTAINS($Profile.Name, 'B2B CR'), CONTAINS(LOWER($Profile.Name), 'system administrator'))}">
+                                    <apex:pageBlockSectionItem id="product">
+                                        <apex:outputLabel value="Product" />
+                                        <apex:selectList value="{!newProduct.Id}" size="1" id="product" onchange="productChanged(this.id)" id="product">
+                                            <apex:selectOptions value="{!newProductItems}" />
+                                        </apex:selectList>
+                                    </apex:pageBlockSectionItem>
+                                    <apex:pageBlockSectionItem id="price">
+                                        <apex:outputLabel value="Price" />
+                                        <apex:inputText value="{!newProduct.Price}" id="price" onkeypress="return numbersonly(this, event, true)"/>
+                                    </apex:pageBlockSectionItem>
+                                    <apex:pageBlockSectionItem id="levelPurchase">
+                                        <apex:outputLabel value="Levels Purchased" />
+                                        <apex:selectList value="{!newProduct.LevelsPurchased}" size="1" id="levelPurchase"  >
+                                            <apex:selectOption itemLabel="0" itemValue="0" />
+                                            <apex:selectOption itemLabel="1" itemValue="1" />
+                                            <apex:selectOption itemLabel="2" itemValue="2" />
+                                            <apex:selectOption itemLabel="3" itemValue="3" />
+                                            <apex:selectOption itemLabel="4" itemValue="4" />
+                                            <apex:selectOption itemLabel="5" itemValue="5" />
+                                            <apex:selectOption itemLabel="6" itemValue="6" />
+                                            <apex:selectOption itemLabel="7" itemValue="7" />
+                                            <apex:selectOption itemLabel="8" itemValue="8" />
+                                            <apex:selectOption itemLabel="9" itemValue="9" />
+                                            <apex:selectOption itemLabel="10" itemValue="10" />
+                                            <apex:selectOption itemLabel="11" itemValue="11" />
+                                            <apex:selectOption itemLabel="12" itemValue="12" />
+                                            <apex:selectOption itemLabel="13" itemValue="13" />
+                                            <apex:selectOption itemLabel="14" itemValue="14" />
+                                            <apex:selectOption itemLabel="15" itemValue="15" />
+                                            <apex:selectOption itemLabel="16" itemValue="16" />
+                                        </apex:selectList>
+                                    </apex:pageBlockSectionItem>
+                                    <apex:pageBlockSectionItem >
+                                        <apex:outputLabel value="Notes" />
+                                        <apex:inputText value="{!newProduct.Notes}" />
+                                    </apex:pageBlockSectionItem>
+                                    <apex:pageBlockSectionItem id="standardLength">
+                                        <apex:outputLabel value="Standard Length" />
+                                        <apex:selectList value="{!newProduct.StandardLength}" size="1" id="standardLength"  >
+                                            <apex:selectOption itemLabel="0" itemValue="0" />
+                                            <apex:selectOption itemLabel="1" itemValue="1" />
+                                            <apex:selectOption itemLabel="2" itemValue="2" />
+                                            <apex:selectOption itemLabel="3" itemValue="3" />
+                                            <apex:selectOption itemLabel="6" itemValue="6" />
+                                            <apex:selectOption itemLabel="9" itemValue="9" />
+                                            <apex:selectOption itemLabel="12" itemValue="12" />
+                                            <apex:selectOption itemLabel="15" itemValue="15" />
+                                            <apex:selectOption itemLabel="18" itemValue="18" />
+                                            <apex:selectOption itemLabel="21" itemValue="21" />
+                                            <apex:selectOption itemLabel="24" itemValue="24" />
+                                            <apex:selectOption itemLabel="27" itemValue="27" />
+                                            <apex:selectOption itemLabel="30" itemValue="30" />
+                                            <apex:selectOption itemLabel="33" itemValue="33" />
+                                            <apex:selectOption itemLabel="36" itemValue="36" />
+                                        </apex:selectList>
+                                    </apex:pageBlockSectionItem>
+                                    <apex:pageBlockSectionItem id="freeLength">
+                                        <apex:outputLabel value="Free Length" />
+                                        <apex:selectList value="{!newProduct.FreeLength}" size="1" id="freeLength">
+                                            <apex:selectOption itemLabel="0" itemValue="0" />
+                                            <apex:selectOption itemLabel="1" itemValue="1" />
+                                            <apex:selectOption itemLabel="2" itemValue="2" />
+                                            <apex:selectOption itemLabel="3" itemValue="3" />
+                                            <apex:selectOption itemLabel="4" itemValue="4" />
+                                            <apex:selectOption itemLabel="5" itemValue="5" />
+                                            <apex:selectOption itemLabel="6" itemValue="6" />
+                                            <apex:selectOption itemLabel="7" itemValue="7" />
+                                            <apex:selectOption itemLabel="8" itemValue="8" />
+                                            <apex:selectOption itemLabel="9" itemValue="9" />
+                                            <apex:selectOption itemLabel="21" itemValue="21" />
+                                            <apex:selectOption itemLabel="33" itemValue="33" />
+                                            <apex:selectOption itemLabel="45" itemValue="45" />
+                                        </apex:selectList>
+                                    </apex:pageBlockSectionItem>
+                                    <!-- apex:pageBlockSectionItem id="marketingLength">
+                                        <apex:outputLabel value="Marketing Length" />
+                                        <apex:selectList value="{!newProduct.MarketingLength}" size="1" id="marketingLength">
+                                            <apex:selectOption itemLabel="0" itemValue="0" />
+                                            <apex:selectOption itemLabel="1" itemValue="1" />
+                                            <apex:selectOption itemLabel="2" itemValue="2" />
+                                            <apex:selectOption itemLabel="3" itemValue="3" />
+                                            <apex:selectOption itemLabel="4" itemValue="4" />
+                                        </apex:selectList>
+                                    </apex:pageBlockSectionItem -->
+                                    <apex:pageBlockSectionItem id="freelevel">
+                                        <apex:outputLabel value="Free Level" />
+                                        <apex:selectList value="{!newProduct.FreeLevel}" size="1" id="freelevel">
+                                            <apex:selectOption itemLabel="0" itemValue="0" />
+                                            <apex:selectOption itemLabel="1" itemValue="1" />
+                                            <apex:selectOption itemLabel="2" itemValue="2" />
+                                            <apex:selectOption itemLabel="3" itemValue="3" />
+                                            <apex:selectOption itemLabel="4" itemValue="4" />
+                                        </apex:selectList>
+                                    </apex:pageBlockSectionItem>  
+                                </apex:pageBlockSection>
+                                <apex:pageBlockSection title="Non-Standard Products" collapsible="true" id="non">
+                                    <apex:pageBlockTable value="{!studentProducts}" var="studentProduct" id="popTable">
+                                        <apex:column headerValue="Product" >
+                                            <apex:selectList value="{!studentProduct.Id}" size="1" onchange="productChanged(this.id)" id="product" style="width:100px">
+                                                <apex:selectOptions value="{!nonStandardProductItems}" />
+                                            </apex:selectList>
+                                        </apex:column>
+                                        <apex:column headerValue="Unit Price">
+                                            <apex:inputText value="{!studentProduct.Price}" size="10" id="price" maxlength="10" onkeypress="return numbersonly(this, event, true)"/>
+                                        </apex:column>
+                                        <apex:column headerValue="Qty">
+                                            <apex:inputText value="{!studentProduct.Quantity}" size="5" id="qty" maxlength="5" onkeypress="return numbersonly(this, event)"/>
+                                        </apex:column>
+                                        <apex:column headerValue="Notes">
+                                            <apex:inputText value="{!studentProduct.Notes}" />
+                                        </apex:column>
+                                    </apex:pageBlockTable>
+                                </apex:pageBlockSection>
+                                <apex:pageBlockSection title="Cross Center Booking" collapsible="true" id="ccb">
+                                    <apex:pageBlockSectionItem id="unitprice">
+                                        <apex:outputLabel value="Unit Price" />
+                                        <apex:inputText value="{!CCBookingProduct.Price}" size="10" id="price" maxlength="10" onkeypress="return numbersonly(this, event, true)"/>
+                                    </apex:pageBlockSectionItem>
+                                    <apex:pageBlockSectionItem id="month">
+                                        <apex:outputLabel value="Month" />
+                                        <apex:inputText value="{!CCBookingProduct.Quantity}" size="5" id="month" maxlength="5" onkeypress="return numbersonly(this, event)"/>
+                                    </apex:pageBlockSectionItem>
+                                    <apex:inputField value="{!studentProductInfo.BookingCenters__c}"/>
+                                    <apex:pageBlockSectionItem id="notes">
+                                        <apex:outputLabel value="Notes" />
+                                        <apex:inputText value="{!CCBookingProduct.Notes}" id="notes"/>
+                                    </apex:pageBlockSectionItem>
+                                </apex:pageBlockSection>
+                                <apex:pageBlockSection title="Original Product" rendered="{!AND(OR(CONTAINS($Profile.Name, 'China Finance'), CONTAINS($Profile.Name, 'B2B CR'), CONTAINS(LOWER($Profile.Name), 'system administrator')), IsUpgrade)}">
+                                    <apex:pageBlockTable value="{!oldProductInfoList}" var="productInfo" id="oldProductTable" rules="all">
+                                        <apex:column headerValue="Product Name"  >
+                                           <apex:selectList value="{!StudentProductSelectId}"  id="oldProductList" size="1">
+                                               <apex:actionsupport event="onchange" reRender="oldProductTable" status="displaying2"/>
+                                                <apex:selectOptions value="{!OriginalProductOptions}" />
+                                            </apex:selectList> 
+                                        </apex:column>
+                                        <apex:column headerValue="Level Purchased" value="{!productInfo.LevelPurchased}"/>
+                                        <apex:column headerValue="Standard Length" value="{!productInfo.StandLength}"/>
+                                        <apex:column headerValue="Free Length" value="{!productInfo.FreeLength}"/>
+                                        <apex:column headerValue="Quantity" value="{!productInfo.Quantity}"/>
+                                    </apex:pageBlockTable>
+                                </apex:pageBlockSection>
+                            </div>
+                        </div>
+                        <div></div>
+                        <div id="InlineEditDialog_buttons" class="buttons">
+                            <apex:commandButton value=" Save " action="{!save}" onclick="return calculatePrice();" />
+                            <apex:actionStatus id="displaying2">
+                                    <apex:facet name="start"><img src="/img/loading.gif" alt="loading..."/></apex:facet>
+                            </apex:actionStatus>
+                        </div>
+                    </div>
+                </div>
+                <div class="bottomRight">
+                    <div class="bottomLeft"></div>
+                </div>
+            </div>
+            <div class="overlayBackground" id="background" style="width: 3289px; height: 1293px; display: none; position: fixed"></div>
+        </apex:pageBlock>
+    </apex:form>
+    <script type="text/javascript" >
+            function findChecked()
+            {
+                for(var i = 0;; i++)
+                {
+                    var checkbox = document.getElementById("page:popForm:studentBlock:studentSection:studentTable:"+ i + ":check");
+                    if(checkbox == null)
+                    {
+                        break;
+                    }
+                    var tempId = document.getElementById("page:popForm:studentBlock:studentSection:studentTable:"+ i + ":checkHidden").value;
+                    addToStudentActualIds(checkbox, tempId);
+                }
+            }
+            findChecked();
+    </script>
+</apex:page>

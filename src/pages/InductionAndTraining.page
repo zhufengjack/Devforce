@@ -1,0 +1,76 @@
+<apex:page controller="InductionAndTrainingController" tabStyle="Contact" id="page">
+	<script type="text/javascript">
+		function checkCurrentRowInput(currentCheckDom, index)
+		{
+			if(currentCheckDom.checked == true)
+			{
+				var currentRowDate = document.getElementById("page:form:block:date" + index);
+				var currentRowTime = document.getElementById("page:form:block:time" + index);
+				var currentRowName = document.getElementById("page:form:block:name" + index);
+				if(currentRowDate.value == null || currentRowDate.value == '' || currentRowTime.value == null || currentRowTime.value == '' || currentRowName.value == null || currentRowName.value == '')
+				{
+					alert("Please fill in the required fields!");
+					currentCheckDom.checked = false;
+				}
+			} 
+		}
+		function setFocusOnLoad(){}
+	</script>
+	<apex:form id="form">
+		<apex:sectionHeader title="Teacher" subtitle="Teacher induction and training" />
+		<apex:pageBlock id="block">
+			<apex:pageBlockSection columns="1" title="Induction & Training" collapsible="false">
+				<apex:outputLink value="https://englishtown.mindflash.com" target="_blank">Take me to the task
+				</apex:outputLink>
+			</apex:pageBlockSection>
+			<br />
+			<br />
+			<apex:pageBlockSection columns="1" title="My Observations" collapsible="false">
+				Download the&nbsp;<a href="https://c.ap1.content.force.com/servlet/servlet.FileDownload?file=01590000000IOdv" target="_blank">Observation Form</a>
+			</apex:pageBlockSection>
+			<br />
+			<apex:pageMessages id="titMessages" />
+			<table class="list" border="0" cellpadding="0" cellspacing="0" width="80%">
+				<tr class="headerRow">
+					<th>&nbsp;</th>
+					<th>Date</th>
+					<th>Class Time (NYT)</th> 
+					<th>Teacher</th>
+				</tr>
+				<tr>
+					<td><apex:inputField value="{!Training.X1_step1__c}" onclick="checkCurrentRowInput(this, 1)" onfocus="setFocusOnLoad()"/>&nbsp;1</td>
+					<td><apex:inputField value="{!Training.Date1__c}"  id="date1"/></td>
+					<td><apex:inputField value="{!Training.Class_time_NYT_1__c}" id="time1"/></td>
+					<td><apex:inputField value="{!Training.X1_teacher_name__c}" id="name1"/></td>
+				</tr>
+				<tr>
+					<td><apex:inputField value="{!Training.X2_step2__c}" onclick="checkCurrentRowInput(this, 2)" />&nbsp;2</td>
+					<td><apex:inputField value="{!Training.Date2__c}" id="date2"/></td>
+					<td><apex:inputField value="{!Training.Class_time_NYT_2__c}"  id="time2"/></td>
+					<td><apex:inputField value="{!Training.X2_teacher_name__c}" id="name2"/></td>
+				</tr>
+				<tr>
+					<td><apex:inputField value="{!Training.X3_step3__c}" onclick="checkCurrentRowInput(this, 3)" />&nbsp;3</td>
+					<td><apex:inputField value="{!Training.Date3__c}" id="date3"/></td>
+					<td><apex:inputField value="{!Training.Class_time_NYT_3__c}"  id="time3"/></td>
+					<td><apex:inputField value="{!Training.X3_teacher_name__c}" id="name3"/></td>
+				</tr> 
+				<tr>
+					<td><apex:inputField value="{!Training.X4_Step4__c}" onclick="checkCurrentRowInput(this, 4)" />&nbsp;4</td>
+					<td><apex:inputField value="{!Training.Date4__c}" id="date4"/></td>
+					<td><apex:inputField value="{!Training.Class_time_NYT_4__c}" id="time4"/></td>
+					<td><apex:inputField value="{!Training.X4_teacher_name__c}" id="name4"/></td>
+				</tr>
+				<tr>
+					<td><apex:inputField value="{!Training.X5_step5__c}" onclick="checkCurrentRowInput(this, 5)" />&nbsp;5</td>
+					<td><apex:inputField value="{!Training.Date5__c}" id="date5"/></td>
+					<td><apex:inputField value="{!Training.Class_time_NYT_5__c}"  id="time5"/></td>
+					<td><apex:inputField value="{!Training.X5_teacher_name__c}" id="name5"/></td>
+				</tr>
+			</table>
+			<apex:pageBlockButtons location="bottom">
+				<apex:commandbutton action="{!save}" value="Save" rendered="{!IsTeacher}"/>
+			</apex:pageBlockButtons> 
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>

@@ -1,0 +1,100 @@
+<!-- 
+*	Display case details from a Tako Case 
+*	Pony Ma 2011-12-14 Created	
+ -->
+<apex:page controller="TakoCaseDetailController" tabStyle="Case">
+	<apex:includeScript value="{!URLFOR($Resource.jQuery, 'jquery-1.4.4.min.js')}" />
+	<style type="text/css">
+        .eventSelected {
+            background: url("/img/alohaSkin/twisty_sprite.png") no-repeat scroll 0 0 transparent;
+        }        
+    </style>
+	<div class="bPageTitle">
+		<div class="ptBody">
+			<div class="content"><img src="/s.gif" alt="Tako Case"  class="pageTitleIcon" title="Tako Case"/>
+				<h1 class="pageType">Tako Case<span  class="titleSeparatingColon">:</span></h1>
+				<h2 class="pageDescription">{!TakoCaseId}</h2>
+				<div class="blank">&nbsp;</div>
+			</div>
+		</div>
+	</div>	
+	<apex:pageBlock title="Case Events" mode="mainDetail" rendered="{!NoT(ISNULL(TakoCaseDetails)) && TakoCaseDetails.Size>0}">
+		<apex:pageBlockSection columns="1">
+		<apex:pageBlockTable id="caseEvents" value="{!TakoCaseDetails}" var="TakoCaseDetail">        		
+       		<apex:column width="10">
+       		    <apex:facet name="header">&nbsp;</apex:facet>
+       			<apex:outputPanel rendered="{!TakoCaseDetail.EventId==TakoCaseSelected.EventId}"><img class="eventSelected" src="/s.gif" style="width:10px;height:10px;"/></apex:outputPanel>
+       		</apex:column>
+       		<apex:column width="30">
+       			<apex:facet name="header">Event Id</apex:facet>       			      				
+       			<apex:outputLink styleClass="actionLink" value="/apex/TakoCaseDetail?takoCaseId={!TakoCaseId}&eventId={!TakoCaseDetail.EventId}">{!TakoCaseDetail.EventId}</apex:outputLink>       				       			      			
+       		</apex:column>
+       		<apex:column width="130">
+       			<apex:facet name="header">Created Date</apex:facet>       			      				
+       			<apex:outputText value="{!TakoCaseDetail.CreatedDate}"/>       				       			      			
+       		</apex:column>
+       		<apex:column width="100">
+       			<apex:facet name="header">From</apex:facet>
+       			<apex:outputText value="{!TakoCaseDetail.CreatedBy}"/>
+       		</apex:column>
+       		<apex:column width="100">
+       			<apex:facet name="header">To</apex:facet>
+       			<apex:outputText value="{!TakoCaseDetail.SentTo}"/>
+       		</apex:column> 
+       		<apex:column >
+       			<apex:facet name="header">Comment</apex:facet>
+       			<apex:outputText value="{!TakoCaseDetail.PlainTextComment}"/>
+       		</apex:column>  
+       		<apex:column width="60">
+       			<apex:facet name="header">Attachments</apex:facet>
+       			<apex:outputPanel rendered="{!NOT(ISNULL(TakoCaseDetail.Attachments)) && TakoCaseDetail.Attachments.Size > 0}">
+                    <img width="21" height="16" title="Checked" class="checkImg" alt="Checked" src="/img/checkbox_checked.gif" />
+                </apex:outputPanel>
+                 	<apex:outputPanel rendered="{!ISNULL(TakoCaseDetail.Attachments) || TakoCaseDetail.Attachments.Size = 0}">
+                     <img width="21" height="16" title="Not Checked" class="checkImg" alt="Not Checked" src="/img/checkbox_unchecked.gif" />
+                 </apex:outputPanel>
+       		</apex:column>       		
+       	</apex:pageBlockTable>	
+       	</apex:pageBlockSection>								
+	</apex:pageBlock>	
+	
+	<apex:pageBlock title="Comment" id="caseCommentBlock" rendered="{!NOT(ISNULL(TakoCaseSelected))}">
+		<apex:pageBlockSection columns="1">								
+			<apex:outputText value="{!TakoCaseSelected.Comment}" escape="false"/>				
+		</apex:pageBlockSection>		
+	</apex:pageBlock>
+	
+	<apex:pageBlock title="Attachments" id="attachmentBlock" rendered="{!NOT(ISNULL(TakoCaseSelected))}">
+		<apex:pageBlockTable value="{!TakoCaseSelected.Attachments}" var="attach" rendered="{!NoT(ISNULL(TakoCaseSelected.Attachments)) && TakoCaseSelected.Attachments.Size>0}">
+			<apex:column styleClass="actionColumn">
+				<apex:facet name="header"><span>Action</span></apex:facet>
+				<apex:outputLink value="{!attach.FileUrl}" target="_blank" styleClass="actionLink">Download</apex:outputLink>
+			</apex:column>
+			<apex:column >
+				<apex:facet name="header"><span>Attachment</span></apex:facet>
+				<apex:outputText value="{!attach.AttachmentLabel}"/>
+			</apex:column>
+		</apex:pageBlockTable>	
+		<apex:outputPanel layout="none" rendered="{!ISNULL(TakoCaseSelected.Attachments) || TakoCaseSelected.Attachments.Size=0}" >
+            <table cellspacing="0" cellpadding="0" border="0" class="list"> 
+                <tbody>
+	                <tr class="headerRow">
+	                    <th scope="col" style="background-color:#F8F8F8;background-image:none;font-weight:normal;">No attachments to display</th>
+	                </tr>
+                </tbody>
+            </table> 
+        </apex:outputPanel>	
+	</apex:pageBlock>
+	
+	<apex:pageBlock id="takoCaseMessageBlock" rendered="{!ISNULL(TakoCaseDetails) || TakoCaseDetails.Size=0}" mode="mainDetail">
+		<apex:pageMessage summary="{!TakoCaseMessage}" strength="2" severity="{!TakoCaseMessageSeverity}"/>							                    
+	</apex:pageBlock>
+		
+	<script type="text/javascript">
+		$j = jQuery.noConflict();
+		$j(function(){
+			$j("div[id$=caseCommentBlock]").parents(".apexp").addClass("bRelatedList").removeClass('apexp');	
+			$j("div[id$=attachmentBlock]").parents(".apexp").addClass("bRelatedList").removeClass('apexp');							
+		});		
+	</script>
+</apex:page>

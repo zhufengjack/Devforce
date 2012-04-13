@@ -1,0 +1,77 @@
+<apex:page sidebar="false" showHeader="false" id="page" controller="SmartHourlyCappingController">
+    <script type="text/javascript">
+        function getAllocation() 
+        { 
+           var school = document.getElementById("school");
+           var sdate = document.getElementById("page:form:txtDate");
+           if(school.value != null && school.value != "")
+           {
+                if(sdate.value != null && sdate.value != "")
+                {
+                    window.location = "SmartHourlyCapping?school=" + school.value + "&date=" + sdate.value;
+                }
+                else
+                {
+                    alert("please select a date!");
+                }
+           }
+           else
+           {
+                alert("please select a school!");
+           }
+        } 
+    </script>
+    <body>
+        <apex:form id="form">
+           
+            <center>
+                <div id="divHead">
+                     School Name: 
+                    <select name="school" id="school"> 
+                        <option value="BJ YYC">BJ YYC</option> 
+                        <option value="BJ FXM">BJ FXM</option>
+                        <option value="BJ ZGC">BJ ZGC</option>                        
+                        <option value="SH DNR">SH DNR</option>
+                        <option value="SH HHR">SH HHR</option> 
+                        <option value="SH PSQ">SH PSQ</option>
+                        <option value="SH XZG">SH XZG</option> 
+                        <option value="SH BBB">SH BBB</option>
+                        <option value="SH LJZ">SH LJZ</option>                     
+                        <option value="SH XJH">SH XJH</option>
+                        <option value="SH WJC">SH WJC</option>
+                        <option value="SH ZSP">SH ZSP</option>
+                        <option value="SH HQC">SH HQC</option> 
+						<option value="HZ HLL">HZ HLL</option> 
+                    </select> 
+                   &nbsp;&nbsp;Date:<apex:inputField value="{!TempReport.Appointment_Date__c}" id="txtDate"/> 
+                    <hr style="width:500px;" align="center"/>
+                    <div id="tblDetails">
+                        <apex:pageMessages />
+                        <Table style="width:380px;border-color:#4F4431;" class="list" border="1" cellspacing="0" cellpadding="0" id="alloctable">
+                            <tr class="headerRow" style="background-color:#ACA96C;">
+                                <th scope="col" class="" style="width:10%;text-align:center">No.</th>
+                                <th scope="col" class="" style="width:40%;text-align:center">Hour</th>
+                                <th scope="col" class="" style="width:30%;text-align:center">Remianing Appointments</th>
+                            </tr>
+                            <apex:outputPanel id="results" rendered="{!results.size > 0}">
+                                <apex:repeat value="{!results}" var="appt" id="items">
+                                    <tr style="background-color:#D6D5CF;">
+                                        <td align="center">{!appt.SNumber}</td>
+                                        <td align="center">{!appt.FormatTime}</td>
+                                        <td align="center">{!appt.RemianingCount}</td>
+                                    </tr>
+                                </apex:repeat>
+                            </apex:outputPanel>
+                        </Table>
+                    </div>
+                    <hr style="width:500px;" align="center"/>
+                    <input id="btnGetAllo" type="button" class="btn" value="Get Appointment Details" onClick="getAllocation();" /> 
+                </div>
+            </center>
+        </apex:form>
+        <script type="text/javascript">
+           document.getElementById("school").value = "{!IF(ISNULL($CurrentPage.parameters.school), '', $CurrentPage.parameters.school)}";
+           document.getElementById("page:form:txtDate").value = "{!IF(ISNULL($CurrentPage.parameters.date), '', $CurrentPage.parameters.date)}";
+        </script>
+    </body> 
+</apex:page>

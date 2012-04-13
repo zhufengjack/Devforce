@@ -1,0 +1,111 @@
+<apex:page controller="AddStudentActualsController" tabStyle="Actual__c">
+    <style type="text/css">
+        .student
+        {
+            height: 30px;
+        }
+        .student td
+        {
+            height: 30px;
+        }
+    </style>
+    <script type="text/javascript">
+        String.prototype.trim = function()
+        {
+           return this.replace(/(^\s*)|(\s*$)/g, "");
+        }
+        
+        function validateCheckbox(thisBox, isNew)
+        {
+            if(!isNew)
+            {    
+                var checked = thisBox.checked;
+                if(!checked)
+                {
+                    return confirm('Are you sure to delete this student?');
+                }
+            }
+            return true;
+        }
+        
+        function changeStatus(component)
+        {
+            component.value = 'Saving...';
+            component.className = 'btnDisabled';
+        }
+        
+        function numbersonly(myfield, e, dec)
+        {
+            var key;
+            var keychar;
+            
+            if (window.event)
+            {
+               key = window.event.keyCode;
+            }
+            else if (e)
+            {
+               key = e.which;
+            }
+            else
+            {
+               return true;
+            }
+            keychar = String.fromCharCode(key);
+            
+            // control keys
+            if ((key==null) || (key==0) || (key==8) || (key==9) || (key==13) || (key==27) )
+            {
+               return true;
+            }
+            // numbers
+            else if ((("0123456789").indexOf(keychar) > -1))
+            {
+               return true;
+            }
+            // decimal point jump
+            else if (dec && (keychar == "."))
+            {
+               myfield.form.elements[dec].focus();
+               return false;
+            }
+            else
+            {
+               return false;
+            }
+        }
+    </script>
+    <apex:sectionHeader title="Add Students To Actual"/>
+    <apex:variable var="IsAdmin"  value="{!CONTAINS(LOWER($Profile.Name), 'system administrator new')}" />
+    <apex:form id="studentActualForm">
+        <apex:pageBlock id="tableBlock" >
+            <apex:pageMessages escape="false"/>
+            <apex:pageBlockTable value="{!StudentActuals}" var="student" columns="5" width="100%" id="studentTable" rowClasses="student">
+                <apex:column id="nameColumn">
+                    <apex:facet name="header">Student Name</apex:facet>
+                    <span><apex:inputCheckbox value="{!student.NotDeleted}" onclick="return validateCheckbox(this, {!student.IsNew});" id="check" title="check this and the student actual will be created"  /></span>
+                    <apex:outputLink value="/{!student.StudentId}" id="studentName">{!student.StudentName}</apex:outputLink>
+                    <apex:inputHidden value="{!student.IsFirstActual}" id="IsFirstActual"/>
+                </apex:column>
+                <apex:column id="invoiceColumn">
+                    <apex:facet name="header">Invoice #</apex:facet>
+                    <apex:inputText value="{!student.InvoiceNumber}" id="invoice"/>
+                </apex:column>
+                <apex:column >
+                    <apex:facet name="header">Company Portion</apex:facet>
+                    <apex:inputText value="{!student.CompanyPortion}" id="companyPortion" onkeypress="return numbersonly(this, event, true)"/>
+                 </apex:column>
+                <apex:column id="entryCenterColumn">
+                    <apex:facet name="header">Entry Center</apex:facet>
+                    <apex:selectList value="{!student.EntryCenter}" multiselect="false" size="1" id="entry" disabled="{!IF(OR($Profile.Name = 'EF China Smart B2B CR User', IsAdmin), false, true)}">
+                        <apex:selectOptions value="{!entryCenterPicklistValues}" />
+                    </apex:selectList>
+                </apex:column>
+            </apex:pageBlockTable>
+            <apex:pageBlockButtons location="bottom">
+                <apex:commandButton value="Save" action="{!save}" onclick="return hasDuplicateInPage();" />
+                <apex:commandButton value="Cancel" action="{!cancel}"/>
+            </apex:pageBlockButtons>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

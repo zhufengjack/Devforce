@@ -1,0 +1,74 @@
+<apex:page standardController="Contact">
+    <script src="/soap/ajax/16.0/connection.js" type="text/javascript"></script>
+    <script src="/soap/ajax/16.0/apex.js" type="text/javascript"></script>
+    <apex:pageBlock mode="maindetail">
+        <div id="checkErrorMessage"></div>
+        <apex:pageBlockSection columns="2">
+            <apex:pageblockSectionItem >
+                <apex:outputLabel >Status</apex:outputLabel>
+                <span id="status"></span>
+            </apex:pageblockSectionItem>
+            <apex:pageblockSectionItem >
+                 <apex:outputLabel >Current Level</apex:outputLabel>
+                 <span id="currentLevel"></span>
+            </apex:pageblockSectionItem>
+            <apex:pageblocksectionItem >
+                 <apex:outputLabel >Study Center</apex:outputLabel>
+                 <span id="studyCenter"></span>
+            </apex:pageblocksectionItem>
+        </apex:pageBlockSection>
+    </apex:pageBlock>
+    <script type="text/javascript">
+        var contactId = '{!Contact.Id}';
+        var errorMessage = document.getElementById("checkErrorMessage");
+
+        sforce.apex.execute
+        (
+            "EtownStudentInfoService",
+             "checkAndUpdateStudentInfo", 
+             {studentId : contactId},
+             {
+                onSuccess : function(result)
+                {
+                    if(result == "Success")
+                    {
+                        refreshPagecontactInfo();
+                    }
+                    else if(result != '')
+                    {
+                        errorMessage.innerHTML = result;
+                        errorMessage.className = "message errorM3";
+                    }
+                },
+                onFailure : function(error)
+                {
+                    errorMessage.innerHTML = error;
+                    errorMessage.className = "message errorM3";
+                }
+            }
+        );
+        
+        function querySuccess(result)
+        {
+            var records = result.getArray("records");
+            if(records.length > 0)
+            {
+                document.getElementById("status").innerHTML = records[0].Status__c;
+                document.getElementById("currentLevel").innerHTML = records[0].CurrentLevel__c;
+                document.getElementById("studyCenter").innerHTML = records[0].StudyCenter__c;
+            } 
+        }
+        
+        function queryFail(error)
+        {
+            log(error);
+        }
+        
+        function refreshPagecontactInfo()
+        {
+            var query = "select Id, Status__c, StudyCenter__c, CurrentLevel__c  from Contact where Id = '" + contactId +"' " ;
+            sforce.connection.query(query, {onSuccess:querySuccess, onFailure:queryFail}); 
+        }
+        
+    </script>
+</apex:page>

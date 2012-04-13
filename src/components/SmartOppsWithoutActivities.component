@@ -1,0 +1,153 @@
+<apex:component controller="SmartOppsWithoutActivitiesController" access="global">
+	<apex:attribute name="SchoolName" description="this is param for the CC." type="String" assignTo="{!SchoolName}"/>
+	<br/>
+	<table style="BORDER-COLLAPSE: collapse" borderColor="#000000" cellSpacing="0" width="1000px" align="left" bgColor="#FFF" border="0">
+	    <apex:outputPanel rendered="{!IF(OpportunitiesWithoutActivities.size > 0, true, false)}">
+		    <tr>
+		    	<td>
+		            <table style="BORDER-COLLAPSE: collapse" borderColor="#000000" cellSpacing="0" width="1159" align="left" bgColor="#FFF" border="1">
+		                <tr >
+	                		<td colspan="6" style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: bold; text-align: center">CC  haven’t been updated comments in 24hours after customer’s first show up</td>
+	              		</tr>
+		                <tr>
+		                    <th width="149">Opportunity Owner</th>
+		                    <th width="149">Opportunity Name</th>
+		                    <th width="149">Mobile</th>
+		                    <th width="126">First Show Up</th>
+		                    <th width="241">Opportunity Stage</th>
+		                    <th width="319">Comments</th>
+		                </tr>
+		                <apex:repeat value="{!OpportunitiesWithoutActivities}" var="opp">
+			                <tr>
+			                    <td style="width: 150px; text-align: center">{!opp.Owner.Name}</td>
+			                    <td style="width: 150px; text-align: center"><apex:outputLink value="{!SystemUrl}/{!opp.Id}">{!opp.Name}</apex:outputLink></td>
+			                    <td style="width: 150px; text-align: center">{!opp.Mobile__c}</td>
+			                    <td style="width: 100px; text-align: center">
+			                    	<apex:outputText value="{0,date,yyyy/MM/dd}">
+			                        	<apex:param value="{!opp.First_Visit__c}"/>
+			                    	</apex:outputText>
+			                    </td> 
+			                    <td style="width: 150px; text-align: center">{!opp.StageName}</td>
+			                    <td style="width: 300px; text-align: left">{!opp.Comments__c}</td>
+			                </tr>
+		                </apex:repeat>
+		                <apex:outputPanel rendered="{!OpportunitiesWithoutActivities.size = 900}"  layout="none">
+			                <tr >
+		                		<td colspan="6" style="text-align: center">more records in the system</td>
+		              		</tr>
+		                </apex:outputPanel>
+		        	</table>
+		        </td> 
+		    </tr>
+		    <tr><td>&nbsp;</td></tr>
+	    </apex:outputPanel>
+	    <apex:outputPanel rendered="{!IF(Events.size > 0, true, false)}">
+		    <tr>
+		    	<td>
+			            <table style="BORDER-COLLAPSE: collapse" borderColor="#000000" cellSpacing="0" width="1173" align="left" bgColor="#ffffff" border="1">
+			                <tr >
+		                		<td colspan="6"  style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: bold; text-align: center">CC haven’t been updated Events in yesterday</td>
+		              		</tr>
+			                <tr>
+			                    <th width="150" height="18">Account Owner</th>
+			                    <th width="150">Subject</th>
+			                    <th width="196">Opportunity Name</th>
+			                    <th width="196">Opportunity Stage</th>
+			                    <th width="150">Event Appt Status</th>
+			                    <th width="296">Comments</th>
+			                </tr>
+			                <apex:repeat value="{!Events}" var="event">
+				                <tr>
+				                    <td style="width: 150px; text-align: center"> {!event.EventOwner} </td> 
+				                    <td style="width: 150px; text-align: center"><apex:outputLink value="{!SystemUrl}/{!event.EventId}">{!event.EventSubject}</apex:outputLink></td>
+				                    <td style="width: 200px; text-align: center"><apex:outputLink value="{!SystemUrl}/{!event.OppId}">{!event.OppName}</apex:outputLink></td>
+				                    <td style="width: 200px; text-align: center"> {!event.OppStage} </td> 
+				                    <td style="width: 150px; text-align: center"> {!event.EventAppStatus} </td> 
+				                    <td style="width: 300px; text-align: left">{!event.EventComments}</td>
+				                </tr>
+			                </apex:repeat>
+			                <apex:outputPanel rendered="{!Events.size = 900}"  layout="none" >
+				                <tr >
+			                		<td colspan="6" style="text-align: center">more records in the system</td>
+			              		</tr>
+		                	</apex:outputPanel>
+			    		</table>
+		    	</td> 
+		    </tr>
+	    	<tr><td>&nbsp;</td></tr>
+	    </apex:outputPanel>
+	    <apex:outputPanel rendered="{!IF(Tasks.size > 0, true, false)}">
+		    <tr>
+		    	<td>
+			            <table style="BORDER-COLLAPSE: collapse" borderColor="#000000" cellSpacing="0" width="1173" align="left" bgColor="#ffffff" border="1">
+			            	<tr >
+		                		<td colspan="6"  style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: bold; text-align: center">CC haven’t been updated Tasks in yesterday</td>
+		              		</tr>
+			                <tr>
+			                    <th width="148">Opportunity Owner</th>
+			                    <th width="148">Subject</th>
+			                    <th width="198">Opportunity Name</th>
+			                    <th width="198">Opportunity Stage</th>
+			                    <th width="168">Task Status</th>
+			                    <th width="296">Comments</th>
+			                </tr>
+			                <apex:repeat value="{!Tasks}" var="task">
+				                <tr>
+				                    <td style="width: 150px; text-align: center"> {!task.TaskOwner} </td> 
+				                    <td style="width: 150px; text-align: center"><apex:outputLink value="{!SystemUrl}/{!task.TaskId}">{!task.TaskSubject}</apex:outputLink></td>
+				                    <td style="width: 200px; text-align: center"><apex:outputLink value="{!SystemUrl}/{!task.OppId}">{!task.TaskRelatedName}</apex:outputLink></td>
+				                    <td style="width: 200px; text-align: center"> {!task.OppStage} </td> 
+				                    <td style="width: 150px; text-align: center"> {!task.TaskAppStatus} </td> 
+				                    <td style="width: 300px; text-align: left">{!task.TaskComments}</td>
+				                </tr>
+			                </apex:repeat>
+			                <apex:outputPanel rendered="{!Tasks.size = 900}"  layout="none">
+				                <tr >
+			                		<td colspan="6" style="text-align: center">more records in the system</td>
+			              		</tr>
+		                	</apex:outputPanel>
+			    		</table>
+		    	</td> 
+		    </tr>
+		    <tr><td>&nbsp;</td></tr>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!IF(FirstShowUpOpps.size > 0, true, false)}">
+		    <tr>
+		    	<td>
+			            <table style="BORDER-COLLAPSE: collapse" borderColor="#000000" cellSpacing="0" width="1182" align="left" bgColor="#ffffff" border="1">
+			                <tr >
+		                		<td colspan="6"  style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: bold; text-align: center">Over 60days leads need CC to follow up, details as below</td>
+		              		</tr>
+			                <tr>
+			                    <th width="162">Account Owner</th>
+			                    <th width="157">Account Name</th>
+			                    <th width="126">Mobile</th>
+			                    <th width="165">First Show Up</th>
+			                    <th width="196">Opportunity Stage</th>
+			                    <th width="418">Comments</th>
+			                </tr>
+			                <apex:repeat value="{!FirstShowUpOpps}" var="opp">
+				                <tr>
+				                    <td style="width: 150px; text-align: center">{!opp.Owner.Name}"</td>
+				                    <td style="width: 150px; text-align: center"><apex:outputLink value="{!SystemUrl}/{!opp.Id}">{!opp.Name}</apex:outputLink></td>
+				                    <td style="width: 120px; text-align: center">{!opp.Mobile__c}</td>
+				                    <td style="width: 100px; text-align: center">
+					                    <apex:outputText value="{0,date,yyyy/MM/dd}">
+					                        <apex:param value="{!opp.First_Visit__c}"/>
+					                    </apex:outputText>
+		                			</td> 
+				                    <td style="width: 100px; text-align: center">{!opp.StageName}</td>
+				                    <td style="width: 330px; text-align: left">{!opp.Comments__c}</td>
+				                </tr>
+			                </apex:repeat>
+			                <apex:outputPanel rendered="{!FirstShowUpOpps.size = 900}" layout="none">
+				                <tr >
+			                		<td colspan="6" style="text-align: center">more records in the system</td>
+			              		</tr>
+		                	</apex:outputPanel>
+			    		</table>
+		   		</td>
+		   	</tr>
+		 </apex:outputPanel>
+	</table>
+</apex:component>

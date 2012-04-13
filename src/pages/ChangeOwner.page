@@ -1,0 +1,23 @@
+<apex:page controller="ChangeOwnerController" tabStyle="Account" action="{!init}">
+    <apex:form >
+        <apex:sectionHeader title="Change Owner" subtitle="{!TargetAccount.Name}"/>
+            <apex:pageMessages />
+            <apex:pageBlock rendered="{!NOT(IsDenied)}">
+                <apex:pageBlockButtons location="bottom">
+                    <apex:commandButton action="{!save}" value="Save" />
+                    <apex:commandButton action="{!cancel}" value="Cancel" />
+                </apex:pageBlockButtons>
+                <apex:pageBlockSection >
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="New Owner" />
+                        <apex:SelectList id="owner" size="1" value="{!SelectedUserId}">
+                            <apex:selectOptions value="{!userList}" />
+                        </apex:SelectList>
+                 </apex:pageBlockSectionItem>
+               </apex:pageBlockSection>
+         </apex:pageBlock>
+                 <apex:pageBlock rendered="{!IsDenied}">
+                     <a href="/001/o">Back to account list</a>
+                 </apex:pageBlock>
+     </apex:form>   
+</apex:page>

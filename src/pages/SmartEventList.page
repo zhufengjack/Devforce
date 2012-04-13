@@ -1,0 +1,76 @@
+<apex:page sideBar="false" showHeader="false"  Controller="SmartEventListController" id="page">
+    <apex:form id="form">
+          <apex:pageBlock tabStyle="Event" id="block">
+            <apex:variable var="EventViewable" value="{!OR(Contains($Profile.Name, 'EF China Telemarketing User'), Contains($Profile.Name, 'EF China Telemarketing Manager'), Contains($Profile.Name, 'EF China Operator'), Contains($Profile.Name, 'EF China Operator Lead'))}"/>
+            <apex:pageBlockTable value="{!events}" var="evn" id="table" rendered="{!NOT(EventViewable)}">
+                <apex:column headerValue="IsDone">
+                    <apex:inputCheckbox value="{!evn.IsDone}" disabled="true" />
+                </apex:column>
+                <apex:column headerValue="Time">
+                       <apex:outputText value="{!evn.TimeShow}" />
+                </apex:column>
+               <apex:column headerValue="Subject">
+                   <a href = "/{!evn.evnId}" target ="_blank" > {!evn.eventSubject} </a>
+               </apex:column> 
+               <apex:column headerValue="Opportunity Name">
+                   <a href = "/{!evn.oppId}"  target = "_blank" > {!evn.oppName} </a>
+               </apex:column> 
+               <apex:column headerValue="Opportunity Stage">
+                   <apex:outputText value="{!evn.OppStage}" />
+               </apex:column> 
+               <apex:column headerValue="Event Appt Status">
+                   <apex:outputText value="{!evn.EventAppStatus}" />
+               </apex:column> 
+               <apex:column headerValue="Mobile">
+                   <apex:outputText value="{!evn.Mobile}" />
+               </apex:column> 
+               <apex:column headerValue="Comments">
+                   <apex:outputText value="{!evn.EventComments}" />
+               </apex:column> 
+            </apex:pageBlockTable>
+            <apex:pageBlockTable value="{!events}" var="evn" id="TMEventstable" rendered="{!EventViewable}">
+                <apex:column headerValue="Time" >
+                   <apex:outputText value="{!evn.ActivityDate} {!evn.TimeShow}"/>
+               </apex:column>
+               <apex:column headerValue="Subject">
+                   <a href = "/{!evn.evnId}" target ="_blank" > {!evn.eventSubject} </a>
+               </apex:column> 
+               <apex:column headerValue="Name">
+                   <a href = "/{!evn.oppId}"  target = "_blank" > {!evn.oppName} </a>
+               </apex:column> 
+               <apex:column headerValue="Ranking">
+                   <apex:outputText value="{!evn.Ranking}"  />
+               </apex:column> 
+               <apex:column headerValue="School">
+                   <apex:outputText value="{!evn.School}" />
+               </apex:column>
+              <apex:column headerValue="Create date" >
+                   <apex:outputText value="{!evn.CreateDate}"/>
+               </apex:column>
+               <apex:column headerValue="Mobile">
+                   <apex:outputText value="{!evn.Mobile}" />
+               </apex:column> 
+               <apex:column headerValue="Comments">
+                   <apex:outputText value="{!evn.EventComments}" />
+               </apex:column>                 
+            </apex:pageBlockTable>  
+            <apex:outputPanel rendered="{!IF(Events.size = 0, true, false)}" layout="block" style="background-color:#FFF;border-width:0px 1px 1px 1px; border-style:solid;border-color: #D4DADC;color: #000;text-align:center;padding:10px">
+                    You have no open event scheduled today.
+            </apex:outputPanel>         
+          </apex:pageBlock>
+    </apex:form>
+    <script type="text/javascript">
+        document.getElementById("page:form:block").className = "";
+        document.getElementById("page:form:block").style.padding = "6px";
+        var defaultEventsTable = document.getElementById("page:form:block:table");
+        var tmEventsTable = document.getElementById("page:form:block:TMEventstable");
+        if(defaultEventsTable != null)
+        {
+            defaultEventsTable.style.width = "100%";
+        }
+        if(tmEventsTable != null)
+        {
+            tmEventsTable.style.width = "100%";
+        }
+    </script>
+</apex:page>

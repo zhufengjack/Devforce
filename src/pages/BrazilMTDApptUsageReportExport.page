@@ -1,0 +1,6 @@
+<apex:page controller="BrazilMTDApptUsageReportController" showHeader="false" contentType="text/csv#MTDApptUsageReportExport.csv" cache="true" action="{!exportReport}">
+<apex:outputText value="Time,Capacity,Usage,Usage %"></apex:outputText> 
+<apex:repeat value="{!ApptUsageSituations}" var="ApptUsageSituation">
+{!ApptUsageSituation.TimeSlot},"{!ApptUsageSituation.Capacity}","{!ApptUsageSituation.Usage}","<apex:outputText value="{0, number, ###,###,###,###.##}"><apex:param value="{!ApptUsageSituation.UsagePercent}"/></apex:outputText>%"
+</apex:repeat>
+</apex:page>

@@ -1,0 +1,128 @@
+<apex:page standardcontroller="Opportunity" extensions="SendApptSmsController" tabStyle="Opportunity" id="page" showHeader="false">
+	<apex:includeScript value="{!URLFOR($Resource.PricingCalculationRes,'res/js/jquery-1.4.4.min.js')}"/>
+	<script type="text/javascript">
+		$j = jQuery.noConflict(); 
+		
+		var $ = function(id)
+		{
+			return  "string" == typeof id ? document.getElementById(id) : id;
+		} 
+		function textCounter()
+        {
+        	$j("#smsTipInfo").css("display", "block");
+        	var oTextArea =  $("page:form:block:section:message");
+        	restChar = 69 - oTextArea.value.length;
+        	if(restChar >= 0)
+        	{
+        		$("smsTipInfo").innerHTML  = "您还可以输入" + restChar + "字";
+        	}
+        	else
+        	{ 
+        		var num = Math.ceil(oTextArea.value.length/69);
+        		$("smsTipInfo").innerHTML = "您输入的短信将被拆分为" + num +"条短信发送给顾客。"
+        	}
+        }
+        function toggleTextarea(oSelect)
+        {
+        	var selectedText = $j('select option:selected').text();
+        	if(selectedText == "Create new SMS")
+        	{
+        		$("page:form:block:section:message").disabled = false;
+        		$("page:form:block:section:message").value = "";
+        		$("smsTipInfo").innerHTML = "";
+        	}
+        	else if(selectedText == "--None--")
+        	{
+        		$("page:form:block:section:message").disabled = true;
+        		$("page:form:block:section:message").value = "";
+        		$("smsTipInfo").innerHTML = "";
+        	}
+        	else
+        	{
+        		$("page:form:block:section:message").disabled = true;
+        		renderSMS();
+        	}
+        }
+        function disabledTextarea()
+        {
+        	textCounter();
+        	$("page:form:block:section:message").disabled = true;
+        	if({!SMSMessage.IsEditable} == false)
+	       	{
+	       		$j("#smsTipInfo").css("display", "none");
+	       	}
+	       	else
+	       	{
+	       		textCounter();
+	       	}
+        }
+        function checkTextarea(editalbe)
+        {
+        	$("page:form:block:section:message").disabled = editalbe;
+        }
+        function enabledBtn()
+        {
+        	$j("input[id$='saveButton']").removeAttr('disabled').val('Send').removeClass('btnDisabled');
+        	$j("input[id$='cancelButton']").removeAttr('disabled').val('Cancel').removeClass('btnDisabled');
+        }
+        function disabledBtn()
+        {
+        	$j(":submit").each(function () {
+	 				$j(this).val('Sending...').addClass('btnDisabled').css('display', 'none');       		
+	        	});
+	        $j(":button").each(function () {
+	        	$j(this).css('display','');
+	        })
+        }
+        
+        $j(document).ready(function () {
+        	$("page:form:block:section:message").disabled = {!NOT(SMSMessage.IsEditable)};
+        });
+	</script>
+    <apex:sectionHeader title="Send SMS" subTitle="{!Opportunity.Name}" /> 
+    <apex:pagemessages />
+    <apex:form id="form">
+    	<apex:inputHidden value="{!Template}" id="template"></apex:inputHidden>
+	 	<apex:actionFunction name="renderSMS" action="{!RefreshSMSmessage}" reRender="message" status="status" onbeforedomupdate="disabledTextarea()" oncomplete="checkTextarea({!NOT(SMSMessage.IsEditable)})"></apex:actionFunction>
+        <apex:pageBlock id="block" rendered="{!isValidOpportunity}">
+            <apex:pageBlockButtons location="bottom">
+            	<input type="button"  name="inlineSaving"  title="Sending" class="btnDisabled" value=" Sending " style="display:none" />
+            	<input type="button"  name="inlineSaving"  title="Sending" class="btnDisabled" value=" Sending " style="display:none"/>
+                <apex:commandButton action="{!sendSMS}" value="Send" id="saveButton" onclick="disabledBtn()" />
+                <apex:commandButton value="Cancel" onclick="window.close()" id="cancelButton"/>  
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection columns="2" id="section">
+	            <apex:outputLabel for="template" value="SMS Template" rendered="{!TemplateNameOptions.size > 1}"/>
+	            <apex:selectList id="template" value="{!Template}" size="1" multiselect="false" onchange="$('page:form:template').value = this.value;toggleTextarea(this)" rendered="{!TemplateNameOptions.size > 1}">
+	                	<apex:selectOptions value="{!TemplateNameOptions}"/>
+                </apex:selectList>          
+                <apex:outputLabel for="recipient" value="Mobile Number" />
+                <apex:outputText id="recipient" value="{!opportunity.Mobile__c}" />
+                <apex:outputLabel for="message" value="Message" />
+                <apex:outputPanel >
+                <apex:inputTextarea id="message" value="{!SMSMessage.MessageContent}" rows="6" style="width:225px"  onfocus="textCounter()" onblur="textCounter()" onkeypress="textCounter()" onkeyup="textCounter()" onmouseup="textCounter()"/>  
+                <div id="smsTipInfo" style="color:#FF0000;"></div>
+                </apex:outputPanel>            
+            </apex:pageBlockSection> 
+            <apex:outputPanel >
+	        	<apex:actionStatus id="status">
+	                <apex:facet name="start">
+	                   <apex:image value="/img/loading.gif"/>
+	                </apex:facet>
+	            </apex:actionStatus>
+        	</apex:outputPanel>           
+        </apex:pageBlock>     
+        <apex:pageBlock title="Error" rendered="{!NOT(isValidOpportunity)}">
+            <apex:pageBlockButtons location="bottom">
+                <apex:commandButton value="OK" onclick="window.close()" />  
+            </apex:pageBlockButtons>
+            <div>You must fill the Sales Appt Location, Initial Appt Date and Mobile before you can send SMS.</div>
+        </apex:pageBlock>
+    </apex:form>
+    <script type="text/javascript">
+        if("{!isSucceeded}".toLowerCase() == "true")
+        {
+            setTimeout("window.close()", 3000);
+        }
+    </script>
+</apex:page>

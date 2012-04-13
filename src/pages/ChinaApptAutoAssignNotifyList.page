@@ -1,0 +1,4 @@
+<apex:page tabStyle="Appt_Auto_Assignment__tab">
+    <apex:sectionHeader title="China Appt Auto Assign Notify" subtitle="Home" />
+    <apex:listViews type="China_Auto_Assign_Notify__c"/>
+</apex:page>

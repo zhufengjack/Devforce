@@ -1,0 +1,32 @@
+<!-- 
+	Used to edit contact name/email/phone/mobile
+	Change Log:
+	Pony Ma	2011-11-21 Created
+ -->
+<apex:page controller="ContactEmbeddedController" >		
+	<apex:form >			
+		<apex:pageBlock mode="edit" title="Contact Edit">
+			<apex:pageBlockButtons >
+				<apex:commandButton value="Save" action="{!saveContact}"/>
+				<apex:commandButton value="Cancel" action="{!cancel}" immediate="true"/>
+			</apex:pageBlockButtons>
+			<apex:pageBlockSection columns="2" title="Contact Information">
+				<apex:outputField value="{!OppContact.OwnerId}"/>
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel value="Contact Phone"/>
+					<apex:inputText value="{!OppContact.Phone}"/>		
+				</apex:pageBlockSectionItem>		
+				<apex:inputField value="{!OppContact.FirstName}"/>
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel value="Contact Mobile"/>
+					<apex:inputText value="{!OppContact.MobilePhone}"/>
+				</apex:pageBlockSectionItem>
+				<apex:inputField value="{!OppContact.LastName}"/>	
+				<apex:pageBlockSectionItem >	
+					<apex:outputLabel value="Contact Email"/>					
+					<apex:inputText value="{!OppContact.Email}"/>	
+				</apex:pageBlockSectionItem>					
+			</apex:pageBlockSection>	
+		</apex:pageBlock>			
+	</apex:form>		
+</apex:page>

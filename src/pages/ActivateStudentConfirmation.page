@@ -1,0 +1,58 @@
+<apex:page controller="ActivateStudentController" tabStyle="Contact" showHeader="false">
+    <style type="text/css">
+        body{
+            background-color:#F8F8F8;
+        }
+        
+        .headPanel{
+            width:100%;
+            margin-bottom:10px;
+            margin-top:10px;
+            font-size:13pt;
+            font-weight:700;
+        }
+        
+        #userName{
+            font-size:12pt;
+            text-align:left;
+        }
+        
+    </style>
+    <script type="text/javascript">
+        function changeStatus(element)
+        {
+            element.className = "btnDisabled";
+            element.value = "Saving...";
+        }
+        
+        function closeWindow()
+        { 
+            opener.location = '{!$CurrentPage.Parameters.openerUrl}';
+            window.close();
+        }
+    </script>
+    <div id="contentArea">
+        <apex:sectionHeader title="Confirm Information"/>
+        <apex:form id="infoForm">
+            <apex:pageBlock >
+                <apex:PageMessages escape="false"/>
+                <apex:panelGrid columns="2" width="100%">
+                    <apex:facet name="caption"><p id="userName">Username: {!StudentUsername}</p></apex:facet>
+                    <apex:outputpanel layout="block" styleClass="headPanel">Salesforce</apex:outputpanel> 
+                    <apex:outputpanel layout="block" styleClass="headPanel">Englishtown</apex:outputpanel> 
+                    <apex:outputText >Chinese Name: {!SalesforceStudentInfo.StudentName}</apex:outputText>
+                    <apex:outputText >Chinese Name: {!EnglishtownStudentInfo.StudentName}</apex:outputText>
+                    <apex:outputText >Email: {!SalesforceStudentInfo.Email}</apex:outputText>
+                    <apex:outputText >Email: {!EnglishtownStudentInfo.Email}</apex:outputText>
+                    <apex:outputText >Telephone: {!SalesforceStudentInfo.Telephone}</apex:outputText>
+                    <apex:outputText >Telephone: {!EnglishtownStudentInfo.Telephone}</apex:outputText>
+                    <apex:outputText >Mobile: {!SalesforceStudentInfo.Mobile}</apex:outputText>
+                </apex:panelGrid>
+                <apex:pageBlockButtons location="bottom">
+                    <apex:commandButton value="Save" action="{!save}" onclick="changeStatus(this)" />
+                    <apex:commandButton value="Back" action="{!back}"/>
+                </apex:pageBlockButtons>
+            </apex:pageBlock>
+        </apex:form>
+    </div>
+</apex:page>

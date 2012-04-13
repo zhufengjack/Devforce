@@ -1,0 +1,9 @@
+<apex:page controller="OverrideLeadConvertController" action="{!convert}" tabstyle="Lead">
+    <apex:sectionHeader title="Lead Convert" />
+    <apex:pageBlock title="Convert">
+        <apex:pageMessages escape="false"/>
+        <div style="margin:10px; font-size:12px">
+        Click <a href='/{!LeadId}'>here</a> to return to the previous page.
+        </div>
+    </apex:pageBlock>
+</apex:page>

@@ -1,0 +1,369 @@
+<apex:page standardController="Opportunity" extensions="OverrideOpportunityViewController" tabStyle="Opportunity" id="page">
+    <style type="text/css">
+        .activeTab  
+        {
+            font-size:100%;
+            font-weight:blod;
+            background-color: #D5EDF5; color:white;
+            background-image:none
+        }
+        .inactiveTab 
+        { 
+            font-size:100%;
+            font-weight:blod;
+            background-color: #F6F6F6; color:black;
+            background-image:none
+        }
+        .actionLink 
+        {
+            color:#015ba7;
+            text-decoration: none;
+            font-weight: normal;
+        }
+    </style> 
+    <apex:form id="theform">
+        <apex:pagemessages />
+        <apex:detail subject="{!Opportunity.Id}" inlineEdit="true" />
+        <apex:pageBlock title="Activity History" id="block">
+            <apex:pageBlockButtons location="top">
+	            <input type="button" class="btn" value="Log a call" onclick="overrideButtonLogic('log a call')"/>
+	            <input type="button" class="btn" value="Mail Merge" onclick="overrideButtonLogic('mailmerge')"/>
+	            <input type="button" class="btn" value="Send an Email" onclick="overrideButtonLogic('sendmail')"/>
+	            <input type="button" class="btn" value="View All" onclick="overrideButtonLogic('viewall')"/>
+            </apex:pageBlockButtons>
+            <apex:tabPanel id="oppTabPanel" switchType="client" tabClass="activeTab" inactiveTabClass="inactiveTab">
+                <apex:tab label="Others" style="font-size:100%;">
+                    <apex:outputPanel rendered="{!Others.size == 0}">
+                        <div style="padding:5px;border:1px solid #C0C0C0">
+                            No records to display
+                        </div>
+                    </apex:outputPanel>
+                    <apex:pageBlockTable value="{!Others}" var="other" rendered="{!Others.size > 0}" id="otherTable"> 
+                    <apex:column width="60px">
+                        <apex:facet name="header">Action</apex:facet>
+                        <a href="javascript:void(0)" onclick="editActivity('{!other.objectId}')" class="actionLink" style="color:#015ba7">Edit</a>&nbsp;|&nbsp;
+                        <a href="javascript:void(0)" onclick="deleteActivity('{!other.objectId}')" class="actionLink" style="color:#015ba7">Del</a>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Subject</apex:facet>
+                        <apex:outputLink value="/{!other.objectId}" target="_blank">{!other.Subject}</apex:outputLink>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Task</apex:facet>
+                        <apex:outputPanel rendered="{!other.IsTask}">
+                            <img width="21" height="16" title="Checked" id="00NO0000000KSBQ_chkbox" class="checkImg" alt="Checked" src="/img/checkbox_checked.gif" />
+                        </apex:outputPanel>
+                        <apex:outputPanel rendered="{!NOT(other.IsTask)}">
+                            <img width="21" height="16" title="Not Checked" id="00NO0000000KaDF_chkbox" class="checkImg" alt="Not Checked" src="/img/checkbox_unchecked.gif" />
+                        </apex:outputPanel>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Due Date</apex:facet>
+                        <apex:outputText value="{0, Date, MM/dd/yyyy}">
+                            <apex:param value="{!other.DueDate}" />
+                        </apex:outputText>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Assigned To</apex:facet>
+                        <apex:outputLink value="/{!other.OwnerId}" target="_blank">{!other.OwnerName}</apex:outputLink>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Last Modified Date/Time</apex:facet>
+                        <apex:outputText value="{0, Date, MM/dd/yyyy HH:mm}">
+                            <apex:param value="{!other.LastModified}" />
+                        </apex:outputText>
+                    </apex:column>
+                </apex:pageBlockTable>
+                <apex:outputPanel rendered="{!Others.size > 5}" id="otherpanel">
+                    <br />
+                    <a href="javascript:void(0)" onclick="showmore('other')">Show more >></a>
+                </apex:outputPanel>
+            </apex:tab>
+            <apex:tab label="New call tracking" style="font-size:100%;">
+                <apex:outputPanel rendered="{!NewCallTracking.size == 0}">
+                    <div style="padding:5px;border:1px solid #C0C0C0">
+                        No records to display
+                    </div>
+                </apex:outputPanel>
+                <apex:pageBlockTable value="{!NewCallTracking}" var="tracking" rendered="{!NewCallTracking.size > 0}" id="trackingTable">
+                    <apex:column width="60px">
+                        <apex:facet name="header">Action</apex:facet>
+                        <a href="javascript:void(0)" onclick="editActivity('{!tracking.objectId}')"  class="actionLink" style="color:#015ba7">Edit </a>&nbsp;|&nbsp;
+                        <a href="javascript:void(0)" onclick="deleteActivity('{!tracking.objectId}')" class="actionLink" style="color:#015ba7">Del</a>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Subject</apex:facet>
+                        <apex:outputLink value="/{!tracking.objectId}" target="_blank">{!tracking.Subject}</apex:outputLink>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Task</apex:facet>
+                        <apex:outputPanel rendered="{!tracking.IsTask}">
+                            <img width="21" height="16" title="Checked" id="00NO0000000KSBQ_chkbox" class="checkImg" alt="Checked" src="/img/checkbox_checked.gif" />
+                        </apex:outputPanel>
+                        <apex:outputPanel rendered="{!NOT(tracking.IsTask)}">
+                            <img width="21" height="16" title="Not Checked" id="00NO0000000KaDF_chkbox" class="checkImg" alt="Not Checked" src="/img/checkbox_unchecked.gif" />
+                        </apex:outputPanel>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Due Date</apex:facet>
+                        <apex:outputText value="{0, Date, MM/dd/yyyy}">
+                            <apex:param value="{!tracking.DueDate}" />
+                        </apex:outputText>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Assigned To</apex:facet>
+                        <apex:outputLink value="/{!tracking.OwnerId}" target="_blank">{!tracking.OwnerName}</apex:outputLink>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Last Modified Date/Time</apex:facet>
+                        <apex:outputText value="{0, Date, MM/dd/yyyy HH:mm}">
+                            <apex:param value="{!tracking.LastModified}" />
+                        </apex:outputText>
+                    </apex:column>
+                </apex:pageBlockTable>
+                <apex:outputPanel rendered="{!NewCallTracking.size > 5}" id="trackingpanel">
+                    <br />
+                    <a href="javascript:void(0)" onclick="showmore('tracking')">Show more >></a>
+                </apex:outputPanel>
+            </apex:tab>
+            <apex:tab label="SMS" style="font-size:100%;">
+                <apex:outputPanel rendered="{!SMS.size == 0}">
+                    <div style="padding:5px;border:1px solid #C0C0C0">
+                        No records to display
+                    </div>
+                </apex:outputPanel>
+                <apex:pageBlockTable value="{!SMS}" var="item" rendered="{!SMS.size > 0}" id="smsTable">
+                    <apex:column width="60px">
+                        <apex:facet name="header">Action</apex:facet>
+                        <a href="javascript:void(0)" onclick="editActivity('{!item.objectId}')" class="actionLink" style="color:#015ba7">Edit</a>&nbsp;|&nbsp;
+                        <a href="javascript:void(0)" onclick="deleteActivity('{!item.objectId}')" class="actionLink" style="color:#015ba7">Del</a>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Subject</apex:facet>
+                        <apex:outputLink value="/{!item.objectId}" target="_blank">{!item.Subject}</apex:outputLink>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Task</apex:facet>
+                        <apex:outputPanel rendered="{!item.IsTask}">
+                            <img width="21" height="16" title="Checked" id="00NO0000000KSBQ_chkbox" class="checkImg" alt="Checked" src="/img/checkbox_checked.gif" />
+                        </apex:outputPanel>
+                        <apex:outputPanel rendered="{!NOT(item.IsTask)}">
+                            <img width="21" height="16" title="Not Checked" id="00NO0000000KaDF_chkbox" class="checkImg" alt="Not Checked" src="/img/checkbox_unchecked.gif" />
+                        </apex:outputPanel>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Due Date</apex:facet>
+                        <apex:outputText value="{0, Date, MM/dd/yyyy}">
+                            <apex:param value="{!item.DueDate}" />
+                        </apex:outputText>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Assigned To</apex:facet>
+                        <apex:outputLink value="/{!item.OwnerId}" target="_blank">{!item.OwnerName}</apex:outputLink>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Last Modified Date/Time</apex:facet>
+                        <apex:outputText value="{0, Date, MM/dd/yyyy HH:mm}">
+                            <apex:param value="{!item.LastModified}" />
+                        </apex:outputText>
+                    </apex:column>
+                </apex:pageBlockTable>
+                <apex:outputPanel rendered="{!SMS.size > 5}" id="smspanel">
+                    <br />
+                    <a href="javascript:void(0)" onclick="showmore('sms')">Show more >></a>
+                </apex:outputPanel>
+            </apex:tab>
+            <apex:tab label="Call mobile and phone" style="font-size:100%;">
+                <apex:outputPanel rendered="{!CallMobilePhone.size == 0}">
+                    <div style="padding:5px;border:1px solid #C0C0C0">
+                        No records to display
+                    </div>
+                </apex:outputPanel>
+                <apex:pageBlockTable value="{!CallMobilePhone}" var="mobilephone" rendered="{!CallMobilePhone.size > 0}" id="mobilephoneTable">
+                    <apex:column width="60px">
+                        <apex:facet name="header">Action</apex:facet>
+                        <a href="javascript:void(0)" onclick="editActivity('{!mobilephone.objectId}')" class="actionLink" style="color:#015ba7">Edit </a>&nbsp;|&nbsp;
+                        <a href="javascript:void(0)" onclick="deleteActivity('{!mobilephone.objectId}')" class="actionLink" style="color:#015ba7">Del</a>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Subject</apex:facet>
+                        <apex:outputLink value="/{!mobilephone.objectId}" target="_blank">{!mobilephone.Subject}</apex:outputLink>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header" >Task</apex:facet>
+                        <apex:outputPanel rendered="{!mobilephone.IsTask}">
+                            <img width="21" height="16" title="Checked" id="00NO0000000KSBQ_chkbox" class="checkImg" alt="Checked" src="/img/checkbox_checked.gif" />
+                        </apex:outputPanel>
+                        <apex:outputPanel rendered="{!NOT(mobilephone.IsTask)}">
+                            <img width="21" height="16" title="Not Checked" id="00NO0000000KaDF_chkbox" class="checkImg" alt="Not Checked" src="/img/checkbox_unchecked.gif" />
+                        </apex:outputPanel>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Due Date</apex:facet>
+                        <apex:outputText value="{0, Date, MM/dd/yyyy}">
+                            <apex:param value="{!mobilephone.DueDate}" />
+                        </apex:outputText>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Assigned To</apex:facet>
+                        <apex:outputLink value="/{!mobilephone.OwnerId}" target="_blank">{!mobilephone.OwnerName}</apex:outputLink>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">Last Modified Date/Time</apex:facet>
+                        <apex:outputText value="{0, Date, MM/dd/yyyy HH:mm}">
+                            <apex:param value="{!mobilephone.LastModified}" />
+                        </apex:outputText>
+                    </apex:column>
+                </apex:pageBlockTable>
+                <apex:outputPanel rendered="{!CallMobilePhone.size > 5}" id="mobilephonepanel">
+                    <br />
+                    <a href="javascript:void(0)" onclick="showmore('mobilephone')">Show more >></a>
+                </apex:outputPanel>
+            </apex:tab>
+            </apex:tabPanel>
+        </apex:pageBlock>
+    </apex:form>
+    <script type="text/javascript">
+        //change style of the custom related list
+        document.getElementById('page:theform:block').parentNode.parentNode.parentNode.className = 'bRelatedList';
+        
+        var initTableDom;
+        if("{!Others.size}" > 5)
+        {
+            initTableDom = document.getElementById("page:theform:block:otherTable");
+            hideRows(initTableDom);
+        }
+        if("{!NewCallTracking.size}" > 5)
+        {
+            initTableDom = document.getElementById("page:theform:block:trackingTable");
+            hideRows(initTableDom);
+        }
+        if("{!SMS.size}" > 5)
+        {
+            initTableDom = document.getElementById("page:theform:block:smsTable");
+            hideRows(initTableDom);
+        }
+        if("{!CallMobilePhone.size}" > 5)
+        {
+            initTableDom = document.getElementById("page:theform:block:mobilephoneTable");
+            hideRows(initTableDom);
+        }
+        
+        function hideRows(tableDom)
+        {
+            var size = tableDom.rows.length;
+            for(i=6;i<size;i++)
+            {
+                tableDom.rows[i].style.display = "none";
+            }
+        }
+        
+        function showmore(type)
+        {
+            var tableDom;
+            if(type == 'other')
+            {
+                tableDom = document.getElementById("page:theform:block:otherTable");
+            } 
+            else if(type == 'tracking')
+            {
+                tableDom = document.getElementById("page:theform:block:trackingTable");
+            } 
+            else if(type == 'sms')
+            {
+                tableDom = document.getElementById("page:theform:block:smsTable");
+            } 
+            else if(type == 'mobilephone')
+            {
+                tableDom = document.getElementById("page:theform:block:mobilephoneTable");
+            } 
+            showRows(tableDom);
+            hideShowMore(type);
+        }
+        
+        function showRows(tableDom)
+        {
+            var size = tableDom.rows.length;
+            for(i=6;i<size;i++)
+            {
+                if(tableDom.rows[i].style.display == "none")
+                {
+                    tableDom.rows[i].style.display = "";
+                }
+            }
+        }
+        
+        function hideShowMore(type)
+        {
+            var panelDom;
+            if(type == 'other')
+            {
+                panelDom = document.getElementById("page:theform:block:otherpanel");
+            }
+            else if(type == 'tracking')
+            {
+                panelDom = document.getElementById("page:theform:block:trackingpanel");
+            }
+            else if(type == 'sms')
+            {
+                panelDom = document.getElementById("page:theform:block:smspanel");
+            }
+            else if(type == 'mobilephone')
+            {
+                panelDom = document.getElementById("page:theform:block:mobilephonepanel");
+            }
+            panelDom.style.display = "none";
+        }
+        
+        function overrideButtonLogic(type)
+        {           
+            if(type == 'log a call')
+            {
+                window.location.href = '/setup/ui/recordtypeselect.jsp?ent=Task&retURL=/apex/OverrideOpportunityView?id=' + "{!Opportunity.Id}" + '&sfdc.override=1&save_new_url=/00T/e?title=Call&who_id=' + "{!Opportunity.AccountId}" + '&what_id=' + "{!Opportunity.Id}" + '&followup=1&tsk5=Call&retURL=/apex/OverrideOpportunityView?id=' + "{!Opportunity.Id}" + '&sfdc.override=1';
+            }
+            else if(type == 'mailmerge')
+            {
+                window.location.href = '/mail/mmchoose.jsp?id=' + "{!Opportunity.Id}" + '&1=HT_ChinaTS_001&retURL=/apex/OverrideOpportunityView?id=' + '{!Opportunity.AccountId}';
+            }
+            else if(type == 'sendmail')
+            {
+                window.location.href = '/_ui/core/email/author/EmailAuthor?p2_lkid='+ '{!Opportunity.AccountId}' +'&rtype=003&p3_lkid='+ '{!Opportunity.Id}' +'&retURL=/apex/OverrideOpportunityView?id='+ '{!Opportunity.Id}';
+            }
+            else if(type == 'viewall')
+            {
+                window.location.href = '/ui/core/activity/ViewAllActivityHistoryPage?retURL=/apex/OverrideOpportunityView?id='+ '{!Opportunity.Id}' +'&id=' + '{!Opportunity.Id}';
+            }
+        }
+        
+        function deleteActivity(objectId)
+        {
+            if(deleteConfirm())
+            {
+                OverrideOpportunityViewController.deleteActivityInfo(objectId, function(result, event)
+                { 
+                    if (event.status) 
+                    {
+                        window.location.reload();
+                    } 
+                }, {escape:true});
+            }           
+        }
+        
+        function deleteConfirm()
+        {
+            if(confirm('Are you sure?'))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        
+        function editActivity(objectId)
+        {
+            window.location = "/" + objectId + "/e?retURL=/apex/OverrideOpportunityView?id=" + "{!Opportunity.Id}";
+        }
+    </script>
+</apex:page>

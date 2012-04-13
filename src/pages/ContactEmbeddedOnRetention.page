@@ -1,0 +1,17 @@
+<!-- 
+	Used to display some contact info on actual pagelayout.
+	Change Log:
+	Pony Ma	2011-11-21 Created
+ -->
+<apex:page standardController="student_after_sales__c" extensions="ContactEmbeddedController" showHeader="false" sidebar="false">	
+	<apex:form >	
+		<apex:pageBlock mode="maindetail">
+			<apex:pageBlockSection columns="2" showHeader="false">
+				<apex:outputField value="{!OppContact.Name}"/>
+				<apex:outputField value="{!OppContact.Phone}"/>
+				<apex:outputField value="{!OppContact.Email}"/>
+				<apex:outputField value="{!OppContact.MobilePhone}"/>			
+			</apex:pageBlockSection>	
+		</apex:pageBlock>					
+	</apex:form>		
+</apex:page>

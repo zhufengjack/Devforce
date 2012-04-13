@@ -1,0 +1,38 @@
+<apex:page showHeader="false" controller="SetStartingLevelController" tabStyle="StudentActual__c">
+	<script type="text/javascript">
+		function refreshOpenerWindow()
+		{
+			opener.location = '{!$CurrentPage.Parameters.openerUrl}';
+			window.close();
+		}
+	</script>
+	<body>
+		<apex:form >
+			<apex:pageBlock >
+				<apex:pageMessages id="ccMsg"/>
+				<apex:pageBlockSection Columns="1">
+					<apex:pageBlockSectionItem rendered="{!IsPanelShow}">
+						<apex:outputLabel for="startingLevelList">Starting Level</apex:outputLabel>
+						<apex:selectList id="startingLevelList" size="1" value="{!StartingLevelValue}">
+							<apex:selectOptions value="{!LevelItems}" />
+						</apex:selectList>
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!!IsPanelShow}">
+						<apex:inputHidden />
+						<apex:outputLabel >Starting level is not required or the record is already existed.</apex:outputLabel>
+					</apex:pageBlockSectionItem>
+				</apex:pageBlockSection>
+				<apex:pageBlockButtons location="bottom">
+					<apex:commandButton action="{!Save}" value="Save" oncomplete="refreshOpenerWindow()" disabled="{!!IsPanelShow}" reRender="ccMsg" status="loadingStatus"/>
+					<apex:commandButton value="Cancel" onclick="window.close()" />
+					<apex:actionStatus id="loadingStatus">
+	                    <apex:facet name="start">
+	                        <img src="/img/loading.gif" alt="loading"/>
+	                    </apex:facet>
+	                </apex:actionStatus>
+				</apex:pageBlockButtons>
+			</apex:pageBlock>
+			
+		</apex:form>
+	</body>
+</apex:page>

@@ -1,0 +1,2 @@
+<apex:page controller="TSPaymentSucceededController" showHeader="false" action="{!processSuccessPayment}" contentType="text/plain">{!ProcessResult}
+</apex:page>

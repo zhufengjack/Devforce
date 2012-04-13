@@ -1,0 +1,46 @@
+<apex:page controller="SmartCancelSuspensionController" showHeader="false" tabStyle="Contact">
+	<apex:includeScript value="{!URLFOR($Resource.jQuery, 'jquery-1.4.4.min.js')}"/>
+    <script type="text/javascript">
+    $j = jQuery.noConflict(); 
+	function disableBtn()
+    {
+     	$j(".btn:visible").each(function () { 
+			$j(this).css('display', 'none');
+			$j(this).parent().append('<input type="button" name="inlineCancelling" title="Yes..." class="btnDisabled" value="Waiting..."/>');      
+    	 });
+    }
+    function refreshOpenerWindow()
+   	{
+   		var openerUrl = "{!CurrentContactUrl}";  
+   		window.opener.location = openerUrl; 
+    	closeWindow();
+   	}
+    function closeWindow()
+   	{
+   		window.close();
+   	}
+   	$j(function(){
+   		if("{!IsCancelSuccessed}".toLowerCase() == "true")
+   		{
+   			$j('input[id$="cancelBtn"]').hide();
+   			$j('#noBtn').hide();
+   			$j('#closeBtn').show();
+   		}
+   	})
+    </script>
+    <apex:form >
+         <div style="font-size:2.0em; margin:5px 5px"><h1> Cancel Suspension</h1></div>
+         <apex:pageBlock >
+             <apex:pageBlockButtons location="bottom">  
+                 <apex:commandButton id="cancelBtn" action="{!cancel}" value="Yes" onclick="disableBtn()"  disabled="{!IF(RescheduleStatus != 'Not start yet', true, false)}"/>
+                 <input id="noBtn" type="button" class="btn" onclick="closeWindow()" value=" No " />
+                 <input id="closeBtn" type="button" class="btn" onclick="refreshOpenerWindow()" value="OK" style="display: none"/>
+             </apex:pageBlockButtons>
+             <apex:pageBlockSection title="Are you sure you want to cancel the suspension?" columns="1" collapsible="false" />
+             <apex:pageMessages />
+             <apex:pageBlockSection rendered="{!IF(RescheduleStatus != 'Not start yet', true, false)}" columns="1">
+            	You can't cancel the suspension, please check the status of student service
+             </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

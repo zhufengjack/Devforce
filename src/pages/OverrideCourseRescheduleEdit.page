@@ -1,0 +1,60 @@
+<apex:page standardController="CourseReschedule__c" extensions="OverrideCourseReschedulePageController" tabStyle="CourseReschedule__c">
+    <apex:includeScript value="{!URLFOR($Resource.jQuery, 'jquery-1.4.4.min.js')}" />
+    <script type="text/javascript">
+    $j = jQuery.noConflict();
+    function showWindow(url)
+    {
+        window.location = url;
+    }
+    function disableBtn()
+    {
+        $j(".btn").each(function () {
+        $j(this).css('display', 'none');
+        $j(this).parent().append('<input type="button"  name="inlineSaving" title="Saving" class="btnDisabled" value="Saving..."/>');      
+        });
+    }
+    </script>
+    <apex:form >
+        <apex:sectionHeader title="Suspend and Resume" subtitle="{!SuspendReschedule.Name}" />
+        <apex:pagemessages />
+        <apex:variable var="Viewable" value="{!OR(Contains(LOWER($Profile.Name), 'system administrator new - smart'), Contains(LOWER($Profile.Name), 'system administrator new - tech'), Contains(LOWER($Profile.Name), 'system administrator new'))}"/>
+        <apex:pageBlock id="block" mode="edit" title="Suspend and Resume Edit">
+            <apex:pageBlockButtons >
+                <apex:commandButton action="{!save}" id="saveButton" value="Save" onclick="disableBtn();" rendered="{!Viewable}"/>
+                <input type="button" class="btn" onclick="showWindow('/apex/OverrideCourseRescheduleDetail?supid={!SuspendReschedule.Id}&resid={!ResumeReschedule.Id}')" value="Cancel" />
+            </apex:pageBlockButtons> 
+            <apex:pageBlockSection columns="2" collapsible="false" title="Information">
+                <apex:inputField value="{!SuspendReschedule.Name}" />
+                <apex:inputField value="{!SuspendReschedule.Contact__c}" />
+                <apex:inputField value="{!SuspendReschedule.StudentActual__c}" />
+                <apex:pageBlockSectionItem >
+                    <apex:outputPanel layout="block">Status</apex:outputPanel>
+                    <apex:selectList value="{!Status}" size="1"> 
+                        <apex:selectOption itemLabel="Not start yet" itemValue="Not start yet" />
+                        <apex:selectOption itemLabel="Completed" itemValue="Completed" />
+                        <apex:selectOption itemLabel="Cancelled" itemValue="Cancelled" />
+                        <apex:selectOption itemLabel="In progress" itemValue="In progress" />
+                        <apex:selectOption itemLabel="Refunded" itemValue="Refunded" />
+                    </apex:selectList>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem > 
+                    <apex:outputPanel layout="block">Suspension Date</apex:outputPanel>
+                    <apex:inputField value="{!SuspendReschedule.ScheduleDate__c}" required="true"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputPanel layout="block">Resume Date</apex:outputPanel>
+                    <apex:inputField value="{!ResumeReschedule.ScheduleDate__c}" required="true"/>
+                </apex:pageBlockSectionItem>
+                <apex:inputField value="{!SuspendReschedule.SuspendReason__c}" />
+                <apex:pageBlockSectionItem >
+                    <apex:outputPanel layout="block">Suspend Schedule Job Id</apex:outputPanel>
+                    <apex:inputField value="{!SuspendReschedule.ScheduleJobId__c}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputPanel layout="block">Resume Schedule Job Id</apex:outputPanel>
+                    <apex:inputField value="{!ResumeReschedule.ScheduleJobId__c}" />
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

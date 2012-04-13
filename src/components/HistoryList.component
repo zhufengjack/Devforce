@@ -1,0 +1,27 @@
+<apex:component controller="HistoryListController">
+    <apex:attribute name="object" assignTo="{!ObjectName}" description="name of the object" type="String" />
+    <apex:attribute name="recordId" assignTo="{!ObjectId}" description="id of the object" type="Id" />
+    <apex:pageBlock title="History" rendered="{!NOT(ISNULL(ObjectId))}">
+        <apex:pageBlockTable value="{!Histories}" var="history" >
+            <apex:column headerValue="User Local Time">
+                <apex:outputText value="{0, date, MM/dd/yy hh:mm a}" rendered="{!NOT(history.OmitUser)}"><apex:param value="{!history.CreatedDate}"/></apex:outputText>
+            </apex:column>
+            <apex:column headerValue="New York Time">
+                <apex:outputText value="{0, date, MM/dd/yy hh:mm a}" rendered="{!NOT(history.OmitUser)}"><apex:param value="{!history.CreatedDateNY}"/></apex:outputText>
+            </apex:column>
+            <apex:column headerValue="User">
+                <apex:outputLink value="/{!history.CreatedBy.Id}" rendered="{!NOT(history.OmitUser)}">{!history.CreatedBy.LastName}</apex:outputLink>
+            </apex:column>
+            <apex:column headerValue="Action">
+                <apex:outputText rendered="{!history.Field = 'created'}">Created</apex:outputText>
+                <apex:outputPanel layout="none" rendered="{!history.Field != 'created'}">
+                    <apex:outputText rendered="{!NOT(ISBLANK(history.NewValue)) && NOT(ISBLANK(history.OldValue))}">Changed <strong>{!history.Field}</strong> from&nbsp;{!history.OldValue} to <strong>{!history.NewValue}</strong></apex:outputText>
+                    <apex:outputText rendered="{!ISBLANK(history.NewValue) && NOT(ISBLANK(history.OldValue))}">Deleted <strong>{!history.Field}</strong></apex:outputText>
+                    <apex:outputText rendered="{!NOT(ISBLANK(history.NewValue)) && ISBLANK(history.OldValue)}">Changed <strong>{!history.Field}</strong> to <strong>{!history.NewValue}</strong></apex:outputText>
+                    <apex:outputText rendered="{!ISBLANK(history.NewValue) && ISBLANK(history.OldValue)}">Changed <strong>{!history.Field}</strong></apex:outputText>
+                </apex:outputPanel>
+            </apex:column>
+        </apex:pageBlockTable>
+        <a href="/_ui/common/history/ui/EntityHistoryFilterPage?id={!ObjectId}" style="line-height:24px">Go to full list »</a>
+    </apex:pageBlock>
+</apex:component>

@@ -1,0 +1,130 @@
+<apex:page controller="BrazilSalesWorkCalendarController">
+    <header>
+        <script type="text/javascript">
+            function validateReg(buttonElement)
+            {
+                changeButtonStatus(buttonElement, "Saving ...", "btnDisabled");
+                var validateDemoTargetResult = validateDigit();
+                if(validateDemoTargetResult == false)
+                {
+                    changeButtonStatus(buttonElement, "Save", "btn");
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            
+            function validateDigit()
+            {
+                var reg = /^[0-9]*[1-9][0-9]*$/;
+                var demoTargetElement = document.getElementById("{!$Component.calendarForm.block.section.demoTargetItem.demoTarget}");
+                if(!reg.test(demoTargetElement.value))
+                {
+                    demoTargetElement.style.borderColor = "red";
+                    alert("Invalid number.");
+                    return false;
+                }
+                else
+                {
+                    demoTargetElement.style.borderColor = "";
+                    return true;
+                }
+            }
+            
+            function changeButtonStatus(buttonElement, textValue, classValue)
+            {
+                buttonElement.className = classValue;
+                buttonElement.value = textValue;
+            }
+            
+            function confirmDailog()
+            {
+                var result = confirm("Are you sure?");
+                return result;
+            }
+            
+        </script>
+        <style type="text/css">
+            .timeLabel
+            {
+                margin-right:3px;
+            }
+        </style>
+    </header>
+    <body>
+        <apex:form id="calendarForm">
+            <apex:sectionHeader subtitle="Brazil Sales Work Calendar"/>
+            <apex:pageMessages id="cMessage"/>
+            <apex:pageBlock id="block">
+                <apex:pageBlockSection id="section" columns="1">
+                    <apex:pageBlockSectionItem id="salesListItem">
+                        <apex:outputLabel value="Select Course Consultant" />
+                        <apex:outputPanel >
+                            <apex:selectList value="{!SalesUserId}" size="1" multiselect="false">
+                                <apex:selectOptions value="{!SalesUserList}" />
+                                <apex:actionSupport action="{!resetCalendarData}" event="onchange" reRender="block,cMessage" status="changeSalesUserStatus"/>
+                            </apex:selectList>
+                            <apex:actionStatus id="changeSalesUserStatus">
+                                <apex:facet name="start"><img src="/img/loading.gif" alt="loading..."/></apex:facet> 
+                            </apex:actionStatus>
+                        </apex:outputPanel>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem id="demoTargetItem">
+                        <apex:outputlabel value="Select a Sales Demo Target" />
+                        <apex:inputText value="{!DemoTarget}" id="demoTarget"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem id="workingHoursItem">
+                        <apex:outputLabel value="Select Working Hours" />
+                        <apex:panelGrid columns="3" width="500px" bgcolor="white" >
+                            <!-- Monday -->
+                            <apex:outputPanel ><apex:inputCheckbox value="{!WeekDay.Monday.isWorkingDay}" ></apex:inputCheckbox><span>Monday</span></apex:outputPanel>
+                            <apex:outputPanel ><span class="timeLabel">Start Time</span><apex:selectList value="{!WeekDay.Monday.StartWorkingTime}" size="1" multiselect="false"><apex:selectOptions value="{!StartWorkingTimeList}"/></apex:selectList></apex:outputPanel>
+                            <apex:outputPanel ><span class="timeLabel">Finish Time</span><apex:selectList value="{!WeekDay.Monday.FinishWorkingTime}" size="1" multiselect="false"><apex:selectOptions value="{!FinishWorkingTimeList}"/></apex:selectList></apex:outputPanel>
+                            <!-- End -->
+                            <!-- Tuesday -->
+                            <apex:outputPanel ><apex:inputCheckbox value="{!WeekDay.Tuesday.isWorkingDay}" ></apex:inputCheckbox><span>Tuesday</span></apex:outputPanel>
+                            <apex:outputPanel ><span class="timeLabel">Start Time</span><apex:selectList value="{!WeekDay.Tuesday.StartWorkingTime}" size="1" multiselect="false"><apex:selectOptions value="{!StartWorkingTimeList}"/></apex:selectList></apex:outputPanel>
+                            <apex:outputPanel ><span class="timeLabel">Finish Time</span><apex:selectList value="{!WeekDay.Tuesday.FinishWorkingTime}" size="1" multiselect="false"><apex:selectOptions value="{!FinishWorkingTimeList}"/></apex:selectList></apex:outputPanel>
+                            <!-- End -->
+                            <!-- Wednesday -->
+                            <apex:outputPanel ><apex:inputCheckbox value="{!WeekDay.Wednesday.isWorkingDay}" ></apex:inputCheckbox><span>Wednesday</span></apex:outputPanel>
+                            <apex:outputPanel ><span class="timeLabel">Start Time</span><apex:selectList value="{!WeekDay.Wednesday.StartWorkingTime}" size="1" multiselect="false"><apex:selectOptions value="{!StartWorkingTimeList}"/></apex:selectList></apex:outputPanel>
+                            <apex:outputPanel ><span class="timeLabel">Finish Time</span><apex:selectList value="{!WeekDay.Wednesday.FinishWorkingTime}" size="1" multiselect="false"><apex:selectOptions value="{!FinishWorkingTimeList}"/></apex:selectList></apex:outputPanel>
+                            <!-- End -->
+                            <!-- Thursday -->
+                            <apex:outputPanel ><apex:inputCheckbox value="{!WeekDay.Thursday.isWorkingDay}" ></apex:inputCheckbox><span>Thursday</span></apex:outputPanel>
+                            <apex:outputPanel ><span class="timeLabel">Start Time</span><apex:selectList value="{!WeekDay.Thursday.StartWorkingTime}" size="1" multiselect="false"><apex:selectOptions value="{!StartWorkingTimeList}"/></apex:selectList></apex:outputPanel>
+                            <apex:outputPanel ><span class="timeLabel">Finish Time</span><apex:selectList value="{!WeekDay.Thursday.FinishWorkingTime}" size="1" multiselect="false"><apex:selectOptions value="{!FinishWorkingTimeList}"/></apex:selectList></apex:outputPanel>
+                            <!-- End -->
+                            <!-- Friday -->
+                            <apex:outputPanel ><apex:inputCheckbox value="{!WeekDay.Friday.isWorkingDay}" ></apex:inputCheckbox><span>Friday</span></apex:outputPanel>
+                            <apex:outputPanel ><span class="timeLabel">Start Time</span><apex:selectList value="{!WeekDay.Friday.StartWorkingTime}" size="1" multiselect="false"><apex:selectOptions value="{!StartWorkingTimeList}"/></apex:selectList></apex:outputPanel>
+                            <apex:outputPanel ><span class="timeLabel">Finish Time</span><apex:selectList value="{!WeekDay.Friday.FinishWorkingTime}" size="1" multiselect="false"><apex:selectOptions value="{!FinishWorkingTimeList}"/></apex:selectList></apex:outputPanel>
+                            <!-- End -->
+                            <!-- Saturday -->
+                            <apex:outputPanel ><apex:inputCheckbox value="{!WeekDay.Saturday.isWorkingDay}" ></apex:inputCheckbox><span>Saturday</span></apex:outputPanel>
+                            <apex:outputPanel ><span class="timeLabel">Start Time</span><apex:selectList value="{!WeekDay.Saturday.StartWorkingTime}" size="1" multiselect="false"><apex:selectOptions value="{!StartWorkingTimeList}"/></apex:selectList></apex:outputPanel>
+                            <apex:outputPanel ><span class="timeLabel">Finish Time</span><apex:selectList value="{!WeekDay.Saturday.FinishWorkingTime}" size="1" multiselect="false"><apex:selectOptions value="{!FinishWorkingTimeList}"/></apex:selectList></apex:outputPanel>
+                            <!-- End -->
+                            <!-- Sunday -->
+                            <apex:outputPanel ><apex:inputCheckbox value="{!WeekDay.Sunday.isWorkingDay}" ></apex:inputCheckbox><span>Sunday</span></apex:outputPanel>
+                            <apex:outputPanel ><span class="timeLabel">Start Time</span><apex:selectList value="{!WeekDay.Sunday.StartWorkingTime}" size="1" multiselect="false"><apex:selectOptions value="{!StartWorkingTimeList}"/></apex:selectList></apex:outputPanel>
+                            <apex:outputPanel ><span class="timeLabel">Finish Time</span><apex:selectList value="{!WeekDay.Sunday.FinishWorkingTime}" size="1" multiselect="false"><apex:selectOptions value="{!FinishWorkingTimeList}"/></apex:selectList></apex:outputPanel>
+                            <!-- End -->
+                        </apex:panelGrid>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem id="nonWorkingDaysItem">
+                        <apex:outputLabel value="Define Non Working Days" />
+                        <apex:inputField value="{!MonthSummary.NonWorkingDay__c}"/>
+                    </apex:pageBlockSectionItem>
+                </apex:pageBlockSection>
+                <apex:pageblockButtons location="bottom" >
+                    <apex:commandButton action="{!save}" value="Save" disabled="{!DisableSaveButton}" onclick="return validateReg(this);"/>
+                    <apex:commandLink action="{!returnToGroupCalendar}" value="Back to Group Calendar" style="float:right;" />
+                </apex:pageblockButtons>
+            </apex:pageBlock>
+        </apex:form>
+    </body>
+</apex:page>

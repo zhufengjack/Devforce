@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApexComponent xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>21.0</apiVersion>
+    <description>the component lists opportunities who  have not been update by Sales in salesforce after 1st show in 24 hours .</description>
+    <label>SmartOppsWithoutActivities</label>
+</ApexComponent>

@@ -1,0 +1,843 @@
+<apex:page controller="SmartPricingCalculationController" showHeader="false" sidebar="false" standardStylesheets="false" >
+<apex:stylesheet value="{!URLFOR($Resource.PricingCalculationRes, 'res/css/main.css')}"/>
+<apex:includeScript value="{!URLFOR($Resource.PricingCalculationRes,'res/js/jquery-1.4.4.min.js')}"/>
+<script type="text/javascript">
+	var products = [
+                <apex:repeat value="{!AllProducts}" var="prd">
+                    { salesType:'{!prd.SalesType__c}', destinationProduct:'{!prd.DestinationProduct__c}', currentProduct:'{!prd.CurrentProduct__c}',
+                    addOnProduct:'{!prd.AddOnProduct__c}', productName:'{!prd.ProductName__c}', levels:{!prd.Levels__c}, freeLevels:{!prd.FreeLevels__c},
+                    freePLs1:{!prd.FreePLs1__c}, standardMonths:{!prd.StandardMonths__c}, freeMonths:{!prd.FreeMonths__c}, totalMonths:{!prd.TotalMonths__c},
+                    mktPromotion:{!prd.MKTPromotion__c}, productPrice:{!prd.ProductPrice__c}, takenDays:{!prd.TakenDays__c}, standardPrice:{!prd.StandardPrice__c}},
+                </apex:repeat>
+            		];
+            		
+	Array.prototype._indexOf = function(n)
+	{
+		if("indexOf" in this)
+		{
+			return this["indexOf"](n);
+		}
+		for(var i=0;i<this.length;i++)
+		{
+			if(n===this[i])
+			{
+				return i;    
+			}
+		}
+		return -1;
+	};
+
+	products.findSalesType = function()
+	{
+		var result = [];
+		for(var i=0; i<products.length-1; i++)
+		{
+			if(result._indexOf(products[i].salesType)==-1)
+			{
+				result.push(products[i].salesType);
+			}
+		}
+		return result;
+	};
+	
+	function loadSelSalesType()
+	{
+		var salesType = products.findSalesType().sort();
+		var $salesType = $("#sel_salesType");
+		$salesType.empty();
+		var options = "<option> -- please select one -- </option>";
+		for(var i=0; i<salesType.length; i++)
+		{
+			options += "<option value='" + salesType[i] + "'></option>";
+		}
+		$salesType.append(options);
+		$salesType.find("option").each(function(){
+			$(this).text($(this).val());
+		});
+	}
+	
+	products.findProductBySalesType = function(salesType)
+	{
+		var result = [];
+		if(salesType=="New" || salesType=="Renew")
+		{
+			for(var i=0; i<this.length-1; i++)
+			{
+				if(this[i].salesType==salesType)
+				{
+					if(result._indexOf(this[i].destinationProduct)==-1)
+					{
+						result.push(this[i].destinationProduct);
+					}
+				}
+			}
+		}
+		else
+		{
+			for(var i=0; i<this.length-1; i++)
+			{
+				if(this[i].salesType==salesType)
+				{
+					if(result._indexOf(this[i].currentProduct)==-1)
+					{
+						result.push(this[i].currentProduct);
+					}
+				}
+			}
+		}
+		return result;
+	};
+	
+	function loadSelCurrentProduct()
+	{
+		var salesType = $("#sel_salesType option:selected").text();
+		var product = products.findProductBySalesType(salesType);
+		var $currentProduct = $("#sel_currentProduct");
+		$currentProduct.empty();
+		var options = "<option> -- please select one -- </option>";
+		for(var i=0; i<product.length; i++)
+		{
+			options += "<option value='" + product[i] + "'></option>";
+		}
+		$currentProduct.append(options);
+		$currentProduct.find("option").each(function(){
+			$(this).text($(this).val());
+		});
+	}
+	
+	products.findDestinationProductByTwoParams = function(salesType, currentProduct)
+	{
+		var result = [];
+		for(var i=0; i<this.length-1; i++)
+		{
+			if(this[i].salesType==salesType && this[i].currentProduct==currentProduct)
+			{
+				if(result._indexOf(this[i].destinationProduct)==-1)
+				{
+					result.push(this[i].destinationProduct);
+				}
+			}
+		}
+		return result;
+	};
+	
+	function loadSelDestinationProduct()
+	{
+		var salesType = $("#sel_salesType").val();
+		if(salesType=="New" || salesType=="Renew")  //salesType equals to "New" or "Renew".
+		{			
+			var product = products.findProductBySalesType(salesType);
+		}
+		else   // salesType equals to others
+		{
+			var product = products.findDestinationProductByTwoParams(salesType, $("#sel_currentProduct").val());
+		}
+		var $destinationProduct = $("#sel_destinationProduct");
+		$destinationProduct.empty();
+		var options = "<option> -- please select one -- </option>";
+		for(var i=0; i<product.length; i++)
+		{
+			options += "<option value='" + product[i] + "'></option>";
+		}
+		$destinationProduct.append(options);
+		$destinationProduct.find("option").each(function(){
+			$(this).text($(this).val());
+		});
+		$("#sel_destinationProduct").show();
+	}
+	
+	function showProductByNewOrRenew()
+	{
+		$("tr[id*=step]").hide();
+		$("tr").has("#step66").show();	
+		$("#step66").text("Step2:");
+	}
+	
+	function showProductByCourseExt1()
+	{
+		$("tr[id*=step]").hide();
+		$("tr").has("#step22, #step33, #step66").show();
+		$("#step22").text("Step2:");
+		$("#step33").text("Step3:");
+		$("#step66").text("Step4:");
+	}
+	
+	function showProductByCourseExt2()
+	{
+		$("tr[id*=step]").hide();
+		$("tr").has("#step22, #step33, #step66, #step77").show();
+		$("#step22").text("Step2:");
+		$("#step33").text("Step3:");
+		$("#step66").text("Step4:");
+	}
+	
+	function showProductByUpgrade()
+	{
+		$("tr[id*=step]").hide();
+		$("tr").has("#step22, #step33, #step44, #step66").show();
+		$("#step22").text("Step2:");
+		$("#step33").text("Step3:");
+		$("#step44").text("Step4:");
+		$("#step66").text("Step5:");
+	}
+	
+	function showProductByDowngrade1()
+	{
+		$("tr[id*=step]").hide();
+		$("tr").has("#step22, #step33, #step66").show();
+		$("#step22").text("Step2:");
+		$("#step33").text("Step3:");
+		$("#step66").text("Step4:");
+	}
+	
+	function showProductByDowngrade2()
+	{
+		$("tr[id*=step]").hide();
+		$selectedElem = $("#step22, #step33, #step44, #step88");
+		$("tr").has($selectedElem).show();
+		$("#step22").text("Step2:");
+		$("#step33").text("Step3:");
+		$("#step44").text("Step4:");
+	}
+	
+	function loadProductAfterSalesTypeBranch()
+	{
+		var salesType = $("#sel_salesType").val();
+		switch (salesType)
+		{
+			case "New":
+			case "Renew":
+			{
+				showProductByNewOrRenew();
+				loadSelDestinationProduct();
+				break;
+			}
+			case "Course Ext 1 (0<D<=30)":
+			{
+				showProductByCourseExt1();
+				loadSelCurrentProduct();
+				break;
+			}
+			case "Course Ext 2 (D>30)":
+			{
+				showProductByCourseExt2();
+				loadSelCurrentProduct();
+				break;
+			}
+			case "Service Level Upgrade":
+			{
+				showProductByUpgrade();
+				loadSelCurrentProduct();
+				break;
+			}
+			case "Downgrade (0<D<=14)":
+			{
+				showProductByDowngrade1();
+				loadSelCurrentProduct();
+				break;
+			}
+			case "Downgrade (D>14)":
+			{
+				showProductByDowngrade2();
+				loadSelCurrentProduct();
+				break;
+			}
+		}
+	}
+
+	function loadDestProdInfoByNewOrRenew()  // new, renew
+	{
+		var salesType = $("#sel_salesType").val();
+		var destinationProduct = $("#sel_destinationProduct").val();
+		for(var i=0; i<products.length-1; i++)
+		{
+			if((products[i].salesType==salesType && products[i].destinationProduct==destinationProduct))
+			{
+				$("#lbl_dproductName").text(products[i].productName);
+				$("#lbl_dlevels").text((products[i].levels==0)? "" : products[i].levels);
+				$("#lbl_dfreeLevels").text((products[i].freeLevels==0)? "" : products[i].freeLevels);
+				$("#lbl_dstandardMonths").text(products[i].standardMonths);
+				$("#lbl_dfreeMonths").text((products[i].freeMonths==0)? "" : products[i].freeMonths);
+				$("#lbl_dtotalMonths").text(products[i].totalMonths);
+				$("#lbl_dfreePLs1").text((products[i].freePLs1==0)? "" : products[i].freePLs1);
+				$("#lbl_dstandardPrice").text(products[i].standardPrice.toFixed(2));
+				$("#lbl_dmktPromotion").text((products[i].mktPromotion==0)? "" : products[i].mktPromotion.toFixed(2));
+				$("#lbl_dproductPrice").text(products[i].productPrice.toFixed(2));
+			}
+		}
+	}
+	
+	function loadDestProdInfoByOthers()   // others include: ext1, upgrade, downgrade1
+	{
+		var salesType = $("#sel_salesType").val();
+		var destinationProduct = $("#sel_destinationProduct").val();
+		var currentProduct = $("#sel_currentProduct").val();
+		for(var i=0; i<products.length-1; i++)
+		{
+			if(products[i].salesType==salesType && products[i].destinationProduct==destinationProduct && products[i].currentProduct==currentProduct)
+			{
+				$("#lbl_dproductName").text(products[i].productName);
+				$("#lbl_dlevels").text((products[i].levels==0)? "" : products[i].levels);
+				$("#lbl_dfreeLevels").text((products[i].freeLevels==0)? "" : products[i].freeLevels);
+				$("#lbl_dstandardMonths").text(products[i].standardMonths);
+				$("#lbl_dfreeMonths").text((products[i].freeMonths==0)? "" : products[i].freeMonths);
+				$("#lbl_dtotalMonths").text(products[i].totalMonths);
+				$("#lbl_dfreePLs1").text((products[i].freePLs1==0)? "" : products[i].freePLs1);
+				$("#lbl_dstandardPrice").text(products[i].standardPrice.toFixed(2));
+				$("#lbl_dmktPromotion").text((products[i].mktPromotion==0)? "" : products[i].mktPromotion.toFixed(2));
+				$("#lbl_dproductPrice").text(products[i].productPrice.toFixed(2));
+			}
+		}
+	}
+	
+	function loadDestProdInfoByExt2()   // ext2
+	{
+		var salesType = $("#sel_salesType").val();
+		var destinationProduct = $("#sel_destinationProduct").val();
+		var currentProduct = $("#sel_currentProduct").val();
+		for(var i=0; i<products.length-1; i++)
+		{
+			if(products[i].salesType==salesType && products[i].destinationProduct==destinationProduct && products[i].currentProduct==currentProduct)
+			{
+				$("#lbl_dproductName").text(products[i].productName);
+				$("#lbl_dlevels").text((products[i].levels==0)? "" : products[i].levels);
+				$("#lbl_dfreeLevels").text((products[i].freeLevels==0)? "" : products[i].freeLevels);
+				$("#lbl_dstandardMonths").text(products[i].standardMonths);
+				$("#lbl_dfreeMonths").text((products[i].freeMonths==0)? "" : products[i].freeMonths);
+				$("#lbl_dtotalMonths").text(products[i].totalMonths);
+				$("#lbl_dfreePLs1").text((products[i].freePLs1==0)? "" : products[i].freePLs1);
+				$("#lbl_dstandardPrice").text(products[i].standardPrice.toFixed(2));
+				$("#lbl_dmktPromotion").text((products[i].mktPromotion==0)? "" : products[i].mktPromotion.toFixed(2));
+				$("#lbl_dproductPrice").text(products[i].productPrice.toFixed(2));
+				$("#lbl_addOnProduct").text(products[i].addOnProduct);
+			}
+		}
+	}
+	
+	function loadDestinationProductInfoBranch() 
+	{
+		var salesType = $("#sel_salesType").val();
+		switch (salesType)
+		{
+			case "New":
+			case "Renew":
+			{
+				loadDestProdInfoByNewOrRenew();
+				amountCalc();
+				break;
+			}
+			case "Course Ext 1 (0<D<=30)":		
+			case "Service Level Upgrade":
+			case "Downgrade (0<D<=14)":
+			{
+				loadDestProdInfoByOthers();
+				amountCalc();
+				break;
+			}
+			 case "Course Ext 2 (D>30)":
+			{
+				loadDestProdInfoByExt2();
+				amountCalc();
+				break;
+			}
+			case "Downgrade (D>14)":
+			{
+				amountCalc();
+				break;
+			}
+		}
+	}
+	
+	function loadBasicCurrProdInfo()  // includes: ext1, ext2, downgrade1
+	{
+		var currentProduct = $("#sel_currentProduct").val();
+		for(var i=0; i<products.length-1; i++)
+		{
+			if(products[i].salesType=="New" && products[i].destinationProduct==currentProduct)
+			{
+				$("#lbl_cproductName").text(products[i].productName);
+				$("#lbl_clevels").text((products[i].levels==0)? "" : products[i].levels);
+				$("#lbl_cfreeLevels").text((products[i].freeLevels==0)? "" : products[i].freeLevels);
+				$("#lbl_cstandardMonths").text(products[i].standardMonths);
+				$("#lbl_cfreePLs1").text((products[i].freePLs1==0)? "" : products[i].freePLs1);
+				$("#lbl_cfreeMonths").text((products[i].freeMonths==0)? "" : products[i].freeMonths);
+				$("#lbl_cproductPrice").text(products[i].productPrice.toFixed(2));
+			}
+		}
+		$("#txt_paidAmount").val($("#lbl_cproductPrice").text());
+	}
+	
+	function loadCurrProdInfoByUpgrade()  // upgrade
+	{
+		loadBasicCurrProdInfo();
+		var maxValue = parseInt($("#lbl_cstandardMonths").text());
+		$("#txt_takenDays").attr({"title": "valid number : 0 - " + maxValue*30, "value": 0});
+		$("#lbl_ctakenMonths").text(0);
+		$("#lbl_cremainingStandardMonths").text($("#lbl_cstandardMonths").text());
+		$("#lbl_cproductRemainingValue").text($("#lbl_cproductPrice").text());
+	}
+	
+	function loadCurrProdInfoByDowngrade2()  // downgrade2
+	{
+		var currentProduct = $("#sel_currentProduct").val();
+		for(var i=0; i<products.length-1; i++)
+		{
+			if(products[i].salesType=="Downgrade (D>14)" && products[i].currentProduct==currentProduct)
+			{
+				$("#lbl_cproductName").text(products[i].productName);
+				$("#lbl_clevels").text((products[i].levels==0)? "" : products[i].levels);
+				$("#lbl_cfreeLevels").text((products[i].freeLevels==0)? "" : products[i].freeLevels);
+				$("#lbl_cstandardMonths").text(products[i].standardMonths);
+				$("#lbl_cfreePLs1").text((products[i].freePLs1==0)? "" : products[i].freePLs1);
+				$("#lbl_cfreeMonths").text((products[i].freeMonths==0)? "" : products[i].freeMonths);
+				$("#lbl_cproductPrice").text(products[i].productPrice.toFixed(2));
+			}
+		}
+		$("#txt_paidAmount").val($("#lbl_cproductPrice").text());
+		var maxValue = parseInt($("#lbl_cstandardMonths").text());
+		$("#txt_takenDays").attr({"title": "valid number : 14 - " + maxValue*30 , "value": 14});
+		if($("#sel_currentProduct").val().indexOf("Premium") == -1)
+		{
+			$("#step5").hide();
+			currProdCalc();
+		}
+		else
+		{
+			$("#txt_takenPoints").val(0);
+			var maxPoint = parseInt($("#lbl_clevels").text());
+			$("#txt_takenPoints").attr("title", "valid number : 0 - " + maxPoint*40);
+			$("#step5").show();
+			$("#step55").text("Step5:");
+			currProdCalc();
+			downgradeTo();
+		}
+	}
+	
+	function loadCurrentProductInfoBranch()
+	{
+		var salesType = $("#sel_salesType").val();
+		switch (salesType)
+		{
+			case "Course Ext 1 (0<D<=30)":
+			case "Course Ext 2 (D>30)":
+			case "Downgrade (0<D<=14)":
+			{
+				loadBasicCurrProdInfo();
+				break;
+			}
+			case "Service Level Upgrade":
+			{
+				loadCurrProdInfoByUpgrade();
+				break;
+			}
+			
+			case "Downgrade (D>14)":
+			{
+				loadCurrProdInfoByDowngrade2();  
+				break;
+			}
+		}
+	}
+	
+	function amountCalc()
+	{
+		var salesType = $("#sel_salesType").val();
+		var destProduct = parseFloat($("#lbl_dproductPrice").text()).toFixed(2);
+		if($("#lbl_cproductPrice").text())
+		{
+			if($("#lbl_cproductRemainingValue").text() == "")
+			{
+				var currProduct = parseFloat($("#lbl_cproductPrice").text()).toFixed(2);
+				$("#lbl_amountValue").text((destProduct - currProduct).toFixed(2));
+			}
+			else
+			{
+				var currProduct = parseFloat($("#lbl_cproductRemainingValue").text()).toFixed(2);
+				var result = destProduct - currProduct;
+				$("#lbl_amountValue").text(result.toFixed(2));
+				if(salesType == "Service Level Upgrade" && result < 0) 
+				{
+					$("#lbl_amountValue").text("Extension/Upgrade Rejected");
+				}
+			}
+		}
+		else
+		{
+			$("#lbl_amountValue").text(destProduct);
+		}
+		if(salesType == "Downgrade (D>14)") 
+		{
+			$("#lbl_amountValue").text("");
+		}
+	}
+	
+	function currProdCalc()
+	{
+		var salesType = $("#sel_salesType").val();
+		if(salesType == "Service Level Upgrade" || salesType == "Downgrade (D>14)")
+		{
+			var takenDays = parseInt($("#txt_takenDays").val());
+			var standardMonths = parseInt($("#lbl_cstandardMonths").text());
+			if(salesType == "Service Level Upgrade")
+			{
+				if(takenDays < 0 || takenDays > standardMonths*30)
+				{
+					alert("input number invalid!!  Please try again. ");
+					$("#txt_takenDays").val(0);
+				}
+			}
+			if(salesType == "Downgrade (D>14)")
+			{
+				if(takenDays < 14 || takenDays > standardMonths*30)
+				{
+					alert("input number invalid!!  Please try again. ");
+					$("#txt_takenDays").val(14);
+				}
+			}
+			var takenDays = parseInt($("#txt_takenDays").val());
+			var remainingMonths = standardMonths - (takenDays/30).toFixed(2);
+			var productPrice = parseFloat($("#lbl_cproductPrice").text()).toFixed(2);
+			var remainingPrice = productPrice*remainingMonths/standardMonths;
+			$("#lbl_ctakenMonths").text((takenDays/30).toFixed(2));
+			$("#lbl_cremainingStandardMonths").text(remainingMonths.toFixed(2));
+			$("#lbl_cproductRemainingValue").text(remainingPrice.toFixed(2));
+			//downgradeTo
+			var currentProduct = $("#sel_currentProduct").val();
+			if(salesType == "Downgrade (D>14)" && currentProduct.indexOf("Premium") == -1)
+			{
+				downgradeTo();
+			}
+		}
+	}
+	
+	function downCalc()
+	{
+		var salesType = $("#sel_salesType").val();
+		var currentProduct = $("#sel_currentProduct").val();
+		if(salesType == "Downgrade (D>14)" && currentProduct.indexOf("Premium") != -1) 
+		{
+				
+			var takenDays = parseInt($("#txt_takenDays").val());
+			var takenPoints = parseInt($("#txt_takenPoints").val());
+			var levels = parseInt($("#lbl_clevels").text());
+			if(takenPoints < 0 || takenPoints > levels*40)
+			{
+				alert("input number invalid!! Please try again ");
+				$("#txt_takenPoints").val(0);       
+			}
+			var takenLevels;
+			var takenPoints = parseInt($("#txt_takenPoints").val());
+			if( parseFloat(takenPoints/40).toFixed(2) > parseInt(takenDays/90))
+			{
+				takenLevels = parseFloat(takenPoints/40);
+			}
+			else
+			{
+				takenLevels = parseInt(takenDays/90);    
+			}
+			var remainingLevels = levels - takenLevels.toFixed(2);
+			var productPrice = parseFloat($("#lbl_cproductPrice").text()).toFixed(2);
+			var remainingPrice = productPrice*remainingLevels/levels;
+			$("#lbl_ctakenLevels").text(takenLevels.toFixed(2));   
+			$("#lbl_cremainingLevels").text(remainingLevels.toFixed(2));
+			$("#lbl_cproductRemainingValue").text(remainingPrice.toFixed(2));    
+			downgradeTo();       
+		}
+	}
+	
+	function downgradeTo()
+	{		
+		var tempMonths = parseFloat($("#lbl_cproductRemainingValue").text())/300;
+		var totalMonths = parseInt(tempMonths);
+		if(tempMonths >= (totalMonths + 0.5))
+		{
+			totalMonths ++;
+		}
+		var destProduct = (totalMonths < 10)? "Home-0"+totalMonths+" Mos" : "Home-"+totalMonths+" Mos";
+		$("#lbl_downgradeToProduct").text(destProduct);
+		$("#lbl_dproductName").text("Home");
+		$("#lbl_dstandardMonths").text(totalMonths);
+		$("#lbl_dtotalMonths").text(totalMonths);
+		var productPrice = $("#lbl_cproductRemainingValue").text();
+		$("#lbl_dstandardPrice").text(productPrice);
+		$("#lbl_dproductPrice").text(productPrice);
+	}
+	
+	function paidAmount()
+	{
+		var amount = parseInt($("#txt_paidAmount").val());
+		$("#lbl_cproductPrice").text(amount);
+	}
+	
+	$().ready(function(){
+		loadSelSalesType();
+		
+		$("#sel_salesType").bind("change", function(){
+			$("#sel_currentProduct, #sel_destinationProduct, #txt_paidAmount, #txt_takenDays, #txt_takenPoints").each(function(){
+				$(this).val("");
+			});
+			$("label").each(function(){
+				$(this).text("");
+			});
+			loadProductAfterSalesTypeBranch();
+		});
+		$("#sel_currentProduct").bind("change", function(){
+			$("label").each(function(){
+				$(this).text("");
+			});
+			loadSelDestinationProduct();
+			loadCurrentProductInfoBranch();
+		});
+		$("#txt_paidAmount").bind("keyup", function(){
+			paidAmount();
+			currProdCalc();
+			amountCalc();
+			downCalc();
+		});
+		$("#txt_takenDays").bind("blur", function(){
+		    currProdCalc();
+			amountCalc();
+			downCalc();
+		});
+		$("#txt_takenPoints").bind("blur", function(){									
+			downCalc();
+		});
+		$("#sel_destinationProduct").bind("change", function(){
+			loadDestinationProductInfoBranch();
+		});
+		$("#clearAll").bind("click", function(){
+			$("#sel_currentProduct, #sel_destinationProduct, #txt_paidAmount, #txt_takenDays, #txt_takenPoints").each(function(){
+				$(this).val("");
+			});
+			$("label").each(function(){
+				$(this).text("");
+			});
+			loadSelSalesType();
+		});
+	});
+</script>
+<body>
+	<div id="wrap">
+		<div class="header"> <a id="clearAll" class="clearAllBtn spA" href="#" >Clear All</a> </div>
+		<table class="stepsStructure">
+			<tbody>
+				<tr>
+					<td valign="top" width="47%">
+						<table class="stepsStructureInner">
+							<tbody>
+								<tr>
+                                    <td class="stepNum">Step1:</td>
+                                    <td width="170">Sales Type</td>
+                                    <td align="right"><select id="sel_salesType"></select></td>
+                                </tr>
+							</tbody>
+						</table>
+            			<div class="stepsInfo"><em>*Notice: Please fill in/select the yellow part by following the steps numbers.</em></div>
+           			</td>
+		            <td valign="top" width="6%"><img src="{!URLFOR($Resource.PricingCalculationRes, 'res/pic/stepArrow.png')}" /></td>
+		            <td valign="top" width="47%">
+		            	<table class="stepsStructureInner">
+			                <tbody id="tbody">
+			                  <tr id="step2">
+			                    <td class="stepNum" id="step22">Step2:</td>
+			                    <td>Current Product</td>
+			                    <td align="right">
+			                    	<select id="sel_currentProduct"></select>
+			                    </td>
+			                  </tr>
+			                  <tr id="step3">
+			                    <td class="stepNum" id="step33">Step3:</td>
+			                    <td>Current Product Paid Amount</td>
+			                    <td align="right"><input id="txt_paidAmount" type="text" /></td>
+			                  </tr>
+			                  <tr id="step4">
+			                    <td class="stepNum" id="step44">Step4:</td>
+			                    <td>Current Product Taken Days</td>
+			                    <td align="right"><input id="txt_takenDays" type="text" /></td>
+			                  </tr>
+			                  <tr id="step5">
+			                    <td class="stepNum" id="step55">Step5:</td>
+			                    <td>Current Product Taken Points</td>
+			                    <td align="right"><input id="txt_takenPoints" type="text" /></td>
+			                  </tr>
+			                  <tr id="step6">
+			                    <td class="stepNum" id="step66">Step6:</td>
+			                    <td width="170">Destination Product</td>
+			                    <td align="right"><select id="sel_destinationProduct" ></select></td>
+			                  </tr>
+			                  <tr id="step7">
+			                    <td class="stepNum" id="step77">&nbsp;</td>
+			                    <td>AddOn Product</td>
+			                    <td align="right">&nbsp;
+			                      <label id="lbl_addOnProduct"></label></td>
+			                  </tr>
+			                  <tr id="step8">
+			                    <td class="stepNum" id="step88">&nbsp;</td>
+			                    <td>DowngradeToProduct</td>
+			                    <td align="right">&nbsp;
+			                      <label id="lbl_downgradeToProduct"></label></td>
+			                  </tr>
+			                </tbody>
+		              	 </table>
+		            </td>
+		        </tr>
+		    </tbody>
+		</table>
+        <h3 class="calculation">Calculation</h3>
+        <table class="detailStructure">
+	        <tbody>
+	          <tr>
+	            <td width="50%"><table class="productDetailTable">
+	                <thead>
+	                  <tr>
+	                    <th colspan="2">Destination Product</th>
+	                  </tr>
+	                </thead>
+	                <tbody>
+	                  <tr>
+	                    <td>Product Name</td>
+	                    <td width="50%">&nbsp;
+	                      <label id="lbl_dproductName"></label></td>
+	                  </tr>
+	                  <tr>
+	                    <td>Levels</td>
+	                    <td>&nbsp;
+	                      <label id="lbl_dlevels"></label></td>
+	                  </tr>
+	                  <tr class="sectionTitle">
+	                    <td>Free Levels</td>
+	                    <td>&nbsp;
+	                      <label id="lbl_dfreeLevels"></label></td>
+	                  </tr>
+	                  <tr>
+	                    <td>&nbsp;</td>
+	                    <td>&nbsp;</td>
+	                  </tr>
+	                  <tr>
+	                    <td>Standard Months</td>
+	                    <td>&nbsp;
+	                      <label id="lbl_dstandardMonths"></label></td>
+	                  </tr>
+	                  <tr>
+	                    <td>Free Months</td>
+	                    <td>&nbsp;
+	                      <label id="lbl_dfreeMonths"></label></td>
+	                  </tr>
+	                  <tr>
+	                    <td>Total Months</td>
+	                    <td>&nbsp;
+	                      <label id="lbl_dtotalMonths"></label></td>
+	                  </tr>
+	                  <tr>
+	                    <td>Free PLs</td>
+	                    <td>&nbsp;
+	                      <label id="lbl_dfreePLs1"></label></td>
+	                  </tr>
+	                  <tr class="sectionTitle">
+	                    <td>&nbsp;</td>
+	                    <td>&nbsp;</td>
+	                  </tr>
+	                  <tr>
+	                    <td>List Price</td>
+	                    <td>&nbsp;
+	                      <label id="lbl_dstandardPrice"></label></td>
+	                  </tr>
+	                  <tr>
+	                    <td>Scholarship</td>
+	                    <td>&nbsp;
+	                      <label id="lbl_dmktPromotion"></label></td>
+	                  </tr>
+	                  <tr>
+	                    <td>Product Price</td>
+	                    <td>&nbsp;
+	                      <label id="lbl_dproductPrice"></label></td>
+	                  </tr>
+	                </tbody>
+	              </table>
+	            </td>
+	            <td width="50%"><table class="productDetailTable detailTableRight">
+	                <thead>
+	                  <tr>
+	                    <th colspan="2">Current Product</th>
+	                  </tr>
+	                </thead>
+	                <tbody>
+	                  <tr>
+	                    <td>Product Name</td>
+	                    <td width="50%">&nbsp;
+	                      <label id="lbl_cproductName"></label></td>
+	                  </tr>
+	                  <tr>
+	                    <td>Levels</td>
+	                    <td>&nbsp;
+	                      <label id="lbl_clevels"></label></td>
+	                  </tr>
+	                  <tr>
+	                    <td>Free Levels</td>
+	                    <td>&nbsp;
+	                      <label id="lbl_cfreeLevels"></label></td>
+	                  </tr>
+	                  <tr>
+	                    <td>Standard Months</td>
+	                    <td>&nbsp;
+	                      <label id="lbl_cstandardMonths"></label></td>
+	                  </tr>
+	                  <tr>
+	                    <td>Free Months</td>
+	                    <td>&nbsp;
+	                      <label id="lbl_cfreeMonths"></label></td>
+	                  </tr>
+	                  <tr>
+	                    <td>Months Taken</td>
+	                    <td>&nbsp;
+	                      <label id="lbl_ctakenMonths"></label></td>
+	                  </tr>
+	                  <tr>
+	                    <td>Remaining Standard Months</td>
+	                    <td>&nbsp;
+	                      <label id="lbl_cremainingStandardMonths"></label></td>
+	                  </tr>
+	                  <tr>
+	                    <td>Free PLs</td>
+	                    <td>&nbsp;
+	                      <label id="lbl_cfreePLs1"></label></td>
+	                  </tr>
+	                  <tr>
+	                    <td>Levels Taken</td>
+	                    <td>&nbsp;
+	                      <label id="lbl_ctakenLevels"></label></td>
+	                  </tr>
+	                  <tr>
+	                    <td>Remaining Levels</td>
+	                    <td>&nbsp;
+	                      <label id="lbl_cremainingLevels"></label></td>
+	                  </tr>
+	                  <tr>
+	                    <td>Product Price</td>
+	                    <td>&nbsp;
+	                      <label id="lbl_cproductPrice"></label></td>
+	                  </tr>
+	                  <tr>
+	                    <td>Product Remaining Value</td>
+	                    <td>&nbsp;
+	                      <label id="lbl_cproductRemainingValue"></label></td>
+	                  </tr>
+	                </tbody>
+	              </table>
+	            </td>
+	          </tr>
+	        </tbody>
+        </table>
+        <table class="amountTable">
+	        <tbody>
+	          <tr>
+	            <td width="50%">Amounts To Be Collected</td>
+	            <td width="50%"><label id="lbl_amountValue"></label>
+	              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RMB</td>
+	          </tr>
+	        </tbody>
+        </table>
+    </div>
+<!--wrap-->
+</body>  
+</apex:page>

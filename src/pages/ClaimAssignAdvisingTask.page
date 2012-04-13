@@ -1,0 +1,346 @@
+<apex:page controller="ClaimAssignAdvisingTaskController" id="ClaimAssignAdvisingTaskPage" tabStyle="StudyAdvisorManager__tab">
+    <header>
+        <apex:includeScript value="/soap/ajax/19.0/connection.js"/>
+        <apex:includeScript value="/soap/ajax/19.0/apex.js"/>
+        <script type="text/javascript">
+            sforce.connection.sessionId = "{!$Api.Session_ID}";
+        </script>
+        <script type="text/javascript">
+            var taskIds = [];
+            function handleSuccess(result)
+            {
+                for(var i = 0; i < result.length; i++)
+                {
+                    try
+                    {
+                        var taskIdCalledBefore = result[i].split(":");
+                        document.getElementById(taskIdCalledBefore[0]).innerHTML = taskIdCalledBefore[1];
+                        document.getElementById("Load" + taskIdCalledBefore[0]).style.display = "none";
+                        if(taskIdCalledBefore[1] > 0)
+                        {   
+                            document.getElementById("calledBy" + taskIdCalledBefore[0]).style.display = '';
+                        }
+                    }
+                    catch(e){}
+                }
+            }
+            
+            var callback = {onSuccess: handleSuccess, onFailure: handleFailure};
+            
+            function handleFailure(error, source)
+            {
+                
+                for(var i = 0; i < source.length; i++)
+                {
+                    document.getElementById(source[i]).innerHTML = "Error";
+                    document.getElementById("Load" + source[i]).style.display = "none";
+                } 
+            }
+            function processCalledBeforeNumber()
+            {
+                var taskIdSet = '';
+                var j = 0;
+                var invokeWebserviceTaskSize = 10;
+                var tempIdSet = [];
+                for(var i = 0; i < taskIds.length - 1; i++)
+                {
+                    tempIdSet[tempIdSet.length] = taskIds[i].taskId;
+                    taskIdSet += taskIds[i].taskId;
+                    taskIdSet += ':';
+                    j++
+                    if(j == invokeWebserviceTaskSize)
+                    { 
+                        sforce.apex.execute("ClaimAssignAdvisingTaskController", "calculateCalledBeforeNumber", {taskIds : taskIdSet},{onSuccess: handleSuccess, onFailure: handleFailure, source: tempIdSet});
+                        j = 0;
+                        taskIdSet = '';
+                        tempIdSet = [];
+                    }
+                }
+                if(taskIdSet != null && taskIdSet != '')
+                {
+                    sforce.apex.execute("ClaimAssignAdvisingTaskController", "calculateCalledBeforeNumber", {taskIds : taskIdSet}, {onSuccess: handleSuccess, onFailure: handleFailure, source: tempIdSet});
+                }
+            }
+            processCalledBeforeNumber();
+                                  
+        </script>
+        <!-- For TableSorter -->
+        <link type="text/css" rel="stylesheet" media="all" href="{!URLFOR($Resource.TableSorter, 'JQuerySorter/css/style.css')}" />
+        <apex:includeScript value="{!URLFOR($Resource.TableSorter, 'JQuerySorter/js/jquerylatest.js')}"/> 
+        <apex:includeScript value="{!URLFOR($Resource.TableSorter, 'JQuerySorter/js/jquery.tablesorter.js')}"/>
+        <style type="text/css">
+            .prevAndNext
+            {
+                margin-right:20px;
+            }
+        </style>
+    </header>
+    <body onload="processCalledBeforeNumber();">
+        <apex:form id="formArea">
+            <apex:pageMessages id="cErrorMessage"/>
+            <apex:sectionHeader title="Search" />
+            <apex:pageBlock id="pageBlock">
+                <apex:pageBlockButtons location="bottom">
+                    <apex:commandButton value="Search" action="{!searchRecordWithFliterCondition}" oncomplete="processCalledBeforeNumber()" reRender="resultBlock,cErrorMessage,taskIdsRefresh" status="displaying"/>
+                    <apex:actionStatus id="displaying">
+                        <apex:facet name="start"><img src="/img/loading.gif" alt="loading..."/></apex:facet>
+                    </apex:actionStatus>
+                </apex:pageBlockButtons>
+                <apex:outputPanel layout="block">
+                <apex:pageBlockSection columns="2">
+                    <!-- Due Date From -->
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Due Date From "></apex:outputLabel>
+                        <apex:inputField value="{!StartDateTask.ActivityDate}"/>
+                    </apex:pageBlockSectionItem>
+                    <!-- Called By -->
+                    <!-- <apex:pageBlockSectionItem >
+                        <apex:outputLabel >Called By</apex:outputLabel>
+                        <apex:selectList value="{!Condition.CalledBy}" multiselect="false" size="1" style="width:150px;">
+                            <apex:selectOptions value="{!Condition.CalledByUsers}"/>
+                        </apex:selectList>
+                    </apex:pageBlockSectionItem> -->
+                    <!-- Attempt -->
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel >Attempt</apex:outputLabel>
+                        <apex:selectList value="{!Condition.AttemptNumber}" multiselect="false" size="1" style="width:150px;">
+                            <apex:selectOptions value="{!Condition.AttemptList}"/>
+                        </apex:selectList>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value=" Due Date To "></apex:outputLabel>
+                        <apex:inputField value="{!EndDateTask.ActivityDate}"/>
+                    </apex:pageBlockSectionItem>
+                    <!-- Assign To -->
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel >Assign To</apex:outputLabel>
+                        <apex:selectList value="{!Condition.AssignTo}" multiselect="false" size="1" style="width:150px;">
+                            <apex:selectOptions value="{!Condition.AssignToUsers}"/>
+                        </apex:selectList>
+                    </apex:pageBlockSectionItem>
+                    <!-- Status -->
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel >Status</apex:outputLabel>
+                        <apex:selectList value="{!Condition.Status}" multiselect="false" size="1" style="width:150px;">
+                            <apex:selectOptions value="{!Condition.StatusList}"/>
+                        </apex:selectList>
+                    </apex:pageBlockSectionItem>
+                    <!-- Corporate -->
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel >Corporate</apex:outputLabel>
+                        <apex:outputPanel layout="none">                            
+                            <select style="width:150px" onchange="document.getElementById('{!$Component.CorporateValue}').value=this.value;handleCorporeateChange();">
+                                <apex:repeat value="{!Condition.CorprateLists}" var="CorprateList">
+                                    <apex:repeat value="{!CorprateList}" var="Corprate">                                    
+                                        <apex:outputPanel layout="none" rendered="{!Condition.Corporate==Corprate.Value}">
+                                            <option value="{!Corprate.Value}" selected="selected">{!Corprate.Label}</option>
+                                        </apex:outputPanel>
+                                        <apex:outputPanel layout="none" rendered="{!Condition.Corporate!=Corprate.Value}">
+                                            <option value="{!Corprate.Value}">{!Corprate.Label}</option>
+                                        </apex:outputPanel>
+                                    </apex:repeat>
+                                </apex:repeat>
+                            </select>  
+                            <apex:inputHidden id="corporateValue" value="{!Condition.Corporate}"/>
+                            <apex:actionFunction name="handleCorporeateChange" action="{!Condition.buildDivisionList}" rerender="divisionList" status="buildDivisionStatus"/>                           
+                        </apex:outputPanel>                                              
+                    </apex:pageBlockSectionItem>
+                    <!-- time zone -->
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel >Time Zone</apex:outputLabel>
+                        <apex:selectList value="{!Condition.TimeZone}" multiselect="false" size="1" style="width:450px;">
+                            <apex:selectOptions value="{!Condition.TimezoneList}"/>
+                        </apex:selectList>
+                    </apex:pageBlockSectionItem>
+                    <!-- Division -->
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel >Division</apex:outputLabel>
+                        <apex:outputPanel >
+                            <apex:selectList value="{!Condition.Division}" multiselect="false" size="1" id="divisionList"  style="width:150px;">
+                                <apex:selectOptions value="{!Condition.DivisionList}"/>
+                            </apex:selectList>
+                            <apex:actionStatus id="buildDivisionStatus">
+                                <apex:facet name="start"><img src="/img/loading.gif" alt="loading..."/></apex:facet>
+                            </apex:actionStatus>
+                        </apex:outputPanel>
+                    </apex:pageBlockSectionItem>
+                    <!-- Call Type -->
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel >Call Result</apex:outputLabel>
+                        <apex:selectList value="{!Condition.CallType}" multiselect="false" size="1"  style="width:150px;">
+                            <apex:selectOptions value="{!Condition.CallTypeList}"/>
+                        </apex:selectList>
+                    </apex:pageBlockSectionItem>
+                    <!-- Country -->
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel >Country</apex:outputLabel>
+                        <apex:selectList value="{!Condition.Country}" multiselect="false" size="1"  style="width:150px;">
+                            <apex:selectOptions value="{!Condition.CountryList}"/>
+                        </apex:selectList>
+                    </apex:pageBlockSectionItem>
+                    <!-- Subject -->
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel >Subject</apex:outputLabel>
+                        <apex:inputText value="{!Condition.Subject}"/>
+                    </apex:pageBlockSectionItem>
+                    <!-- Language -->
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel >Language</apex:outputLabel>
+                        <apex:selectList value="{!Condition.Language}" multiselect="false" size="1" style="width:150px;">
+                            <apex:selectOptions value="{!Condition.LanguageList}"/>
+                        </apex:selectList>
+                    </apex:pageBlockSectionItem>
+                </apex:pageBlockSection>
+                </apex:outputPanel>
+            </apex:pageBlock>
+            <apex:pageblock id="resultBlock">
+                <apex:pageBlockButtons location="bottom">
+                    <apex:commandButton value="Close" action="{!closeTask}" status="displaying2" oncomplete="processCalledBeforeNumber()" reRender="cErrorMessage, resultBlock, taskIdsRefresh" rendered="{!AND(OR(IsSystemAdmin, IsSAManageer), DisplayButton)}"/>
+                    <apex:commandButton value="Assign" action="{!assginTask}" status="displaying2" reRender="cErrorMessage" rendered="{!DisplayButton}"/>
+                    <apex:actionStatus id="displaying2">
+                        <apex:facet name="start"><img src="/img/loading.gif" alt="loading..."/></apex:facet>
+                    </apex:actionStatus>
+                </apex:pageBlockButtons>
+                <!-- Assign To -->
+                <apex:pageBlockSection columns="2">
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel >Assign To</apex:outputLabel>
+                        <apex:selectList value="{!Condition.Assignee}" multiselect="false" size="1"  style="width:150px;">
+                            <apex:selectOptions value="{!Condition.AssignToUsers}"/>
+                        </apex:selectList>
+                    </apex:pageBlockSectionItem>
+                </apex:pageBlockSection>
+                <br/>
+                
+                <table id="taskTable" cellspacing="1" class="tablesorter">             
+                    <thead>
+                        <tr> 
+                            <th><input id="allchecked" type="checkbox" onclick="checkAll(this)" value="false"/></th> 
+                            <th>Contact Name</th> 
+                            <th>Contact Email</th> 
+                            <th>Called Before</th> 
+                            <th>Called By</th> 
+                            <th>Current Assign To</th>
+                            <th>Due Date</th> 
+                            <th>Telephone</th> 
+                            <th>Country</th>
+                            <th>Local Time</th>
+                            <th>Corporate</th>
+                            <th>Preferred Language</th>
+                        </tr> 
+                    </thead> 
+                    <tbody> 
+                        <apex:repeat value="{!TaskEntities}" var="taskEntity" rows="{!tableSize}" first="{!startIndex}">
+                            <tr> 
+                                <td><apex:inputCheckbox value="{!taskEntity.IsSelected}" id="isSelect"/></td> 
+                                <td><apex:outputLink value="/{!taskEntity.ContactId}" target="_blank"><apex:outputText value="{!taskEntity.ContactName}" escape="true"></apex:outputText></apex:outputLink></td> 
+                                
+                                <td>
+                                    <apex:outputLink value="/{!taskEntity.ContactId}" target="_blank">{!taskEntity.ContactEmail}</apex:outputLink>
+                                </td>
+                                
+                                <td>
+                                    <apex:outputPanel >
+                                        <span id="{!taskEntity.taskId}"/>
+                                        <span id="Load{!taskEntity.taskId}">Loading...</span>
+                                    </apex:outputPanel>
+                                </td>
+                                 
+                                <td>
+                                    <span id="calledBy{!taskEntity.taskId}" style="display:none;">
+                                        <apex:outputText value="{!taskEntity.CalledBy}" ></apex:outputText>
+                                    </span>
+                                </td> 
+                                <td><apex:outputText value="{!taskEntity.OwnerName}"></apex:outputText></td> 
+                                <td><apex:outputText value="{!taskEntity.DueDate}"></apex:outputText></td> 
+                                <td><apex:outputText value="{!taskEntity.Telephone}"></apex:outputText></td> 
+                                <td><apex:outputText value="{!taskEntity.Country}"></apex:outputText></td>
+                                <td><apex:outputText value="{!taskEntity.LocalTime}"></apex:outputText></td>
+                                <td><apex:outputText value="{!taskEntity.Corporate}"></apex:outputText></td>
+                                <td><apex:outputText value="{!taskEntity.Language}"></apex:outputText></td>
+                            </tr> 
+                        </apex:repeat>
+                    </tbody> 
+                </table>
+               
+                <!-- separate page -->
+                <apex:outputPanel rendered="{!DisplayPreviousAndNextPanel}" layout="block" id="previousNextCommandNew" style="margin-top:5px;">
+                    <span class="prevAndNext">
+                        <apex:commandLink action="{!toFirstPage}" value="|<" reRender="resultBlock, previousNextCommand,taskIdsRefresh" status="previousNextStatus" oncomplete="processCalledBeforeNumber()" rendered="{!PreviousButtonDisplay}" style="text-decoration: none;"/>
+                        <apex:outputText value="|<" rendered="{!NOT(PreviousButtonDisplay)}" style="color: #A8A8A8;"></apex:outputText>
+                    </span>
+                    <span class="prevAndNext">
+                        <apex:commandLink action="{!previous}" value="<" reRender="resultBlock, previousNextCommand,taskIdsRefresh" status="previousNextStatus" oncomplete="processCalledBeforeNumber()" rendered="{!PreviousButtonDisplay}" style="text-decoration: none;"/>
+                        <apex:outputText value="<" rendered="{!NOT(PreviousButtonDisplay)}" style="color: #A8A8A8;"></apex:outputText>
+                    </span>
+                    <span class="prevAndNext">
+                        <apex:commandLink action="{!next}" value=">" reRender="resultBlock,previousNextCommand,taskIdsRefresh" status="previousNextStatus" oncomplete="processCalledBeforeNumber()" rendered="{!NextButtonDisplay}" style="text-decoration: none;"/>
+                        <apex:outputText value=">" rendered="{!NOT(NextButtonDisplay)}" style="color: #A8A8A8;"></apex:outputText>
+                    </span>
+                    <span class="prevAndNext">
+                        <apex:commandLink action="{!toLastPage}" value=">|" reRender="resultBlock,previousNextCommand,taskIdsRefresh" status="previousNextStatus" oncomplete="processCalledBeforeNumber()" rendered="{!NextButtonDisplay}" style="text-decoration: none;"/>
+                        <apex:outputText value=">|" rendered="{!NOT(NextButtonDisplay)}" style="color: #A8A8A8;"></apex:outputText>
+                    </span>
+                    <span class="prevAndNext">Current {!pageNumber} - Total {!pageSize}</span>
+                    <apex:actionStatus id="previousNextStatus">
+                        <apex:facet name="start"><img src="/img/loading.gif" alt="loading..."/></apex:facet>
+                    </apex:actionStatus>
+                </apex:outputPanel>
+            </apex:pageblock>
+            <apex:outputPanel layout="block" id="taskIdsRefresh">
+                <script type="text/javascript">
+                    var taskIds = [
+                                <apex:repeat value="{!TaskEntities}" var="taskEntity" rows="{!tableSize}" first="{!startIndex}">
+                                    {taskId : '{!taskEntity.taskId}'},
+                                </apex:repeat>
+                                {}];
+                    var isSelectAllChb;
+                    function checkAll(cb)
+                    {
+                        isSelectAllChb = cb;
+                        var inputElem = document.getElementsByTagName("input");
+                        for(var i=0; i<inputElem.length; i++)
+                        {
+                            if(inputElem[i].id.indexOf("isSelect")!=-1)
+                                inputElem[i].checked = cb.checked;
+                        }
+                    } 
+                    
+                    $.tablesorter.addParser({ 
+                        // set a unique id 
+                        id: 'firstStudentNameColumn', 
+                        is: function(s) { 
+                            // return false so this parser is not auto detected 
+                            return false; 
+                        }, 
+                        format: function(s) { 
+                            // format your data for normalization
+                            return $.trim(s.replace(/<[^>]+>/g,"").toLocaleLowerCase()); 
+                        }, 
+                        // set type, either numeric or text 
+                        type: 'text' 
+                    });
+                    
+                    $.tablesorter.defaults.dateFormat = 'uk';
+                    
+                    $(document).ready(function() {
+                        // call the tablesorter plugin
+                        $("#taskTable").tablesorter({
+                            
+                            headers: {
+                                0: {sorter:false},
+                                1: {sorter:'firstStudentNameColumn'},
+                                2: {sorter:'firstStudentNameColumn'},
+                                3: {sorter:false},
+                                7: {sorter:'text'}
+                            },
+                            sortList: [[1,0]],
+                            widgets: ['zebra']
+                        });
+                    });                               
+                </script>
+            </apex:outputPanel>
+        </apex:form>
+
+    </body>
+</apex:page>

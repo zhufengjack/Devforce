@@ -1,0 +1,59 @@
+<apex:page showHeader="false" sidebar="false" controller="ContactLookupController" tabStyle="Contact">
+    <script type="text/javascript">
+        var contactName = window.opener.document.getElementById('page:form:block:caseSection:nameItem:contact');
+        var contactId = window.opener.document.getElementById('page:form:block:caseSection:nameItem:contactId');
+        var hiddenContactName = window.opener.document.getElementById('page:form:block:caseSection:nameItem:hiddenContactName');
+        function selectName(linkElem)
+        {
+            contactName.value = linkElem.innerHTML;
+            contactId.value = (linkElem.nextSibling.value != undefined) ? linkElem.nextSibling.value : linkElem.nextSibling.nextSibling.value;
+            hiddenContactName.value = linkElem.innerHTML;
+            window.close();
+        }
+    </script>
+    <body class="lookupTab">
+        <apex:form >
+            <div class="lookup">
+                <div class="bPageTitle">
+                    <div class="ptBody secondaryPalette">
+                        <div class="content">
+                            <img class="pageTitleIcon" title="" alt="" src="/s.gif" />
+                            <h1>Lookup</h1>
+                        </div>
+                    </div>
+                </div>
+                <div class="pBody">
+                    <label for="lksrch">Search</label>
+                    <apex:inputText value="{!QueryKey}" />
+                    <apex:commandButton value=" Go! " action="{!search}"/>
+                    <div class="bDescription">
+                        "You can use "*" as a wildcard next to other characters to improve your search results."
+                    </div>
+                </div>
+            </div>
+        </apex:form>
+        <apex:pageBlock title="Search Result" >
+            <apex:outputText value="No records found." rendered="{!Contacts.size = 0}" />
+            <apex:pageBlock title="Contacts" tabStyle="Contact" mode="detail" rendered="{!Contacts.size != 0}" >  
+                <apex:pageBlockTable value="{!Contacts}" var="con" id="table">
+                    <apex:column headerValue="Name">
+                        <a href="#" onclick="selectName(this)">{!con.Name}</a>
+                        <input type="hidden" value="{!con.Id}" />
+                    </apex:column>
+                    <apex:column headerValue="Account Name">
+                        <apex:outputText value="{!con.Account.Name}" />
+                    </apex:column>
+                    <apex:column headerValue="Phone">
+                        <apex:outputText value="{!con.Phone}" />
+                    </apex:column> 
+                    <apex:column headerValue="Email">
+                        <apex:outputText value="{!con.Email}" />
+                    </apex:column> 
+                    <apex:column headerValue="Contact Owner">
+                        <apex:outputText value="{!con.Owner.Name}" />
+                    </apex:column> 
+                </apex:pageBlockTable>
+           </apex:pageBlock>
+        </apex:pageBlock>
+    </body>
+</apex:page>

@@ -1,0 +1,169 @@
+<apex:page controller="MassTransfer_ToController" language="en">
+    <script src="/soap/ajax/11.1/connection.js" type="text/javascript"></script>
+    <script language="javascript">
+        String.prototype.trim = function()
+        {
+           return this.replace(/(^\s*)|(\s*$)/g, "");
+        }
+        
+        function confirmReloadData()
+        {
+            var con = window.confirm("Are you sure reload data using current parameters?");
+            if(!con)
+            {
+                return false;
+            }
+        }
+        
+        function validData(lblTag,transCount)
+        {
+            try
+            {
+                transCount = parseInt(document.getElementById(transCount+":totalamount").innerHTML.replace(",",""));
+                if(transCount == 0)
+                {
+                    alert("Mass transfer for this sales has been completed. please click Reload Data button.");
+                    return false;
+                }
+            }
+            catch(e) 
+            {
+                alert('Script Error:' + e);
+                return false;
+            }
+            
+            var numberId = '';
+            var nameId = '';
+            var retValue = true;
+            var initCount = 0;
+            
+            for(var i=0;i<6 ;i++)
+            {
+                numberId = lblTag+":"+'cc'+(i+1).toString()+'Number';
+                nameId = lblTag+":"+'ccName'+(i+1).toString();
+                
+                var numCtrl = document.getElementById(numberId);
+                var nameCtrl = document.getElementById(nameId);
+                var selectedIndex = nameCtrl.selectedIndex;
+                var selectedValue = nameCtrl.options[selectedIndex].value;
+                if(selectedValue != undefined && selectedValue != '')
+                {
+                    if(numCtrl.value == '')
+                    {
+                        alert('please specify a number for consultant '+nameCtrl.options[selectedIndex].text+'.  CC Name:('+ (i+1).toString() +')');
+                        numCtrl.focus();
+                        retValue = false;
+                        break;
+                    }
+                }
+                if(numCtrl != undefined && numCtrl != null)
+                {
+                    if(!isDigit(numCtrl.value) && selectedValue != '')
+                    {
+                        alert('please check your input: Number of Accounts:('+ (i+1).toString() +'), an invalid character.');
+                        numCtrl.focus();
+                        retValue = false;
+                        break;
+                    }
+                    else if(numCtrl.value.trim() != '' && isDigit(numCtrl.value))
+                    {
+                        initCount += parseInt(numCtrl.value);
+                    }
+                }
+            }
+            if(initCount == 0)
+            {
+                alert("please select a sales consultant, and specify a transfer student number.");
+                return false;
+            }
+            if(initCount != 0 && initCount>transCount)
+            {
+                alert("You can not exceed the total amount. total amount is "+transCount);
+                return false;
+            }
+        
+            var con = window.confirm("Do you confirm to execute transferring process now?");
+            if(!con)
+            {
+                return false;
+            }
+            return retValue;
+        }
+        
+        function isDigit(s)  
+        {  
+           var patrn=/^[0-9]{1,20}$/;  
+           if (!patrn.exec(s)) return false  
+           return true  
+        }  
+    </script>
+    <apex:form > 
+        <apex:sectionHeader subtitle="Mass Transfer Tool"/>
+        <apex:pageBlock >  
+            <apex:pageBlockSection >
+                <apex:outputLabel value="School:" for="out1no"/>
+                <apex:outputText value="{!schoolRoleName}"/>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection >
+                <apex:outputLabel value="Transfer From:" for="out1no"/>
+                <apex:outputText value="{!ownerName}"/>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection id="sec_totalamount">
+                <apex:outputLabel value="Total transfer student amount:" for="out1no"/>
+                <apex:outputText value="{!totalAccount}" id="totalamount"/>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection id="sec_totalamount1">
+                <apex:outputLabel value="Total transfer opportunity amount:" for="out1no"/>
+                <apex:outputText value="{!totalOpportunity}" id="totalamount1"/>
+            </apex:pageBlockSection>   
+            <apex:pageBlockSection title="Transfer to" id="sec1" showHeader="true" collapsible="false">
+                <apex:panelGrid width="600px" columns="4" id="sec2">
+                    <apex:outputLabel value="CC Name:(1)" for="ccName1" escape="true"/>
+                    <apex:selectList id="ccName1" value="{!ccNames1}" size="1">
+                        <apex:selectOptions value="{!ccNamesList}"/>
+                    </apex:selectList> 
+                    <apex:outputLabel value="Number of Accounts:(1)" for="cc1Number" escape="false"/>
+                    <apex:inputText value="{!cc1Number}" id="cc1Number"/>
+                    <apex:outputLabel value="CC Name:(2)" for="ccName2" escape="false"/>
+                    <apex:selectList id="ccName2" value="{!ccNames2}" size="1">
+                        <apex:selectOptions value="{!ccNamesList}"/>
+                    </apex:selectList> 
+                    <apex:outputLabel value="Number of Accounts:(2)" for="cc2Number" escape="false"/>
+                    <apex:inputText value="{!cc2Number}" id="cc2Number"/>
+                    <apex:outputLabel value="CC Name:(3)" for="ccName3" escape="false"/>
+                    <apex:selectList id="ccName3" value="{!ccNames3}" size="1">
+                        <apex:selectOptions value="{!ccNamesList}"/>
+                    </apex:selectList> 
+                    <apex:outputLabel value="Number of Accounts:(3)" for="cc3Number" escape="false"/>
+                    <apex:inputText value="{!cc3Number}" id="cc3Number"/>
+                    <apex:outputLabel value="CC Name:(4)" for="ccName4" escape="false"/>
+                    <apex:selectList id="ccName4" value="{!ccNames4}" size="1">
+                        <apex:selectOptions value="{!ccNamesList}"/>
+                    </apex:selectList> 
+                    <apex:outputLabel value="Number of Accounts:(4)" for="cc4Number" escape="false"/>
+                    <apex:inputText value="{!cc4Number}" id="cc4Number"/>
+                    <apex:outputLabel value="CC Name:(5)" for="ccName5" escape="false"/>
+                    <apex:selectList id="ccName5" value="{!ccNames5}" size="1">
+                        <apex:selectOptions value="{!ccNamesList}"/>
+                    </apex:selectList> 
+                    <apex:outputLabel value="Number of Accounts:(5)" for="cc5Number" escape="false"/>
+                    <apex:inputText value="{!cc5Number}" id="cc5Number"/>
+                    <apex:outputLabel value="CC Name:(6)" for="ccName6" escape="false"/>
+                    <apex:selectList id="ccName6" value="{!ccNames6}" size="1">
+                        <apex:selectOptions value="{!ccNamesList}"/>
+                    </apex:selectList> 
+                    <apex:outputLabel value="Number of Accounts:(6)" for="cc6Number" escape="false"/>
+                    <apex:inputText value="{!cc6Number}" id="cc6Number"/>
+                    <!-- apex:panelGroup >
+                        <apex:commandButton value="Transfer Students" action="{!DoAction}" status="status1" onclick="return validData('{!$Component.sec1}','{!$Component.sec_totalamount}');" />
+                        <apex:actionStatus id="status1" startText="Loading data, please wait......"/>
+                    </apex:panelGroup -->
+                </apex:panelGrid>
+            </apex:pageBlockSection>
+            <apex:pageBlockButtons location="bottom">
+                <apex:commandButton value="Transfer Students" action="{!DoAction}" status="status1" onclick="return validData('{!$Component.sec1}','{!$Component.sec_totalamount}');" />
+                <apex:actionStatus id="status1" startText="Loading data, please wait......"/>
+            </apex:pageBlockButtons>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

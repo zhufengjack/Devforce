@@ -1,0 +1,15 @@
+<apex:page controller="BatchExceedLimitController">
+    <apex:pageBlock title="Batch Reassignment Alert">
+        <apex:form id="errMsgForm">
+        
+            <apex:pageBlockSection >
+                  <apex:outputPanel >
+                      <apex:outputText >{!ErrorMessage}</apex:outputText>
+                      <br/>
+                      <br/>
+                      <apex:outputText >{!CnErrorMessage}</apex:outputText>
+                  </apex:outputPanel>
+            </apex:pageBlockSection>
+        </apex:form>
+    </apex:pageBlock>
+</apex:page>

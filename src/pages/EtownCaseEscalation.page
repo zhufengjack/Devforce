@@ -1,0 +1,29 @@
+<apex:page controller="EtownCaseEscaController" tabStyle="Case" action="{!init}">
+    <apex:form >
+    <script>
+    function closewindow()
+    {
+   
+    }
+    </script>
+        <apex:sectionHeader title="Transfer Case" subtitle="{!TargetCase.CaseNumber}"/>
+            <apex:pageMessages />
+            <apex:pageBlock rendered="{!NOT(IsDenied)}">
+                <apex:pageBlockButtons location="bottom">
+                    <apex:commandButton action="{!save}" value="Save" onclick="closewindow()"/>
+                    <apex:commandButton action="{!cancel}" value="Cancel"/>
+                </apex:pageBlockButtons>
+                <apex:pageBlockSection >
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Transfer Case to : "/>            
+                        <apex:selectRadio value="{!SelectedQueueId}">
+                            <apex:selectoptions value="{!QueueList}"></apex:selectoptions>
+                        </apex:selectRadio>
+                 </apex:pageBlockSectionItem>
+               </apex:pageBlockSection>
+         </apex:pageBlock>
+                 <apex:pageBlock rendered="{!NOT(IsDenied)}">
+                     <a href="/500/o">Back to Case list</a>
+                 </apex:pageBlock>
+     </apex:form>   
+</apex:page>

@@ -1,0 +1,8 @@
+<apex:component >
+    <apex:attribute name="value" description="The text to load into the editor" type="String" required="true"/>
+    <apex:attribute name="width" description="width of the editor" type="String" required="false" default="100%"/>
+    <apex:attribute name="height" description="height of the editor" type="String" required="false" default="200"/>
+    <apex:inputHidden id="sf_FCKeditor" value="{!value}"/>
+    <iframe id="sf_FCKeditor___Frame" src="{!$Resource.fckeditor}/editor/fckeditor.html?InstanceName={!$Component.sf_FCKeditor}" 
+     width="{!width}" height="{!height}" frameborder="no" scrolling="no"></iframe>
+</apex:component>

@@ -1,0 +1,63 @@
+<apex:page standardController="CourseReschedule__c" extensions="OverrideCourseReschedulePageController" tabStyle="CourseReschedule__c">
+    <script type="text/javascript">
+    function showEditWindow(url)
+    {
+		window.location = url;
+    }
+    </script>
+    <apex:form >
+        <apex:sectionHeader title="Suspend and Resume" subtitle="{!SuspendReschedule.Name}" />
+        <apex:pagemessages />
+        <apex:variable var="Viewable" value="{!OR(Contains(LOWER($Profile.Name), 'system administrator new - smart'), Contains(LOWER($Profile.Name), 'system administrator new - tech'), Contains(LOWER($Profile.Name), 'system administrator new'))}"/>
+        <apex:pageBlock id="block" mode="mainDetail" title="Suspend and Resume Detail">
+            <apex:pageBlockButtons >
+            	<apex:outputPanel layout="block" rendered="{!Viewable}">
+	                <input type="button" class="btn" onclick="showEditWindow('/apex/OverrideCourseRescheduleEdit?supid={!SuspendReschedule.Id}&resid={!ResumeReschedule.Id}')" value="Edit" />
+	                <apex:commandButton action="{!del}" value="Delete" id="delButton" onclick="if(confirm('Are you sure?')){return true}else{return false}"/>
+               </apex:outputPanel>
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection columns="2" collapsible="false">
+                <apex:outputField value="{!SuspendReschedule.Name}" />
+                <apex:outputField value="{!SuspendReschedule.Contact__c}" />
+                <apex:outputField value="{!SuspendReschedule.StudentActual__c}" />
+                <apex:pageBlockSectionItem >
+                    <apex:outputPanel layout="block">Status</apex:outputPanel>
+                    <apex:outputText value="{!Status}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputPanel layout="block">Suspension Date</apex:outputPanel>
+                    <apex:outputField value="{!SuspendReschedule.ScheduleDate__c}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputPanel layout="block">Resume Date</apex:outputPanel>
+                    <apex:outputField value="{!ResumeReschedule.ScheduleDate__c}" />
+                </apex:pageBlockSectionItem>
+                <apex:outputField value="{!SuspendReschedule.SuspendReason__c}" />
+                <apex:outputField value="{!SuspendReschedule.Duration__c}" />
+                <apex:pageBlockSectionItem >
+                    <apex:outputPanel layout="block">Suspend Action Date</apex:outputPanel>
+                    <apex:outputField value="{!SuspendReschedule.ActionDate__c}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputPanel layout="block">Resume Action Date</apex:outputPanel>
+                    <apex:outputField value="{!ResumeReschedule.ActionDate__c}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputPanel layout="block">Suspend Schedule Job Id</apex:outputPanel>
+                    <apex:outputField value="{!SuspendReschedule.ScheduleJobId__c}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputPanel layout="block">Resume Action Status</apex:outputPanel>
+                    <apex:outputField value="{!ResumeReschedule.ActionStatus__c}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputPanel layout="block">Resume Schedule Job Id</apex:outputPanel>
+                    <apex:outputField value="{!ResumeReschedule.ScheduleJobId__c}" />
+                </apex:pageBlockSectionItem>
+                <apex:outputField value="{!SuspendReschedule.CreatedDate}" />
+                <apex:outputField value="{!SuspendReschedule.CreatedById}" />
+                <apex:outputField value="{!ResumeReschedule.LastModifiedDate}" />
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

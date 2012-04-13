@@ -1,0 +1,26 @@
+<apex:page controller="SASuccessRateThisMonthReportController">
+    <!--<script type='text/javascript' src='https://www.google.com/jsapi'></script>
+    <script type="text/javascript">
+    google.load('visualization', '1', {packages:['gauge']});
+    google.setOnLoadCallback(drawChart);
+    function drawChart() 
+    {
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Label');
+        data.addColumn('number', 'Value');
+        data.addRows(1);
+        data.setValue(0, 0, '%');
+        data.setValue(0, 1, {!SuccessRate});
+        
+        var chart = new google.visualization.Gauge(document.getElementById('chart_div'));
+        var options = {redFrom: 0, redTo: 30, yellowFrom: 30, yellowTo: 67, greenFrom: 67, greenTo: 100};
+        chart.draw(data, options);
+    }
+    </script>-->
+    <apex:pageBlock >
+        <span style="font-size:14px"><b>My Success Rate this month</b></span><br/>
+        <div id="chart_div" style="width:150px;height:150px">
+            <img src="https://chart.googleapis.com/chart?chs=200x100&cht=gom&chd=t:{!SuccessRate}&chco=FF0000,FFFF00,00FF00&chxt=x,y&chxl=0:|{!FLOOR(SuccessRate)}|1:|0|100&chtt={!SuccessRate}%" alt="Success Rate: {!SuccessRate}%"/>
+        </div>
+    </apex:pageBlock>
+</apex:page>

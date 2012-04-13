@@ -1,0 +1,197 @@
+<apex:page controller="TaskAssignmentRuleEditorController" tabStyle="StudyAdvisorManager__tab">
+    <apex:sectionHeader title="Assignment Rule Configuration" subtitle="Task Assignment Rules"/>
+    <script type="text/javascript">
+        function closePop()
+        {
+            document.getElementById("InlineEditDialog").style.visibility = "hidden";
+            document.getElementById("background").style.display = "none";
+        }
+        function showPop()
+        {
+            document.getElementById("InlineEditDialog").style.visibility = "visible";
+            document.getElementById("background").style.display = "block";
+        }
+        function passIndexValue(indexNum)
+        {
+            //specify the ruleIndex to the Id="theSelectedIndex" , still need to get the accurate Id. 
+            var inputElem = document.getElementsByTagName("input");
+            for(var i=0; i<inputElem.length; i++)
+            {
+                if(inputElem[i].id.indexOf("theSelectedIndex") != -1)
+                inputElem[i].value = indexNum;
+            } 
+        }
+        function initCheckBox()
+        {
+            var inputElem = document.getElementsByTagName("input");
+            for(var i=0; i<inputElem.length; i++)
+            {
+                if(inputElem[i].id.indexOf("theCheckBox") != -1)
+                inputElem[i].checked = false;
+            }
+        }
+        function delConfirm()
+        {
+            return confirm('Are you sure to delete this record?');
+        } 
+    </script>
+    <apex:form >
+        <apex:pageMessages />
+        <apex:pageBlock >
+            <apex:pageBlockButtons location="bottom">
+                <apex:commandButton id="commandInsert" value="New Rule" action="{!insertRule}" onclick="initCheckBox()" oncomplete="showPop();" rerender="popPanel" status="loadingStatus" />                             
+                <apex:commandLink id="commandPop" value="Default Rule" action="{!popDefaultRule}" status="loadingStatus" oncomplete="showPop()" rerender="popPanel" style="float:right"/>
+                <apex:actionStatus id="loadingStatus">
+                    <apex:facet name="start">
+                        <img src="/img/loading.gif" alt="loading" />
+                    </apex:facet>
+                </apex:actionStatus>         
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection columns="1" collapsible="false">
+                <apex:outputPanel >
+                    <table class="list" border="1" cellpadding="0" cellspacing="0" style="text-align:center;">                                 
+                        <thead class="">
+                            <tr class="headerRow">
+                                <th scope="col" style="width:50px; text-align:center">Priority</th>
+                                <th scope="col" style="width:50px; text-align:center">Partner</th>
+                                <th scope="col" style="width:50px; text-align:center">Language</th>
+                                <th scope="col" style="width:50px; text-align:center">Country</th>
+                                <th scope="col" style="width:150px; text-align:center">SA</th>
+                                <th scope="col" style="width:100px; text-align:center">&nbsp;</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <apex:variable var="pageRuleIndex" value="{!0}"/>                       
+                            <apex:repeat value="{!RuleInfos}" var="item" id="repeat"> 
+                                <tr class="IF(({!CEILING(pageRuleIndex)}/2 == 0),dataRow odd, dataRow even)" style="height:26px">
+                                    <td>{!item.Priority}</td>
+                                    <td>{!item.Partner}</td>
+                                    <td>{!item.Language}</td>
+                                    <td>{!item.Country}</td>
+                                    <td>{!item.SAList}</td>
+                                    <td>
+                                        <apex:commandLink id="commandEdit" value="Edit" action="{!editRule}" status="loadingStatus" oncomplete="showPop();" rerender="popPanel" >
+                                            <apex:param name="index" value="{!CEILING(pageRuleIndex)}" assignTo="{!EditingRuleIndex}" />
+                                        </apex:commandLink>
+                                        &nbsp;|&nbsp;
+                                        <apex:commandLink id="commandDelete" value="Delete" action="{!deleteRule}" onclick="if(delConfirm()==false){return false;}">
+                                            <apex:param name="index" value="{!CEILING(pageRuleIndex)}" assignTo="{!EditingRuleIndex}" />
+                                        </apex:commandLink>
+                                    </td>
+                                </tr>
+                                <apex:variable var="pageRuleIndex" value="{!(pageRuleIndex+1)}"/>
+                            </apex:repeat>
+                        </tbody>
+                    </table>
+                </apex:outputPanel>              
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+                    
+        <div id="InlineEditDialog" class="overlayDialog inlineEditDialog" style="max-width: 600px; display:block;left:100px; top:-250px;visibility:hidden;position:relative;">
+            <div class="topRight" style="margin-bottom:0px">
+                <div class="topLeft">
+                    <img id="InlineEditDialogX" onmouseover="this.className='dialogCloseOn'" onmouseout="this.className='dialogClose'" onclick="closePop()" class="dialogClose" src="/s.gif"/>
+                    <h2 id="InlineEditDialogTitle">AssignmentRule Edit</h2>
+                </div>
+            </div> 
+            <div class="middle" style="margin-top:0px;">
+                <div class="innerContent" id="InlineEditDialogContent">
+                    <div class="activeField">
+                        <div id="editDivComponent" class="InlineEditCompoundDiv" style="text-align:left;">
+                            <apex:outputPanel id="popPanel">  
+                                <apex:pageblock >
+                                   <apex:pageBlockSection title="Rule Configuration" columns="1" collapsible="false" rendered="{!IsDefaultShow}">                                      
+                                       <apex:pageBlockSectionItem id="editPriority">
+                                           <apex:outputLabel value="Priority"/>
+                                           <apex:inputText id="editPriorityValue" value="{!EditingRule.Priority}"/>
+                                       </apex:pageBlockSectionItem>
+                                       <apex:pageBlockSectionItem id="editLanguage">
+                                           <apex:outputLabel value="Language" for="theLanguageFilter"/>
+                                           <apex:outputPanel >
+                                               <apex:selectList id="theLanguageFilter" value="{!EditingRule.Language}" size="1" style="width:220px">
+                                                   <apex:selectOptions value="{!languageItems}"/>
+                                               </apex:selectList>&nbsp;&nbsp;&nbsp;
+                                               <apex:inputCheckBox value="{!EditingRule.LanguageStatus}"/>
+                                               <label>not equal</label>
+                                           </apex:outputPanel>
+                                       </apex:pageBlockSectionItem>
+                                       <apex:pageBlockSectionItem id="editCountry">
+                                           <apex:outputLabel value="Country" for="theCountryFilter"/>
+                                           <apex:outputPanel >
+                                               <apex:selectList id="theCountryFilter" value="{!EditingRule.Country}" size="1" style="width:220px">
+                                                   <apex:selectOptions value="{!countryItems}"/>
+                                               </apex:selectList>&nbsp;&nbsp;&nbsp;
+                                               <apex:inputCheckBox value="{!EditingRule.CountryStatus}"/>
+                                               <label>not equal</label>                                           
+                                           </apex:outputPanel>
+                                       </apex:pageBlockSectionItem>
+                                       <apex:pageBlockSectionItem id="editPartner">
+                                           <apex:outputLabel value="Partner" for="thePartnerFilter"/>
+                                           <apex:outputPanel >
+                                               <apex:selectList id="thePartnerFilter" value="{!EditingRule.Partner}" size="1" style="width:220px">
+                                                   <apex:selectOptions value="{!partnerItems}"/>
+                                               </apex:selectList>&nbsp;&nbsp;&nbsp;
+                                               <apex:inputCheckBox value="{!EditingRule.PartnerStatus}"/>
+                                               <label>not equal</label>
+                                           </apex:outputPanel>
+                                       </apex:pageBlockSectionItem>
+                                   </apex:pageBlockSection>
+                                   <apex:pageBlockSection title="SAUser List" columns="1" id="saTable" collapsible="false">
+                                       <apex:pageBlockSectionItem >
+                                           <apex:inputText value="{!AdvisorFilter}"/>
+                                           <apex:commandButton value="Find" rerender="saTable" status="displaying" action="{!refreshUserList}"/>
+                                       </apex:pageBlockSectionItem>
+                                       <apex:actionStatus id="displaying">
+                                           <apex:facet name="start"> 
+                                               <img src="/img/loading.gif" alt="loading..."/>
+                                           </apex:facet>
+                                       </apex:actionStatus>
+                                       <apex:pageBlockTable value="{!FilteredAdvisors}" var="advisor" rows="20" first="{!(CurrentPageIndex-1)*20}">
+                                           <apex:column >
+                                               <apex:inputCheckBox id="theCheckBox" value="{!advisor.IsSelected}"/>
+                                           </apex:column> 
+                                           <apex:column >
+                                               <apex:facet name="header">Name</apex:facet>
+                                               {!advisor.UserName}
+                                           </apex:column>
+                                           <apex:column >
+                                               <apex:facet name="header">Email</apex:facet>
+                                               {!advisor.Email}
+                                           </apex:column>
+                                           <apex:column >
+                                               <apex:facet name="header">Department</apex:facet>
+                                               {!advisor.Department}
+                                           </apex:column>
+                                       </apex:pageBlockTable>                                    
+                                       <apex:panelGrid columns="3">          
+                                           <apex:commandLink id="previousBtn" action="{!previous}" value="< Previous" reRender="saTable" rendered="{!CurrentPageIndex != 1}" status="linking" />
+                                           <apex:commandLink id="nextBtn" action="{!next}" value="Next >" reRender="saTable" rendered="{!(CurrentPageIndex != TotalPageSize) && (TotalPageSize != 0)}" status="linking" />
+                                           <apex:actionStatus id="linking">
+                                               <apex:facet name="start"> 
+                                                   <img src="/img/loading.gif" alt="loading..."/>
+                                               </apex:facet>
+                                           </apex:actionStatus>
+                                       </apex:panelGrid>                                       
+                                  </apex:pageBlockSection>
+                               </apex:pageblock>
+                           </apex:outputPanel>
+                        </div>
+                    </div>
+                    <div id="InlineEditDialog_Button" class="buttons">
+                        <apex:commandButton value="Save" action="{!save}" />
+                        <input type="button" class="btn" value="Cancel" onclick="closePop()"/>
+                        <apex:actionStatus id="displaying">
+                            <apex:facet name="start"> 
+                                <img src="/img/loading.gif" alt="loading..."/>
+                            </apex:facet>
+                        </apex:actionStatus>
+                    </div>                
+                </div>                
+            </div>            
+            <div class="bottomRight">
+                <div class="bottomLeft"></div>
+            </div>
+        </div>
+        <div id="background" class="overlayBackground" style="width:3289px; height:1293px; display:none; position:fixed" ></div>                     
+    </apex:form>
+</apex:page>

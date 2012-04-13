@@ -1,0 +1,6 @@
+<apex:page controller="CreatePaymentPlanController" action="{!CreateActualAndPaymentRecords}">
+    <apex:outputPanel id="Messages">
+        <apex:pageMessages />
+    </apex:outputPanel>
+    <a href="/{!$CurrentPage.Parameters.oppId}"><b>Back to Opportunity</b></a>
+</apex:page>

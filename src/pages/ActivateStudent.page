@@ -1,0 +1,54 @@
+<apex:page controller="ActivateStudentController" tabStyle="Contact" showHeader="false">
+    <style type="text/css">
+        body{
+            background-color:#F8F8F8;
+        }
+       #contentArea{
+           background-color:#F8F8F8;
+           text-align:left;
+       }
+       
+    </style>
+    <script type="text/javascript">
+        
+        String.prototype.trim = function()
+        {
+           return this.replace(/(^\s*)|(\s*$)/g,"");
+        }
+
+        function checkForm()
+        {
+            var userNameBox = document.getElementById('{!$Component.nameForm.formBlock.formSection.nameItem.userName}');
+            if(userNameBox.value.trim() == '' || userNameBox.value == null)
+            {
+                alert('User Name cann\'t be null.');
+                userNameBox.style.border = "1px solid red";
+                return false;
+            }
+            return true;
+        }
+        
+        function changeStatus(element)
+        {
+            element.className = "btnDisabled";
+            element.value = "Checking...";
+        }
+    </script>
+    <div id="contentArea">
+        <apex:sectionHeader title="Map Student"/>
+        <apex:form id="nameForm">
+            <apex:pageBlock id="formBlock" >
+                <apex:pageMessages escape="false"/>
+                <apex:pageBlockSection columns="1" id="formSection">
+                    <apex:pageBlockSectionItem labelStyle="width:25%;text-align:left;" id="nameItem">
+                        <apex:outputLabel >Englishtown Username</apex:outputLabel>
+                        <apex:inputText value="{!StudentUsername}"id="userName" disabled="{!userNameExist}"/>
+                    </apex:pageBlockSectionItem>
+                </apex:pageBlockSection>
+                <apex:pageBlockButtons location="bottom">
+                    <apex:commandButton value="Next" action="{!next}" onclick="changeStatus(this);return checkForm();" disabled="{!userNameExist}"/>
+                </apex:pageBlockButtons>
+            </apex:pageBlock>
+        </apex:form>
+    </div>
+</apex:page>

@@ -1,0 +1,7 @@
+<apex:page standardController="Account" extensions="StudentShowUpExtension" action="{!showUp}">
+  <apex:pageMessages escape="false" />
+  <a href="/{!Account.Id}">Back to Account</a>
+  <apex:form >
+      <apex:inputHidden value="{!Account.OwnerId}"/>
+  </apex:form>
+</apex:page>

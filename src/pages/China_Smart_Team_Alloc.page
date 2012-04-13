@@ -1,0 +1,48 @@
+<apex:page >
+<html> 
+<head> 
+<script src="/soap/ajax/12.0/connection.js" type="text/javascript"></script> 
+<script src="/soap/ajax/12.0/apex.js" type="text/javascript"></script>
+<link href="/sCSS/9.0/Theme2/zh/common.css" rel="stylesheet" type="text/css" /> 
+
+</head> 
+<body>
+    <iframe frameborder="0" scrolling="true"  height="400px" id="theIframe" name="theIframe" src="/servlet/servlet.Integration?lid=01N40000000Dqk4&ic=1" width="100%"></iframe>
+<script type="text/javascript"> 
+getSControl();
+function getSControl(){
+    var strRoleName = "{!$UserRole.Name}";
+    var strControlId = "";
+    //alert(strRoleName);
+    if(strRoleName == "Europe and Americas Management"){
+        //Brazil Auto Assignment
+        strControlId = "/servlet/servlet.Integration?lid=01N40000000H2SI&ic=1";
+    }
+    else if(strRoleName.indexOf("China Telesales")>=0 && (strRoleName.indexOf("Manager") ||  strRoleName.indexOf("Director"))){
+        //China TS
+        strControlId = "/servlet/servlet.Integration?lid=01N40000000H2SJ&ic=1";
+    }
+    else if(strRoleName == "China Management"){
+        //China TS
+        strControlId = "/servlet/servlet.Integration?lid=01N40000000H2SJ&ic=1";
+    }
+    else if((strRoleName.indexOf("China Telesales")<=-1 && strRoleName.indexOf("China")>=0) || strRoleName == "China Telemarketing Manager" ){
+        //China Smart
+        strControlId = "/servlet/servlet.Integration?lid=01N40000000Dqk4&ic=1";
+    }
+    else if(strRoleName == "English Town")
+    {
+        strControlId = "/servlet/servlet.Integration?lid=01N40000000H2SK&ic=1";
+    }
+    else
+    {
+        strControlId = "about:blank";
+        alert("You can not open this page, please contact your administrator.");
+    }
+    //alert(strControlId);
+    var ctrlFrame = document.getElementById("theIframe");
+    ctrlFrame.src = strControlId;
+}
+</script>
+</body>
+</apex:page>

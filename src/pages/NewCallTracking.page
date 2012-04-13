@@ -1,0 +1,118 @@
+<apex:page controller="NewCallTrackingController" id="page" showHeader="false" sidebar="false">
+    <apex:sectionHeader title="New Call Tracking"/>
+    <apex:pageMessages id="message" escape="false"/>
+     <apex:form id="form">
+        <apex:inputHidden value="{!IsCreateSalesDemo}" id="isCreateSalesDemo"></apex:inputHidden>
+        <apex:inputHidden value="{!CurrentSelectSchool}" id="currentSchool"></apex:inputHidden>
+        <apex:actionFunction name="renderSaleDemo" action="{!Refresh}" reRender="salesDemoBlock" status="status"></apex:actionFunction>
+        <apex:pageBlock id="block" rendered="{!IsRenderedEventBlock}">
+            <apex:pageBlockButtons location="bottom">
+                <apex:commandButton action="{!CreateNewPhoneTask}" value="Save" />
+                <apex:commandButton value="Cancel" onclick="window.close()" />  
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection columns="1" collapsible="false"> 
+                <apex:facet name="header">
+                        <span style="color:white">New Call Task</span>
+                </apex:facet> 
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Subject"></apex:outputLabel>
+                    <apex:outputField value="{!NewPhoneTask.Subject}"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Assigned To"></apex:outputLabel>
+                   <apex:outputText value="{!$User.FirstName} {!$User.LastName}"></apex:outputText>
+                </apex:pageBlockSectionItem>              
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Due Date"></apex:outputLabel>
+                    <apex:outputField value="{!NewPhoneTask.ActivityDate}"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Next Call Time"></apex:outputLabel>
+                    <apex:inputField value="{!CurrentOpportunity.NextCallTime__c}"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Comments"></apex:outputLabel>
+                    <apex:inputField value="{!NewPhoneTask.Comments__c}"/>
+                </apex:pageBlockSectionItem>                            
+            </apex:pageBlockSection>
+            <apex:pageBlockSection columns="1" collapsible="false" id="section2"> 
+                <apex:facet name="header">
+                         <span style="color:white">Reschedule Appt Date Time</span>
+                 </apex:facet> 
+                <apex:pageBlockSectionItem >
+                     <apex:outputLabel value="App Date Time"></apex:outputLabel>
+                     <apex:inputField value="{!CurrentOpportunity.Reschedule_appt_Date_Time__c}" onchange="changeScheduleDate()"/>
+                 </apex:pageBlockSectionItem>
+                 <apex:pageBlockSectionItem id="schoolItem">
+                     <apex:outputLabel for="school" value="Appt Location"/>
+                        <apex:selectList id="school" value="{!CurrentSelectSchool}" size="1" multiselect="false" onchange="document.getElementById('page:form:currentSchool').value = this.value;renderSaleDemo()">
+                            <apex:selectOptions value="{!AllSchoolOptions}"/>
+                    </apex:selectList>   
+                 </apex:pageBlockSectionItem>
+                 <!-- <apex:pageBlockSectionItem id="item"> 
+                     <apex:outputLabel value="{!IsRenderSalesDemo}"></apex:outputLabel>
+                     <apex:inputCheckBox value="{!IsCreateSalesDemo}"  onchange="document.getElementById('page:form:isCreateSalesDemo').value = this.checked;renderSaleDemo()" id="selectDemo"/>
+                 </apex:pageBlockSectionItem>  -->
+          </apex:pageBlockSection> 
+          <apex:outputPanel id="salesDemoBlock"> 
+             <apex:pageBlockSection columns="1" rendered="{!IsRenderSalesDemo}" id="demoSection">
+                <apex:pageBlockSectionItem id="demoCheckBoxItem">
+                    <apex:outputLabel value="sales Demo"></apex:outputLabel>
+                    <apex:inputCheckBox value="{!IsCreateSalesDemo}"  onchange="document.getElementById('page:form:isCreateSalesDemo').value = this.checked;renderSaleDemo()" id="selectDemo"/>
+                </apex:pageBlockSectionItem>  
+             </apex:pageBlockSection> 
+             <apex:pageBlockSection columns="1">
+                <apex:pageBlockSectionItem >
+                    <apex:actionStatus id="status">
+                      <apex:facet name="start">
+                          <apex:image value="/img/loading.gif"/>
+                      </apex:facet>
+                    </apex:actionStatus>
+                  </apex:pageBlockSectionItem> 
+             </apex:pageBlockSection>         
+              <apex:pageBlockSection columns="1" rendered="{!IsCreateSalesDemo}">
+                     <apex:pageBlockSectionItem >
+                     <apex:pageBlockTable value="{!SalesDemoEvents}" var="salesDemo">
+                        <apex:column >
+                            <apex:facet name="header">Subject</apex:facet>
+                            <apex:outputText value="{!salesDemo.Subject}"></apex:outputText>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Due Date</apex:facet>
+                            <apex:outputText value="{0, date, yyyy-MM-dd}">
+                                <apex:param value="{!salesDemo.ActivityDateTime}" />
+                            </apex:outputText>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">Assigned To</apex:facet>
+                            <apex:outputText value="{!$User.FirstName} {!$User.LastName}"></apex:outputText>
+                        </apex:column>
+                     </apex:pageBlockTable>
+                    </apex:pageBlockSectionItem>
+                </apex:pageBlockSection>
+          </apex:outputPanel> 
+        </apex:pageBlock>
+    </apex:form>
+    <script type="text/javascript">
+        function changeScheduleDate()
+        {
+            var selectDemoDom = document.getElementById('page:form:block:demoSection:demoCheckBoxItem:selectDemo');
+            if(selectDemoDom != null && selectDemoDom.checked)
+            {
+                renderSaleDemo();
+            }
+        }
+        
+        var selectSchoolDom = document.getElementById('page:form:block:section2:schoolItem:school');
+        if(selectSchoolDom != null)
+        {
+                document.getElementById('page:form:currentSchool').value = selectSchoolDom.value;
+                renderSaleDemo();
+        }
+        if("{!isSucceeded}".toLowerCase() == "true")
+        {
+            window.opener.location="{!$CurrentPage.Parameters.openerUrl}"; 
+            setTimeout("window.close()", 2000);
+        }
+    </script>
+</apex:page>
