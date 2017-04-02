@@ -4,3 +4,5 @@ This is our testing file
 So now I think I can update second time
 
 I think this is working on branch develop
+
+I think this time will be a good time to learn how to use git
